@@ -1,0 +1,116 @@
+{
+	"/samples": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": true,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "a",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "b",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "c",
+				"type": "bool",
+				"required": true
+			},
+			{
+				"name": "d",
+				"type": "[]interface {}",
+				"required": true
+			},
+			{
+				"name": "e",
+				"type": "map[string]interface {}",
+				"required": true
+			}
+		]
+	},
+	"/db/initialize": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 10,
+		"require_parameters": []
+	},
+	"/auth/login": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "email",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "token",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "sns_type",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/auth/login/detail": {
+		"allow_method": "POST",
+		"data_type": "multipart/form-data",
+		"require_token": true,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "profile_photo",
+				"type": "blob",
+				"required": false
+			},
+			{
+				"name": "nick_name",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/auth/login/refresh": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "refresh_token",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/auth/authentication": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
+	},
+	"/auth/authentication/set": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "authentication_ci",
+				"type": "string",
+				"required": true
+			}
+		]
+	}
+}
