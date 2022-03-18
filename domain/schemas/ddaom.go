@@ -61,3 +61,23 @@ type MemberAdminLoginLog struct {
 	Token                  string `gorm:"type:varchar(1024)" json:"token"`
 	LoginAt                time.Time
 }
+
+// 주저에
+type Keyword struct {
+	SeqKeyword int64  `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword"`
+	Keyword    string `gorm:"type:varchar(1024)" json:"keyword"`
+	ActiveYn   bool   `gorm:"default:false" json:"active_yn"`
+	StartDate  time.Time
+	EndDate    time.Time
+	CntTotal   int64 `json:"cnt_total"`
+}
+
+// 장르
+type Genre struct {
+	SeqGenre  int64  `gorm:"primaryKey;autoIncrement:true" json:"seq_genre"`
+	Genre     string `gorm:"type:varchar(50)" json:"keyword"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Creator   string `gorm:"type:varchar(50)" json:"creator"`
+	Updator   string `gorm:"type:varchar(50)" json:"updator"`
+}
