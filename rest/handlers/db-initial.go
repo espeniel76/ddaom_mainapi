@@ -23,6 +23,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	masterDB.AutoMigrate(schemas.Member{})
 	masterDB.AutoMigrate(schemas.MemberDetail{})
 
 	logDB1.AutoMigrate(schemas.MemberExist{})

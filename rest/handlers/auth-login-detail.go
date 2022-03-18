@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"time"
 )
 
 func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
@@ -105,7 +106,7 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 	} else {
-		result = masterDB.Model(&memberDetail).Create(&schemas.MemberDetail{SeqMember: userToken.SeqMember, NickName: nickName, ProfilePhoto: fullPath})
+		result = masterDB.Model(&memberDetail).Create(&schemas.MemberDetail{SeqMember: userToken.SeqMember, NickName: nickName, ProfilePhoto: fullPath, AuthenticationAt: time.Now()})
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
 			res.ErrorDesc = result.Error.Error()

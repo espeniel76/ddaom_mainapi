@@ -22,7 +22,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	var result *gorm.DB
 	existProfilePhoto := false
 
-	// 파라미터 검증
 	if email == "<nil>" || len(email) == 0 {
 		res.ResultCode = define.NO_PARAMETER
 		res.ErrorDesc = "no date email"
@@ -39,15 +38,13 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// 1. 최초 로그인 여부
-	isExist := db.ExistRow(masterDB, "donuts.members", "email", email)
+	isExist := db.ExistRow(masterDB, "members", "email", email)
 	member := &schemas.Member{
 		Email:   email,
 		Token:   token,
 		SnsType: snsType,
 	}
 	if !isExist {
-		// 1.1. 없으면, 사용자 추가
 		result = masterDB.Create(member)
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
@@ -72,8 +69,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	// 2. 로그인 로그 남기기
-	// 2.1. 각 LOG DB 사용자 카운트
 	var myLogDB *gorm.DB
 	var allocatedDb int8
 	logDB1 := db.List[define.DSN_LOG1]
@@ -93,7 +88,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		// 2.2. 데이터가 제일 작은 녀석에 데이터를 생성한다.
 		if count1 > count2 {
 			myLogDB = logDB2
 			allocatedDb = 2
@@ -108,7 +102,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		// 2.3. 내 로그가 어느 DB 에 들어 있는지 기록한다.
 		result = masterDB.Model(&member).Update("allocated_db", allocatedDb)
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
@@ -116,7 +109,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 	} else {
-		// 2.4. 최초 로그인이 아니면, 내가 속한 DB 가져온다.
 		result = masterDB.Find(&member, "email", email)
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
@@ -131,7 +123,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	// 3. JWT 토큰 만들기 (access)
 	userToken := domain.UserToken{
 		Authorized: true,
 		SeqMember:  member.SeqMember,
@@ -145,7 +136,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
-	// 3. JWT 토큰 만들기 (refresh)
 	refreshToken, err := define.CreateToken(&userToken, define.JWT_REFRESH_SECRET)
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
@@ -153,7 +143,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// 4. login log 기록하기
 	result = myLogDB.Create(&schemas.MemberLoginLog{
 		SeqMember: member.SeqMember,
 		Token:     refreshToken,
