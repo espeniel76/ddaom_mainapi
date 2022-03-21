@@ -4,8 +4,10 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"ddaom/tools"
 	"fmt"
+	"time"
 )
 
 func Keyword(req *domain.CommonRequest) domain.CommonResponse {
@@ -23,6 +25,8 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 			k.seq_keyword,
 			k.keyword,
 			kt.view_date,
+			k.start_date,
+			k.end_date,
 			k.cnt_total
 		FROM ddaom.keywords AS k
 		INNER JOIN ddaom.keyword_todays AS kt ON k.seq_keyword = kt.seq_keyword
@@ -49,8 +53,10 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 			SeqKeyword int64  "json:\"seq_keyword\""
 			Keyword    string "json:\"keyword\""
 			IsToday    bool   "json:\"is_today\""
+			StartDate  int64  "json:\"start_date\""
+			EndDate    int64  "json:\"end_date\""
 			CntTotal   int64  "json:\"cnt_total\""
-		}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, IsToday: isToday, CntTotal: int64(o.EndDate.Nanosecond())})
+		}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, IsToday: isToday, StartDate: o.StartDate.UnixMilli(), EndDate: o.EndDate.UnixMilli(), CntTotal: o.CntTotal})
 	}
 
 	res.Data = keywordRes
@@ -63,7 +69,9 @@ type KeywordDate struct {
 	Keyword    string `json:"keyword"`
 	ViewDate   string `json:"view_date"`
 	IsToday    bool   `json:"is_today"`
-	CntTotal   int64  `json:"cnt_total"`
+	StartDate  time.Time
+	EndDate    time.Time
+	CntTotal   int64 `json:"cnt_total"`
 }
 
 type KeywordRes struct {
@@ -71,6 +79,60 @@ type KeywordRes struct {
 		SeqKeyword int64  `json:"seq_keyword"`
 		Keyword    string `json:"keyword"`
 		IsToday    bool   `json:"is_today"`
+		StartDate  int64  `json:"start_date"`
+		EndDate    int64  `json:"end_date"`
 		CntTotal   int64  `json:"cnt_total"`
+	} `json:"list"`
+}
+
+func Skin(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+
+	// 데이터 가져온다.
+	masterDB := db.List[define.DSN_MASTER]
+	skinRes := SkinRes{}
+	result := masterDB.Model(&schemas.Image{}).Where("active_yn = true").Find(&skinRes.List)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+
+	res.Data = skinRes
+
+	return res
+}
+
+type SkinRes struct {
+	List []struct {
+		SeqImage int64  `json:"seq_image"`
+		Image    string `json:"image"`
+	} `json:"list"`
+}
+
+func Genre(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+
+	// 데이터 가져온다.
+	masterDB := db.List[define.DSN_MASTER]
+	genreRes := GenreRes{}
+	result := masterDB.Model(&schemas.Genre{}).Where("active_yn = true").Find(&genreRes.List)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+
+	res.Data = genreRes
+
+	return res
+}
+
+type GenreRes struct {
+	List []struct {
+		SeqGenre int64  `json:"seq_genre"`
+		Genre    string `json:"genre"`
 	} `json:"list"`
 }

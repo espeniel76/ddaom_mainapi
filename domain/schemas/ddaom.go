@@ -87,6 +87,7 @@ type Genre struct {
 	Genre     string    `gorm:"type:varchar(50)" json:"keyword"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
 	Updator   string    `gorm:"type:varchar(50)" json:"updator"`
 }
@@ -94,6 +95,7 @@ type Genre struct {
 type Image struct {
 	SeqImage  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_image"`
 	Image     string    `gorm:"type:varchar(1024)" json:"image"`
+	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt time.Time `json:"created_at"`
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
 }

@@ -21,5 +21,7 @@ func Handlers(mux *mux.Router) {
 
 	// 주제어
 	mux.HandleFunc("/keyword", common(handlers.Keyword))
+	mux.HandleFunc("/skin", common(handlers.Skin))
+	mux.HandleFunc("/genre", common(handlers.Genre))
 
 }
