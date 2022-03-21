@@ -130,13 +130,13 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		UserLevel:  5,
 		Allocated:  allocatedDb,
 	}
-	accessToken, err := define.CreateToken(&userToken, define.JWT_ACCESS_SECRET)
+	accessToken, err := define.CreateToken(&userToken, define.JWT_ACCESS_SECRET, "ACCESS")
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()
 		return res
 	}
-	refreshToken, err := define.CreateToken(&userToken, define.JWT_REFRESH_SECRET)
+	refreshToken, err := define.CreateToken(&userToken, define.JWT_REFRESH_SECRET, "REFRESH")
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()

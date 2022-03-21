@@ -38,6 +38,19 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	masterDB.AutoMigrate(schemas.KeywordToday{})
 	masterDB.AutoMigrate(schemas.Genre{})
 	masterDB.AutoMigrate(schemas.Image{})
+	masterDB.AutoMigrate(schemas.Color{})
+
+	masterDB.AutoMigrate(schemas.NovelStep1{})
+	masterDB.AutoMigrate(schemas.NovelStep2{})
+	masterDB.AutoMigrate(schemas.NovelStep3{})
+	masterDB.AutoMigrate(schemas.NovelStep4{})
+
+	logDB1.AutoMigrate(schemas.MemberSubscribe{})
+	logDB2.AutoMigrate(schemas.MemberSubscribe{})
+	logDB1.AutoMigrate(schemas.MemberBookmark{})
+	logDB2.AutoMigrate(schemas.MemberBookmark{})
+	logDB1.AutoMigrate(schemas.MemberLike{})
+	logDB2.AutoMigrate(schemas.MemberLike{})
 
 	return res
 }

@@ -23,5 +23,9 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/keyword", common(handlers.Keyword))
 	mux.HandleFunc("/skin", common(handlers.Skin))
 	mux.HandleFunc("/genre", common(handlers.Genre))
+	mux.HandleFunc("/assets", common(handlers.Assets))
+
+	// 1단계 소설 등록
+	mux.HandleFunc("/novel/write/step1", common(handlers.NovelWriteStep1))
 
 }

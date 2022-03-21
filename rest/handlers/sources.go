@@ -10,6 +10,98 @@ import (
 	"time"
 )
 
+func Assets(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+
+	today := tools.TodayFormattedDate()
+	masterDB := db.List[define.DSN_MASTER]
+	query := `
+			SELECT
+			k.seq_keyword,
+			k.keyword,
+			kt.view_date,
+			k.start_date,
+			k.end_date,
+			k.cnt_total
+		FROM ddaom.keywords AS k
+		INNER JOIN ddaom.keyword_todays AS kt ON k.seq_keyword = kt.seq_keyword
+		WHERE k.active_yn = true AND NOW() BETWEEN k.start_date AND k.end_date
+		ORDER BY kt.view_date ASC
+	`
+	keywordDate := []KeywordDate{}
+	result := masterDB.Raw(query).Scan(&keywordDate)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	assetRes := AssetRes{}
+	for i := 0; i < len(keywordDate); i++ {
+		o := keywordDate[i]
+		isToday := false
+		if o.ViewDate == today {
+			isToday = true
+		} else {
+			isToday = false
+		}
+		assetRes.ListKeyword = append(assetRes.ListKeyword, struct {
+			SeqKeyword int64  "json:\"seq_keyword\""
+			Keyword    string "json:\"keyword\""
+			IsToday    bool   "json:\"is_today\""
+			StartDate  int64  "json:\"start_date\""
+			EndDate    int64  "json:\"end_date\""
+			CntTotal   int64  "json:\"cnt_total\""
+		}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, IsToday: isToday, StartDate: o.StartDate.UnixMilli(), EndDate: o.EndDate.UnixMilli(), CntTotal: o.CntTotal})
+	}
+
+	result = masterDB.Model(&schemas.Image{}).Where("active_yn = true").Find(&assetRes.ListImage)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	result = masterDB.Model(&schemas.Color{}).Where("active_yn = true").Find(&assetRes.ListColor)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	result = masterDB.Model(&schemas.Genre{}).Where("active_yn = true").Find(&assetRes.ListGenre)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+
+	res.Data = assetRes
+
+	return res
+}
+
+type AssetRes struct {
+	ListKeyword []struct {
+		SeqKeyword int64  `json:"seq_keyword"`
+		Keyword    string `json:"keyword"`
+		IsToday    bool   `json:"is_today"`
+		StartDate  int64  `json:"start_date"`
+		EndDate    int64  `json:"end_date"`
+		CntTotal   int64  `json:"cnt_total"`
+	} `json:"list_keyword"`
+	ListImage []struct {
+		SeqImage int64  `json:"seq_image"`
+		Image    string `json:"image"`
+	} `json:"list_image"`
+	ListColor []struct {
+		SeqColor int64  `json:"seq_color"`
+		Color    string `json:"color"`
+	} `json:"list_color"`
+	ListGenre []struct {
+		SeqGenre int64  `json:"seq_genre"`
+		Genre    string `json:"genre"`
+	} `json:"list_genre"`
+}
+
 func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}

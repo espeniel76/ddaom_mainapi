@@ -99,3 +99,69 @@ type Image struct {
 	CreatedAt time.Time `json:"created_at"`
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
 }
+
+type Color struct {
+	SeqColor  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_color"`
+	Color     string    `gorm:"unique type:varchar(12)" json:"color"`
+	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
+	CreatedAt time.Time `json:"created_at"`
+	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
+}
+
+type NovelStep1 struct {
+	SeqNovelStep1 int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_step1"`
+	SeqKeyword    int64     `gorm:"index" json:"seq_keyword"`
+	SeqImage      int64     `gorm:"index" json:"seq_image"`
+	SeqColor      int64     `gorm:"index" json:"seq_color"`
+	SeqGenre      int64     `gorm:"index" json:"seq_genre"`
+	SeqMember     int64     `gorm:"index" json:"seq_member"`
+	Title         string    `gorm:"unique;type:varchar(1024)" json:"title"`
+	Content       string    `gorm:"type:varchar(5120)" json:"content"`
+	CntLike       int64     `gorm:"default:0" json:"cnt_like"`
+	CntView       int64     `gorm:"default:0" json:"cnt_view"`
+	CntStep2      int64     `gorm:"default:0" json:"cnt_step2"`
+	CntStep3      int64     `gorm:"default:0" json:"cnt_step3"`
+	CntStep4      int64     `gorm:"default:0" json:"cnt_step4"`
+	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type NovelStep2 struct {
+	SeqNovelStep2 int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_step2"`
+	SeqNovelStep1 int64     `gorm:"index" json:"seq_novel_step1"`
+	SeqMember     int64     `gorm:"index" json:"seq_member"`
+	Content       string    `gorm:"type:varchar(5120)" json:"content"`
+	CntLike       int64     `gorm:"default:0" json:"cnt_like"`
+	CntView       int64     `gorm:"default:0" json:"cnt_view"`
+	CntStep3      int64     `gorm:"default:0" json:"cnt_step3"`
+	CntStep4      int64     `gorm:"default:0" json:"cnt_step4"`
+	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type NovelStep3 struct {
+	SeqNovelStep3 int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_step3"`
+	SeqNovelStep2 int64     `gorm:"index" json:"seq_novel_step2"`
+	SeqMember     int64     `gorm:"index" json:"seq_member"`
+	Content       string    `gorm:"type:varchar(5120)" json:"content"`
+	CntLike       int64     `gorm:"default:0" json:"cnt_like"`
+	CntView       int64     `gorm:"default:0" json:"cnt_view"`
+	CntStep4      int64     `gorm:"default:0" json:"cnt_step4"`
+	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type NovelStep4 struct {
+	SeqNovelStep4 int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_step4"`
+	SeqNovelStep3 int64     `gorm:"index" json:"seq_novel_step3"`
+	SeqMember     int64     `gorm:"index" json:"seq_member"`
+	Content       string    `gorm:"type:varchar(5120)" json:"content"`
+	CntLike       int       `gorm:"default:0" json:"cnt_like"`
+	CntView       int64     `gorm:"default:0" json:"cnt_view"`
+	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}

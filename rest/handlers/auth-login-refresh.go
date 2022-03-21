@@ -26,14 +26,14 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	// 2. 신규 access_token 과 refresh_token 을 발급한다.
-	accessToken, err := define.CreateToken(userToken, define.JWT_ACCESS_SECRET)
+	accessToken, err := define.CreateToken(userToken, define.JWT_ACCESS_SECRET, "ACCESS")
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()
 		return res
 	}
 	// 3. JWT 토큰 만들기 (refresh)
-	refreshToken, err = define.CreateToken(userToken, define.JWT_REFRESH_SECRET)
+	refreshToken, err = define.CreateToken(userToken, define.JWT_REFRESH_SECRET, "REFRESH")
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()
@@ -43,6 +43,7 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	m := make(map[string]string)
 	m["access_token"] = accessToken
 	m["refresh_token"] = refreshToken
+	m["http_server"] = define.HTTP_SERVER
 
 	res.Data = m
 

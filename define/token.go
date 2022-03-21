@@ -9,7 +9,7 @@ import (
 )
 
 //Creating Access Token
-func CreateToken(userToken *domain.UserToken, secretKey string) (string, error) {
+func CreateToken(userToken *domain.UserToken, secretKey string, tokenType string) (string, error) {
 	var err error
 
 	atClaims := jwt.MapClaims{}
@@ -17,7 +17,11 @@ func CreateToken(userToken *domain.UserToken, secretKey string) (string, error) 
 	atClaims["seq_member"] = userToken.SeqMember
 	atClaims["email"] = userToken.Email
 	atClaims["user_level"] = userToken.UserLevel
-	atClaims["exp"] = time.Now().Add(time.Minute * 60 * 12).Unix() // 개발 편의상 12시간 설정
+	if tokenType == "ACCESS" {
+		atClaims["exp"] = time.Now().Add(time.Minute * 60 * 12).Unix() // 액세스 토큰 12 시간
+	} else {
+		atClaims["exp"] = time.Now().Add(time.Minute * 60 * 24 * 30).Unix() // 리프래쉬토큰 30일
+	}
 	atClaims["allocated"] = userToken.Allocated
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
