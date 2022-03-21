@@ -41,43 +41,59 @@ type MemberDetail struct {
 }
 
 type MemberAdmin struct {
-	SeqMemberAdmin int64  `gorm:"primaryKey;autoIncrement:true" json:"seq_member_admin"`
-	UserId         string `gorm:"type:varchar(50);unique" json:"user_id"`
-	Password       string `gorm:"type:varchar(1024)" json:"password"`
-	ActiveYn       bool   `gorm:"default:false" json:"active_yn"`
-	Name           string `gorm:"type:varchar(50)" json:"name"`
-	NickName       string `gorm:"type:varchar(50);unique;column:nick_name" json:"nick_name"`
-	UserLevel      int8   `gorm:"default:5" json:"user_level"`
-	ProfileImage   string `gorm:"type:varchar(1024)" json:"profile_image"`
-	CreatedAt      time.Time
-	Creator        string `gorm:"type:varchar(50)" json:"creator"`
-	UpdatedAt      time.Time
-	Updator        string `gorm:"type:varchar(50)" json:"updator"`
+	SeqMemberAdmin int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_admin"`
+	UserId         string    `gorm:"type:varchar(50);unique" json:"user_id"`
+	Password       string    `gorm:"type:varchar(1024)" json:"password"`
+	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
+	Name           string    `gorm:"type:varchar(50)" json:"name"`
+	NickName       string    `gorm:"type:varchar(50);unique;column:nick_name" json:"nick_name"`
+	UserLevel      int8      `gorm:"default:5" json:"user_level"`
+	ProfileImage   string    `gorm:"type:varchar(1024)" json:"profile_image"`
+	CreatedAt      time.Time `json:"created_at"`
+	Creator        string    `gorm:"type:varchar(50)" json:"creator"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	Updator        string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type MemberAdminLoginLog struct {
-	SeqMemberAdminLoginLog int64  `gorm:"primaryKey;autoIncrement:true" json:"seq_member_admin_login_log"`
-	SeqMemberAdmin         int64  `gorm:"index" json:"seq_member_admin"`
-	Token                  string `gorm:"type:varchar(1024)" json:"token"`
-	LoginAt                time.Time
+	SeqMemberAdminLoginLog int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_admin_login_log"`
+	SeqMemberAdmin         int64     `gorm:"index" json:"seq_member_admin"`
+	Token                  string    `gorm:"type:varchar(1024)" json:"token"`
+	LoginAt                time.Time `json:"login_at"`
 }
 
 // 주저에
 type Keyword struct {
-	SeqKeyword int64  `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword"`
-	Keyword    string `gorm:"type:varchar(1024)" json:"keyword"`
-	ActiveYn   bool   `gorm:"default:false" json:"active_yn"`
-	StartDate  time.Time
-	EndDate    time.Time
-	CntTotal   int64 `json:"cnt_total"`
+	SeqKeyword int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword"`
+	Keyword    string    `gorm:"unique;type:varchar(1024)" json:"keyword"`
+	ActiveYn   bool      `gorm:"default:false" json:"active_yn"`
+	StartDate  time.Time `json:"start_date"`
+	EndDate    time.Time `json:"end_date"`
+	CntTotal   int64     `gorm:"default:0" json:"cnt_total"`
+}
+
+type KeywordToday struct {
+	SeqKeywordToday int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword_today"`
+	SeqKeyword      int64     `gorm:"index" json:"seq_keyword"`
+	ViewDate        string    `gorm:"unique;type:char(8)" json:"view_date"`
+	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // 장르
 type Genre struct {
-	SeqGenre  int64  `gorm:"primaryKey;autoIncrement:true" json:"seq_genre"`
-	Genre     string `gorm:"type:varchar(50)" json:"keyword"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Creator   string `gorm:"type:varchar(50)" json:"creator"`
-	Updator   string `gorm:"type:varchar(50)" json:"updator"`
+	SeqGenre  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_genre"`
+	Genre     string    `gorm:"type:varchar(50)" json:"keyword"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
+	Updator   string    `gorm:"type:varchar(50)" json:"updator"`
+}
+
+type Image struct {
+	SeqImage  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_image"`
+	Image     string    `gorm:"type:varchar(1024)" json:"image"`
+	CreatedAt time.Time `json:"created_at"`
+	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
 }

@@ -34,5 +34,10 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	masterDB.AutoMigrate(schemas.MemberAdmin{})
 	masterDB.AutoMigrate(schemas.MemberAdminLoginLog{})
 
+	masterDB.AutoMigrate(schemas.Keyword{})
+	masterDB.AutoMigrate(schemas.KeywordToday{})
+	masterDB.AutoMigrate(schemas.Genre{})
+	masterDB.AutoMigrate(schemas.Image{})
+
 	return res
 }
