@@ -178,5 +178,156 @@
 				"required": true
 			}
 		]
+	},
+	"/novel/write/step2": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step1",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/novel/write/step3": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step2",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/novel/write/step4": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step3",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/novel/list/live": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_genre",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "sort",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/novel/list/step2": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step1",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/novel/list/step3": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step2",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/novel/list/step4": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step3",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
 	}
 }

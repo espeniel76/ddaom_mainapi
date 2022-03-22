@@ -25,7 +25,16 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/genre", common(handlers.Genre))
 	mux.HandleFunc("/assets", common(handlers.Assets))
 
-	// 1단계 소설 등록
+	// 소설 등록
 	mux.HandleFunc("/novel/write/step1", common(handlers.NovelWriteStep1))
+	mux.HandleFunc("/novel/write/step2", common(handlers.NovelWriteStep2))
+	mux.HandleFunc("/novel/write/step3", common(handlers.NovelWriteStep3))
+	mux.HandleFunc("/novel/write/step4", common(handlers.NovelWriteStep4))
+
+	// 소설 목록
+	mux.HandleFunc("/novel/list/live", common(handlers.NovelListLive))
+	mux.HandleFunc("/novel/list/step2", common(handlers.NovelListStep2))
+	mux.HandleFunc("/novel/list/step3", common(handlers.NovelListStep3))
+	mux.HandleFunc("/novel/list/step4", common(handlers.NovelListStep4))
 
 }
