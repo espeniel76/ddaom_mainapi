@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	HTTP_SERVER   = "http://192.168.1.20"
+	HTTP_SERVER   = "http://192.168.1.20:81"
 	HTTP_PORT     = "3011"
 	HTTP_PORT_SSL = "3012"
 	SOCKET_SERVER = "http://192.168.1.20:5150"

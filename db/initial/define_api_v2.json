@@ -93,6 +93,31 @@
 			}
 		]
 	},
+	"/auth/info/update": {
+		"allow_method": "POST",
+		"data_type": "multipart/form-data",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "nick_name",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "profile_photo",
+				"type": "blob",
+				"required": true
+			}
+		]
+	},
+	"/auth/info": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
+	},
 	"/auth/authentication": {
 		"allow_method": "GET",
 		"data_type": "text/plain",

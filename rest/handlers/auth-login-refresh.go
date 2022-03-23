@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 )
 
 func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
@@ -40,10 +42,21 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	m := make(map[string]string)
+	existNickName := false
+	masterDB := db.List[define.DSN_MASTER]
+	memberDetail := schemas.MemberDetail{}
+	masterDB.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
+	if memberDetail.NickName == "" {
+		existNickName = false
+	} else {
+		existNickName = true
+	}
+
+	m := make(map[string]interface{})
 	m["access_token"] = accessToken
 	m["refresh_token"] = refreshToken
 	m["http_server"] = define.HTTP_SERVER
+	m["exist_nick_name"] = existNickName
 
 	res.Data = m
 

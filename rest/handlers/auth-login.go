@@ -20,7 +20,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	token := Cp(req.Parameters, "token")
 	snsType := Cp(req.Parameters, "sns_type")
 	var result *gorm.DB
-	existProfilePhoto := false
+	existNickName := false
 
 	if email == "<nil>" || len(email) == 0 {
 		res.ResultCode = define.NO_PARAMETER
@@ -51,7 +51,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			res.ErrorDesc = result.Error.Error()
 			return res
 		}
-		existProfilePhoto = false
+		existNickName = false
 	} else {
 		result = masterDB.Find(&member, "email", email)
 		if result.Error != nil {
@@ -61,11 +61,11 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		memberDetail := schemas.MemberDetail{}
-		masterDB.Select("profile_photo").Where("seq_member = ?", member.SeqMember).Find(&memberDetail)
-		if memberDetail.ProfilePhoto == "" {
-			existProfilePhoto = false
+		masterDB.Select("nick_name").Where("seq_member = ?", member.SeqMember).Find(&memberDetail)
+		if memberDetail.NickName == "" {
+			existNickName = false
 		} else {
-			existProfilePhoto = true
+			existNickName = true
 		}
 	}
 
@@ -157,7 +157,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m := make(map[string]interface{})
 	m["access_token"] = accessToken
 	m["refresh_token"] = refreshToken
-	m["exist_profile_photo"] = existProfilePhoto
+	m["exist_nick_name"] = existNickName
 	m["http_server"] = define.HTTP_SERVER
 
 	res.Data = m

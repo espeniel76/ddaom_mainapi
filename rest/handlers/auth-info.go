@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"strconv"
 )
 
 type MemberDetailRes struct {
@@ -66,32 +65,54 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
-	_name := Cp(req.Parameters, "name")
-	_mobileCompany, _ := strconv.ParseInt(Cp(req.Parameters, "mobile_company"), 10, 64)
-	_mobile := Cp(req.Parameters, "mobile")
-	_zipcode := Cp(req.Parameters, "zipcode")
-	_address := Cp(req.Parameters, "address")
-	_addressDetail := Cp(req.Parameters, "address_detail")
-	_email := Cp(req.Parameters, "email")
 
-	memberDetail := schemas.MemberDetail{
-		Name:          _name,
-		MobileCompany: int8(_mobileCompany),
-		Mobile:        _mobile,
-		Zipcode:       _zipcode,
-		Address:       _address,
-		AddressDetail: _addressDetail,
-		Email:         _email,
+	isExistImage := false
+	_nickName := req.HttpRquest.FormValue("nick_name")
+	var profilePhoto domain.FileStructure
+	file, handler, err := req.HttpRquest.FormFile("profile_photo")
+	if err != nil {
+		isExistImage = false
+	} else {
+		isExistImage = true
+		profilePhoto = domain.FileStructure{
+			File:        file,
+			FileName:    handler.Filename,
+			ContentType: handler.Header.Get("Content-Type"),
+			Size:        handler.Size,
+		}
 	}
+	fullPath := ""
+	if isExistImage {
+		fullPath, err = SaveFile("profile", &profilePhoto)
+		if err != nil {
+			res.ResultCode = define.SYSTEM_ERROR
+			res.ErrorDesc = err.Error()
+			return res
+		}
+	}
+
 	masterDB := db.List[define.DSN_MASTER]
-	result := masterDB.
-		Model(schemas.MemberDetail{}).
-		Where("seq_member", userToken.SeqMember).
-		Updates(&memberDetail)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
-		return res
+	if isExistImage {
+		memberDetail := schemas.MemberDetail{
+			NickName:     _nickName,
+			ProfilePhoto: fullPath,
+		}
+		result := masterDB.Updates(&memberDetail).Where("seq_member = ?", userToken.SeqMember)
+		if result.Error != nil {
+			res.ResultCode = define.OK
+			res.ErrorDesc = result.Error.Error()
+			return res
+		}
+	} else {
+		memberDetail := schemas.MemberDetail{
+			NickName: _nickName,
+		}
+		result := masterDB.Updates(&memberDetail).Where("seq_member = ?", userToken.SeqMember)
+		if result.Error != nil {
+			res.ResultCode = define.OK
+			res.ErrorDesc = result.Error.Error()
+			return res
+		}
 	}
 
 	return res
