@@ -37,4 +37,6 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/novel/list/step3", common(handlers.NovelListStep3))
 	mux.HandleFunc("/novel/list/step4", common(handlers.NovelListStep4))
 
+	mux.HandleFunc("/novel/view/{seq_novel_step1:[0-9]+}", common(handlers.NovelView))
+
 }

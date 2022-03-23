@@ -42,21 +42,20 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	existNickName := false
 	masterDB := db.List[define.DSN_MASTER]
 	memberDetail := schemas.MemberDetail{}
-	masterDB.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
-	if memberDetail.NickName == "" {
-		existNickName = false
-	} else {
-		existNickName = true
+	result := masterDB.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
+	if result.Error != nil {
+		res.ResultCode = define.OK
+		res.ErrorDesc = result.Error.Error()
+		return res
 	}
 
 	m := make(map[string]interface{})
 	m["access_token"] = accessToken
 	m["refresh_token"] = refreshToken
 	m["http_server"] = define.HTTP_SERVER
-	m["exist_nick_name"] = existNickName
+	m["nick_name"] = memberDetail.NickName
 
 	res.Data = m
 

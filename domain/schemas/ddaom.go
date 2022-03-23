@@ -100,6 +100,15 @@ type Image struct {
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
 }
 
+type Slang struct {
+	SeqSlang       int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_slang"`
+	Slang          string    `gorm:"type:varchar(50)" json:"slang"`
+	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
+	SeqMemberAdmin string    `gorm:"index" json:"seq_member_admin"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type Color struct {
 	SeqColor  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_color"`
 	Color     string    `gorm:"unique type:varchar(12)" json:"color"`
@@ -143,6 +152,7 @@ type NovelStep2 struct {
 
 type NovelStep3 struct {
 	SeqNovelStep3 int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_step3"`
+	SeqNovelStep1 int64     `gorm:"index" json:"seq_novel_step1"`
 	SeqNovelStep2 int64     `gorm:"index" json:"seq_novel_step2"`
 	SeqMember     int64     `gorm:"index" json:"seq_member"`
 	Content       string    `gorm:"type:varchar(5120)" json:"content"`
@@ -156,6 +166,8 @@ type NovelStep3 struct {
 
 type NovelStep4 struct {
 	SeqNovelStep4 int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_step4"`
+	SeqNovelStep1 int64     `gorm:"index" json:"seq_novel_step1"`
+	SeqNovelStep2 int64     `gorm:"index" json:"seq_novel_step2"`
 	SeqNovelStep3 int64     `gorm:"index" json:"seq_novel_step3"`
 	SeqMember     int64     `gorm:"index" json:"seq_member"`
 	Content       string    `gorm:"type:varchar(5120)" json:"content"`

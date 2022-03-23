@@ -39,6 +39,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	masterDB.AutoMigrate(schemas.Genre{})
 	masterDB.AutoMigrate(schemas.Image{})
 	masterDB.AutoMigrate(schemas.Color{})
+	masterDB.AutoMigrate(schemas.Slang{})
 
 	masterDB.AutoMigrate(schemas.NovelStep1{})
 	masterDB.AutoMigrate(schemas.NovelStep2{})

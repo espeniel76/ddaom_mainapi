@@ -270,6 +270,11 @@
 				"required": true
 			},
 			{
+				"name": "seq_keyword",
+				"type": "int",
+				"required": true
+			},
+			{
 				"name": "page",
 				"type": "int",
 				"required": true
@@ -350,6 +355,19 @@
 			},
 			{
 				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/novel/view/:seq_novel_step1": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_step1",
 				"type": "int",
 				"required": true
 			}

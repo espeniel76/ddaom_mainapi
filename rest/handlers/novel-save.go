@@ -158,6 +158,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	// 3단계 저장
 	novelStep3 := schemas.NovelStep3{
+		SeqNovelStep1: seqNovelStep1,
 		SeqNovelStep2: _seqNovelStep2,
 		SeqMember:     userToken.SeqMember,
 		Content:       _content,
@@ -200,28 +201,21 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	// 1/2단계 seq 알아내기
-	var seqNovelStep1 int64
-	var seqNovelStep2 int64
-	result = masterDB.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Pluck("seq_novel_step2", &seqNovelStep2)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
-		return res
-	}
-	result = masterDB.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", seqNovelStep2).Pluck("seq_novel_step1", &seqNovelStep1)
+	novelStep3 := schemas.NovelStep3{}
+	result = masterDB.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep3)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
 		return res
 	}
 
-	result = masterDB.Exec("UPDATE novel_step1 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step1 = ?", seqNovelStep1)
+	result = masterDB.Exec("UPDATE novel_step1 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step1 = ?", novelStep3.SeqNovelStep1)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
 		return res
 	}
-	result = masterDB.Exec("UPDATE novel_step2 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step2 = ?", seqNovelStep2)
+	result = masterDB.Exec("UPDATE novel_step2 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step2 = ?", novelStep3.SeqNovelStep2)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
@@ -235,6 +229,8 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	// 4단계 저장
 	novelStep4 := schemas.NovelStep4{
+		SeqNovelStep1: novelStep3.SeqNovelStep1,
+		SeqNovelStep2: novelStep3.SeqNovelStep2,
 		SeqNovelStep3: _seqNovelStep3,
 		SeqMember:     userToken.SeqMember,
 		Content:       _content,

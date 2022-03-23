@@ -97,9 +97,9 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 			NickName:     _nickName,
 			ProfilePhoto: fullPath,
 		}
-		result := masterDB.Updates(&memberDetail).Where("seq_member = ?", userToken.SeqMember)
+		result := masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Updates(&memberDetail)
 		if result.Error != nil {
-			res.ResultCode = define.OK
+			res.ResultCode = define.DB_ERROR_ORM
 			res.ErrorDesc = result.Error.Error()
 			return res
 		}
@@ -107,9 +107,9 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		memberDetail := schemas.MemberDetail{
 			NickName: _nickName,
 		}
-		result := masterDB.Updates(&memberDetail).Where("seq_member = ?", userToken.SeqMember)
+		result := masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Update("nick_name", _nickName)
 		if result.Error != nil {
-			res.ResultCode = define.OK
+			res.ResultCode = define.DB_ERROR_ORM
 			res.ErrorDesc = result.Error.Error()
 			return res
 		}

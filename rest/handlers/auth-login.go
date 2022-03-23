@@ -20,7 +20,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	token := Cp(req.Parameters, "token")
 	snsType := Cp(req.Parameters, "sns_type")
 	var result *gorm.DB
-	existNickName := false
+	nickName := ""
 
 	if email == "<nil>" || len(email) == 0 {
 		res.ResultCode = define.NO_PARAMETER
@@ -51,7 +51,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			res.ErrorDesc = result.Error.Error()
 			return res
 		}
-		existNickName = false
 	} else {
 		result = masterDB.Find(&member, "email", email)
 		if result.Error != nil {
@@ -62,11 +61,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 		memberDetail := schemas.MemberDetail{}
 		masterDB.Select("nick_name").Where("seq_member = ?", member.SeqMember).Find(&memberDetail)
-		if memberDetail.NickName == "" {
-			existNickName = false
-		} else {
-			existNickName = true
-		}
+		nickName = memberDetail.NickName
 	}
 
 	var myLogDB *gorm.DB
@@ -157,7 +152,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m := make(map[string]interface{})
 	m["access_token"] = accessToken
 	m["refresh_token"] = refreshToken
-	m["exist_nick_name"] = existNickName
+	m["nick_name"] = nickName
 	m["http_server"] = define.HTTP_SERVER
 
 	res.Data = m

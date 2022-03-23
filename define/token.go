@@ -18,7 +18,7 @@ func CreateToken(userToken *domain.UserToken, secretKey string, tokenType string
 	atClaims["email"] = userToken.Email
 	atClaims["user_level"] = userToken.UserLevel
 	if tokenType == "ACCESS" {
-		atClaims["exp"] = time.Now().Add(time.Minute * 60 * 12).Unix() // 액세스 토큰 12 시간
+		atClaims["exp"] = time.Now().Add(time.Minute * 60 * 24 * 30).Unix() // 액세스 토큰 12 시간
 	} else {
 		atClaims["exp"] = time.Now().Add(time.Minute * 60 * 24 * 30).Unix() // 리프래쉬토큰 30일
 	}

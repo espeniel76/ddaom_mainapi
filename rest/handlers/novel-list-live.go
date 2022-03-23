@@ -15,6 +15,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	_seqGenre := CpInt64(req.Parameters, "seq_genre")
+	_seqKeyword := CpInt64(req.Parameters, "seq_keyword")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 	_sort := Cp(req.Parameters, "sort")
@@ -34,11 +35,11 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step1 ns
 		INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword
 		WHERE NOW() BETWEEN k.start_date AND k.end_date
-		AND ns.active_yn = true AND k.active_yn = true`)
+		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ?`)
 	if _seqGenre > 0 {
 		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}
-	result := masterDB.Raw(query.String()).Count(&totalData)
+	result := masterDB.Raw(query.String(), _seqKeyword).Count(&totalData)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()
@@ -64,13 +65,13 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step1 ns
 		INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword
 		WHERE NOW() BETWEEN k.start_date AND k.end_date
-		AND ns.active_yn = true AND k.active_yn = true`)
+		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ?`)
 	if _seqGenre > 0 {
 		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}
-	query.WriteString(" ORDER BY ns.seq_novel_step1")
+	query.WriteString(" ORDER BY ns.seq_novel_step1 DESC")
 	query.WriteString(" LIMIT ?, ?")
-	result = masterDB.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListLiveRes.List)
+	result = masterDB.Raw(query.String(), _seqKeyword, limitStart, _sizePerPage).Find(&novelListLiveRes.List)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()

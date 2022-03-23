@@ -73,6 +73,12 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = result.Error.Error()
 		return res
 	}
+	result = masterDB.Model(&schemas.Slang{}).Where("active_yn = true").Select("slang").Find(&assetRes.ListSlang)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
 
 	res.Data = assetRes
 
@@ -100,6 +106,7 @@ type AssetRes struct {
 		SeqGenre int64  `json:"seq_genre"`
 		Genre    string `json:"genre"`
 	} `json:"list_genre"`
+	ListSlang []string `json:"list_slang"`
 }
 
 func Keyword(req *domain.CommonRequest) domain.CommonResponse {
