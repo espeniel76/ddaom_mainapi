@@ -53,5 +53,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	logDB1.AutoMigrate(schemas.MemberLike{})
 	logDB2.AutoMigrate(schemas.MemberLike{})
 
+	masterDB.AutoMigrate(schemas.NovelFinish{})
+
 	return res
 }

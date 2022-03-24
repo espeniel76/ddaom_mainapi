@@ -55,6 +55,14 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	// 키워드 글 수 업데이트
+	result = masterDB.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", _seqKeyword)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+
 	return res
 }
 
