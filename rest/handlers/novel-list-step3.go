@@ -13,7 +13,7 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
+	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 
@@ -26,8 +26,8 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 	var totalData int64
 	masterDB := db.List[define.DSN_MASTER]
 	var query bytes.Buffer
-	query.WriteString("SELECT seq_novel_step3 FROM novel_step3 WHERE active_yn = true AND seq_novel_step2 = ?")
-	result := masterDB.Raw(query.String(), _seqNovelStep2).Count(&totalData)
+	query.WriteString("SELECT seq_novel_step3 FROM novel_step3 WHERE active_yn = true AND seq_novel_step1 = ?")
+	result := masterDB.Raw(query.String(), _seqNovelStep1).Count(&totalData)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()
@@ -45,11 +45,11 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 			ns.content
 		FROM novel_step3 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
-		WHERE ns.active_yn = true AND ns.seq_novel_step2 = ?`)
+		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ?`)
 	query.WriteString(" ORDER BY ns.seq_novel_step3")
 	query.WriteString(" LIMIT ?, ?")
 	step3ResTmp := []Step3ResTmp{}
-	result = masterDB.Raw(query.String(), _seqNovelStep2, limitStart, _sizePerPage).Find(&step3ResTmp)
+	result = masterDB.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step3ResTmp)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()

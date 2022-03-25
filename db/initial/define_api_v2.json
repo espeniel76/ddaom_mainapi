@@ -321,7 +321,7 @@
 		"user_level": 5,
 		"require_parameters": [
 			{
-				"name": "seq_novel_step2",
+				"name": "seq_novel_step1",
 				"type": "int",
 				"required": true
 			},
@@ -344,7 +344,7 @@
 		"user_level": 5,
 		"require_parameters": [
 			{
-				"name": "seq_novel_step3",
+				"name": "seq_novel_step1",
 				"type": "int",
 				"required": true
 			},
@@ -368,6 +368,19 @@
 		"require_parameters": [
 			{
 				"name": "seq_novel_step1",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/novel/subscribe": {
+		"allow_method": "POST",
+		"data_type": "applicaton/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_member",
 				"type": "int",
 				"required": true
 			}
