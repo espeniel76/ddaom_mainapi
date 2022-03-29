@@ -29,6 +29,7 @@ const (
 	REQUIRE_OVER_1          = "REQUIRE_OVER_1"
 	NO_EXIST_DATA           = "NO_EXIST_DATA"
 	NOT_AUTHOR              = "NOT_AUTHOR"
+	SELF_SUBSCRIBE          = "SELF_SUBSCRIBE"
 )
 
 // const LIST_PER_PAGE = 2

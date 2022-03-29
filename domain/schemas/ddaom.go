@@ -36,6 +36,7 @@ type MemberDetail struct {
 	AltSuccessfulBid bool      `gorm:"default:false" json:"alt_successful_bid"`
 	AltNewContent    bool      `gorm:"default:false" json:"alt_new_content"`
 	AltNightPush     bool      `gorm:"default:false" json:"alt_night_push"`
+	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
@@ -180,11 +181,11 @@ type NovelStep4 struct {
 
 type NovelFinish struct {
 	SeqNovelFinish int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_finish"`
-	SeqKeyword     int64     `gorm:"index" json:"seq_keyword"`
-	SeqNovelStep1  int64     `gorm:"index" json:"seq_novel_step1"`
-	SeqNovelStep2  int64     `gorm:"index" json:"seq_novel_step2"`
-	SeqNovelStep3  int64     `gorm:"index" json:"seq_novel_step3"`
-	SeqNovelStep4  int64     `gorm:"index" json:"seq_novel_step4"`
+	SeqNovelStep1  int64     `json:"seq_novel_step1"`
+	SeqNovelStep2  int64     `json:"seq_novel_step2"`
+	SeqNovelStep3  int64     `json:"seq_novel_step3"`
+	SeqNovelStep4  int64     `json:"seq_novel_step4"`
+	CntBookmark    int64     `gorm:"default:0" json:"cnt_bookmark"`
 	ActiveYn       bool      `gorm:"default:true" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
 }

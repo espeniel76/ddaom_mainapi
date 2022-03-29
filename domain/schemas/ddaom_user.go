@@ -19,22 +19,43 @@ type MemberSubscribe struct {
 	SeqMemberSubscribe int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_subscribe"`
 	SeqMember          int64     `gorm:"index" json:"seq_member"`
 	SeqMemberFollowing int64     `gorm:"index" json:"seq_member_following"`
+	SubscribeYn        bool      `gorm:"default:false" json:"subscribe_yn"`
 	CreatedAt          time.Time `json:"created_at"`
 }
 
 type MemberBookmark struct {
 	SeqMemberBookmark int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_bookmark"`
 	SeqMember         int64     `gorm:"index" json:"seq_member"`
-	SeqNovelStep1     int64     `gorm:"index" json:"seq_novel_step1"`
+	SeqNovelFinish    int64     `gorm:"index" json:"seq_novel_finish"`
+	BookmarkYn        bool      `gorm:"default:false" json:"bookmark_yn"`
 	CreatedAt         time.Time `json:"created_at"`
 }
 
-type MemberLike struct {
+type MemberLikeStep1 struct {
 	SeqMemberLike int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_like"`
-	SeqMember     int64     `gorm:"index" json:"seq_member"`
-	SeqNovelStep1 int64     `gorm:"index" json:"seq_novel_step1"`
-	SeqNovelStep2 int64     `gorm:"index" json:"seq_novel_step2"`
-	SeqNovelStep3 int64     `gorm:"index" json:"seq_novel_step3"`
-	SeqNovelStep4 int64     `gorm:"index" json:"seq_novel_step4"`
+	SeqMember     int64     `gorm:"index:idx_like" json:"seq_member"`
+	SeqNovelStep1 int64     `gorm:"index:idx_like" json:"seq_novel_step1"`
+	LikeYn        bool      `gorm:"default:false" json:"like_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+type MemberLikeStep2 struct {
+	SeqMemberLike int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_like"`
+	SeqMember     int64     `gorm:"index:idx_like" json:"seq_member"`
+	SeqNovelStep2 int64     `gorm:"index:idx_like" json:"seq_novel_step2"`
+	LikeYn        bool      `gorm:"default:false" json:"like_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+type MemberLikeStep3 struct {
+	SeqMemberLike int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_like"`
+	SeqMember     int64     `gorm:"index:idx_like" json:"seq_member"`
+	SeqNovelStep3 int64     `gorm:"index:idx_like" json:"seq_novel_step3"`
+	LikeYn        bool      `gorm:"default:false" json:"like_yn"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+type MemberLikeStep4 struct {
+	SeqMemberLike int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_like"`
+	SeqMember     int64     `gorm:"index:idx_like" json:"seq_member"`
+	SeqNovelStep4 int64     `gorm:"index:idx_like" json:"seq_novel_step4"`
+	LikeYn        bool      `gorm:"default:false" json:"like_yn"`
 	CreatedAt     time.Time `json:"created_at"`
 }

@@ -50,8 +50,15 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	logDB2.AutoMigrate(schemas.MemberSubscribe{})
 	logDB1.AutoMigrate(schemas.MemberBookmark{})
 	logDB2.AutoMigrate(schemas.MemberBookmark{})
-	logDB1.AutoMigrate(schemas.MemberLike{})
-	logDB2.AutoMigrate(schemas.MemberLike{})
+
+	logDB1.AutoMigrate(schemas.MemberLikeStep1{})
+	logDB2.AutoMigrate(schemas.MemberLikeStep1{})
+	logDB1.AutoMigrate(schemas.MemberLikeStep2{})
+	logDB2.AutoMigrate(schemas.MemberLikeStep2{})
+	logDB1.AutoMigrate(schemas.MemberLikeStep3{})
+	logDB2.AutoMigrate(schemas.MemberLikeStep3{})
+	logDB1.AutoMigrate(schemas.MemberLikeStep4{})
+	logDB2.AutoMigrate(schemas.MemberLikeStep4{})
 
 	masterDB.AutoMigrate(schemas.NovelFinish{})
 
