@@ -31,15 +31,16 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/novel/write/step3", common(handlers.NovelWriteStep3))
 	mux.HandleFunc("/novel/write/step4", common(handlers.NovelWriteStep4))
 
-	// 진행중 소설 목록
+	// 진행중 소설
 	mux.HandleFunc("/novel/list/live", common(handlers.NovelListLive))
 	mux.HandleFunc("/novel/list/step2", common(handlers.NovelListStep2))
 	mux.HandleFunc("/novel/list/step3", common(handlers.NovelListStep3))
 	mux.HandleFunc("/novel/list/step4", common(handlers.NovelListStep4))
 	mux.HandleFunc("/novel/view/{seq_novel_step1:[0-9]+}", common(handlers.NovelView))
 
-	// 완결 소설 목록
+	// 완결 소설
 	mux.HandleFunc("/novel/list/finish", common(handlers.NovelListFinish))
+	mux.HandleFunc("/novel/view/finish/{seq_novel_finish:[0-9]+}", common(handlers.NovelViewFinish))
 
 	// 소설 좋아요
 	mux.HandleFunc("/novel/like/step1/{seq_novel_step1:[0-9]+}", common(handlers.NovelLikeStep1))
