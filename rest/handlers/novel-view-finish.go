@@ -4,6 +4,7 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"fmt"
 	"time"
 )
@@ -23,6 +24,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	query := `
 	SELECT
 		nf.seq_novel_finish,
+		ns1.seq_novel_step1,
 		ns1.title,
 		ns1.seq_genre,
 		ns1.seq_keyword ,
@@ -59,6 +61,29 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	myLogDb := GetMyLogDb(userToken.Allocated)
+	var cnt int64
+	myLike := false
+	myBookmark := false
+	result = myLogDb.Model(schemas.MemberLikeStep1{}).Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).Count(&cnt)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	if cnt > 0 {
+		myLike = true
+	}
+	result = myLogDb.Model(schemas.MemberBookmark{}).Where("seq_member = ? AND seq_novel_finish = ? AND bookmark_yn = true", userToken.SeqMember, _seqNovelFinish).Count(&cnt)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	if cnt > 0 {
+		myBookmark = true
+	}
+
 	novelViewFinishRes := NovelViewFinishRes{
 		SeqNovelFinish: n.SeqNovelFinish,
 		Title:          n.Title,
@@ -68,8 +93,8 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		SeqColor:       n.SeqColor,
 		CntLike:        n.CntLike,
 		CntView:        n.CntView,
-		MyLike:         false,
-		MyBookmark:     false,
+		MyLike:         myLike,
+		MyBookmark:     myBookmark,
 		CreatedAt:      n.CreatedAt.UnixMilli(),
 		Step1: struct {
 			SeqMember int64  "json:\"seq_member\""
@@ -117,6 +142,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 type NovelViewFinishData struct {
 	SeqNovelFinish int64     `json:"seq_novel_finish"`
 	Title          string    `json:"title"`
+	SeqNovelStep1  int64     `json:"seq_novel_step1"`
 	SeqGenre       int64     `json:"seq_genre"`
 	SeqKeyword     int64     `json:"seq_keyword"`
 	SeqImage       int64     `json:"seq_image"`

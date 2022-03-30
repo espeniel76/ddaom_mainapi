@@ -41,7 +41,6 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 		TotalPage: tools.GetTotalPage(totalData, _sizePerPage),
 		TotalData: int(totalData),
 	}
-	fmt.Println(novelListFinishRes)
 
 	var query bytes.Buffer
 	query.WriteString(`
