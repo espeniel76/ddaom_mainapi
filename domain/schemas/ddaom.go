@@ -133,6 +133,7 @@ type NovelStep1 struct {
 	CntStep3      int64     `gorm:"default:0" json:"cnt_step3"`
 	CntStep4      int64     `gorm:"default:0" json:"cnt_step4"`
 	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	TempYn        bool      `gorm:"default:false" json:"temp_yn"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
@@ -147,6 +148,7 @@ type NovelStep2 struct {
 	CntStep3      int64     `gorm:"default:0" json:"cnt_step3"`
 	CntStep4      int64     `gorm:"default:0" json:"cnt_step4"`
 	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	TempYn        bool      `gorm:"default:false" json:"temp_yn"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
@@ -161,6 +163,7 @@ type NovelStep3 struct {
 	CntView       int64     `gorm:"default:0" json:"cnt_view"`
 	CntStep4      int64     `gorm:"default:0" json:"cnt_step4"`
 	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	TempYn        bool      `gorm:"default:false" json:"temp_yn"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
@@ -175,6 +178,7 @@ type NovelStep4 struct {
 	CntLike       int       `gorm:"default:0" json:"cnt_like"`
 	CntView       int64     `gorm:"default:0" json:"cnt_view"`
 	ActiveYn      bool      `gorm:"default:true" json:"active_yn"`
+	TempYn        bool      `gorm:"default:false" json:"temp_yn"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }

@@ -30,6 +30,7 @@ const (
 	NO_EXIST_DATA           = "NO_EXIST_DATA"
 	NOT_AUTHOR              = "NOT_AUTHOR"
 	SELF_SUBSCRIBE          = "SELF_SUBSCRIBE"
+	NO_EXIST_NICK           = "NO_EXIST_NICK"
 )
 
 // const LIST_PER_PAGE = 2

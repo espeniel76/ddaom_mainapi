@@ -105,3 +105,13 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 
 	return fullPath, nil
 }
+
+func corm(o *gorm.DB, res *domain.CommonResponse) bool {
+	isError := false
+	if o.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = o.Error.Error()
+		isError = true
+	}
+	return isError
+}

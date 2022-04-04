@@ -38,7 +38,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.seq_color
 	FROM novel_step1 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ?`
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false`
 	step1Res := Step1Res{}
 	result := masterDB.Raw(query, _seqNovelStep1).Scan(&step1Res)
 	if result.Error != nil {
@@ -74,7 +74,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like
 	FROM novel_step2 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ?
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
 	ORDER BY ns.seq_novel_step2 DESC`
 	step2Res := Step2Res{}
 	result = masterDB.Raw(query, _seqNovelStep1).Scan(&step2Res)
@@ -114,7 +114,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like
 	FROM novel_step3 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ?
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
 	ORDER BY ns.seq_novel_step3 DESC`
 	step3Res := Step3Res{}
 	result = masterDB.Raw(query, _seqNovelStep1).Scan(&step3Res)
@@ -154,7 +154,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like
 	FROM novel_step4 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ?
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
 	ORDER BY ns.seq_novel_step4 DESC`
 	step4Res := Step4Res{}
 	result = masterDB.Raw(query, _seqNovelStep1).Scan(&step4Res)

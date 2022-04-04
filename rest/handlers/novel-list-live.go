@@ -35,7 +35,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step1 ns
 		INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword
 		WHERE NOW() BETWEEN k.start_date AND k.end_date
-		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ?`)
+		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ? AND ns.temp_yn = false`)
 	if _seqGenre > 0 {
 		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}
@@ -65,7 +65,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step1 ns
 		INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword
 		WHERE NOW() BETWEEN k.start_date AND k.end_date
-		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ?`)
+		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ? AND ns.temp_yn = false`)
 	if _seqGenre > 0 {
 		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}

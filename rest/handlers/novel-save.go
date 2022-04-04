@@ -23,8 +23,21 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	_seqColor := CpInt64(req.Parameters, "seq_color")
 	_title := Cp(req.Parameters, "title")
 	_content := Cp(req.Parameters, "content")
+	_tempYn := CpBool(req.Parameters, "temp_yn")
 
+	// 존재하는 닉네임 여부
 	masterDB := db.List[define.DSN_MASTER]
+	var cnt int64
+	result := masterDB.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	if cnt == 0 {
+		res.ResultCode = define.NO_EXIST_NICK
+	}
+
 	novelWriteStep1 := schemas.NovelStep1{
 		SeqKeyword: _seqKeyword,
 		SeqImage:   _seqImage,
@@ -33,11 +46,11 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		SeqMember:  userToken.SeqMember,
 		Title:      _title,
 		Content:    _content,
+		TempYn:     _tempYn,
 	}
 
 	// 동일 제목 검사
-	var cnt int64
-	result := masterDB.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
+	result = masterDB.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
@@ -78,11 +91,22 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_content := Cp(req.Parameters, "content")
+	_tempYn := CpBool(req.Parameters, "temp_yn")
 
+	// 존재하는 닉네임 여부
 	masterDB := db.List[define.DSN_MASTER]
-
 	var cnt int64
-	result := masterDB.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
+	result := masterDB.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	if cnt == 0 {
+		res.ResultCode = define.NO_EXIST_NICK
+	}
+
+	result = masterDB.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
@@ -105,6 +129,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		SeqNovelStep1: _seqNovelStep1,
 		SeqMember:     userToken.SeqMember,
 		Content:       _content,
+		TempYn:        _tempYn,
 	}
 	result = masterDB.Save(&novelStep2)
 	if result.Error != nil {
@@ -128,10 +153,21 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
 	_content := Cp(req.Parameters, "content")
+	_tempYn := CpBool(req.Parameters, "temp_yn")
 
+	// 존재하는 닉네임 여부
 	masterDB := db.List[define.DSN_MASTER]
 	var cnt int64
-	result := masterDB.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", _seqNovelStep2).Count(&cnt)
+	result := masterDB.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	if cnt == 0 {
+		res.ResultCode = define.NO_EXIST_NICK
+	}
+	result = masterDB.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", _seqNovelStep2).Count(&cnt)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
@@ -170,6 +206,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		SeqNovelStep2: _seqNovelStep2,
 		SeqMember:     userToken.SeqMember,
 		Content:       _content,
+		TempYn:        _tempYn,
 	}
 	result = masterDB.Save(&novelStep3)
 	if result.Error != nil {
@@ -193,10 +230,21 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 	_seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
 	_content := Cp(req.Parameters, "content")
+	_tempYn := CpBool(req.Parameters, "temp_yn")
 
+	// 존재하는 닉네임 여부
 	masterDB := db.List[define.DSN_MASTER]
 	var cnt int64
-	result := masterDB.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Count(&cnt)
+	result := masterDB.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
+	if cnt == 0 {
+		res.ResultCode = define.NO_EXIST_NICK
+	}
+	result = masterDB.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Count(&cnt)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
@@ -242,6 +290,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		SeqNovelStep3: _seqNovelStep3,
 		SeqMember:     userToken.SeqMember,
 		Content:       _content,
+		TempYn:        _tempYn,
 	}
 	result = masterDB.Save(&novelStep4)
 	if result.Error != nil {
