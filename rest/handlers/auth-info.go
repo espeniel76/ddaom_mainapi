@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"time"
 )
 
@@ -71,32 +70,34 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	isExistImage := false
 	_nickName := req.HttpRquest.FormValue("nick_name")
 	_email := req.HttpRquest.FormValue("email")
-	// _isDefaultImage := req.HttpRquest.FormValue("is_default_image")
+	_isDefaultImage := req.HttpRquest.FormValue("is_default_image")
 	file, handler, err := req.HttpRquest.FormFile("profile_photo")
-
-	var profilePhoto domain.FileStructure
-	if err != nil {
-		isExistImage = false
-	} else {
-		isExistImage = true
-		profilePhoto = domain.FileStructure{
-			File:        file,
-			FileName:    handler.Filename,
-			ContentType: handler.Header.Get("Content-Type"),
-			Size:        handler.Size,
-		}
-	}
-	fmt.Println("###############################################")
-	fmt.Println(profilePhoto)
-	fmt.Println("###############################################")
 	fullPath := ""
-	if isExistImage {
-		fullPath, err = SaveFile("profile", &profilePhoto)
+
+	if _isDefaultImage == "N" {
+		var profilePhoto domain.FileStructure
 		if err != nil {
-			res.ResultCode = define.SYSTEM_ERROR
-			res.ErrorDesc = err.Error()
-			return res
+			isExistImage = false
+		} else {
+			isExistImage = true
+			profilePhoto = domain.FileStructure{
+				File:        file,
+				FileName:    handler.Filename,
+				ContentType: handler.Header.Get("Content-Type"),
+				Size:        handler.Size,
+			}
 		}
+
+		if isExistImage {
+			fullPath, err = SaveFile("profile", &profilePhoto)
+			if err != nil {
+				res.ResultCode = define.SYSTEM_ERROR
+				res.ErrorDesc = err.Error()
+				return res
+			}
+		}
+	} else {
+		fullPath = define.DEFAULT_PROFILE
 	}
 
 	masterDB := db.List[define.DSN_MASTER]
@@ -105,7 +106,6 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
-
 	if memberDetail.SeqMember > 0 {
 		if memberDetail.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.ALREADY_EXISTS_NICKNAME
@@ -118,24 +118,24 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
-
 	isExistMember := false
 	if memberDetail.SeqMember > 0 {
 		isExistMember = true
 	}
-
 	if len(_nickName) > 0 {
 		memberDetail.NickName = _nickName
 	}
-	if isExistImage {
-		memberDetail.ProfilePhoto = fullPath
+	if _isDefaultImage == "Y" {
+		memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
+	} else {
+		if isExistImage {
+			memberDetail.ProfilePhoto = fullPath
+		}
 	}
 	if len(_email) > 0 {
 		memberDetail.Email = _email
 	}
-
 	if isExistMember {
-
 		result = masterDB.Model(&memberDetail).
 			Where("seq_member = ?", userToken.SeqMember).
 			Updates(&memberDetail)
@@ -150,33 +150,12 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		} else {
 			memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
 		}
-
 		memberDetail.AuthenticationAt = time.Now()
-		fmt.Println(memberDetail)
 		result = masterDB.Create(&memberDetail)
 		if corm(result, &res) {
 			return res
 		}
 	}
-
-	// if isExistImage {
-	// 	memberDetail := schemas.MemberDetail{
-	// 		NickName:     _nickName,
-	// 		ProfilePhoto: fullPath,
-	// 	}
-	// 	result = masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Updates(&memberDetail)
-	// 	if corm(result, &res) {
-	// 		return res
-	// 	}
-	// } else {
-	// 	memberDetail := schemas.MemberDetail{
-	// 		NickName: _nickName,
-	// 	}
-	// 	result = masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Update("nick_name", _nickName)
-	// 	if corm(result, &res) {
-	// 		return res
-	// 	}
-	// }
 
 	return res
 }
