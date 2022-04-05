@@ -64,9 +64,9 @@ func GetMyLogDb(allocated int8) *gorm.DB {
 func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 
 	var err error
-	if oFile.ContentType == "" {
-		return "", err
-	}
+	// if oFile.ContentType == "" {
+	// 	return "", err
+	// }
 
 	defer oFile.File.Close()
 
@@ -87,6 +87,9 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 		ext = "jpg"
 	case "image/gif":
 		ext = "gif"
+	default:
+		tmp := strings.Split(oFile.FileName, ".")
+		ext = tmp[len(tmp)-1]
 	}
 
 	saveFileName := uuid + "." + ext

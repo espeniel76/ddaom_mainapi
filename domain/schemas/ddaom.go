@@ -190,6 +190,10 @@ type NovelFinish struct {
 	SeqNovelStep3  int64     `json:"seq_novel_step3"`
 	SeqNovelStep4  int64     `json:"seq_novel_step4"`
 	CntBookmark    int64     `gorm:"default:0" json:"cnt_bookmark"`
+	SeqMemberStep1 int64     `gorm:"default:0" json:"seq_member_step1"`
+	SeqMemberStep2 int64     `gorm:"default:0" json:"seq_member_step2"`
+	SeqMemberStep3 int64     `gorm:"default:0" json:"seq_member_step3"`
+	SeqMemberStep4 int64     `gorm:"default:0" json:"seq_member_step4"`
 	ActiveYn       bool      `gorm:"default:true" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
 }

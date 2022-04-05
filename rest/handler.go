@@ -60,4 +60,6 @@ func Handlers(mux *mux.Router) {
 
 	// 마이페이지
 	mux.HandleFunc("/mypage/info", common(handlers.MypageInfo))
+	mux.HandleFunc("/mypage/list/live", common(handlers.MypageListLive))
+	mux.HandleFunc("/mypage/list/finish", common(handlers.MypageListFinish))
 }
