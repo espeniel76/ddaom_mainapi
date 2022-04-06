@@ -26,6 +26,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/assets", common(handlers.Assets))
 
 	// 소설 등록
+	mux.HandleFunc("/novel/check/title", common(handlers.NovelCheckTitle))
 	mux.HandleFunc("/novel/write/step1", common(handlers.NovelWriteStep1))
 	mux.HandleFunc("/novel/write/step2", common(handlers.NovelWriteStep2))
 	mux.HandleFunc("/novel/write/step3", common(handlers.NovelWriteStep3))
@@ -62,4 +63,10 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/info", common(handlers.MypageInfo))
 	mux.HandleFunc("/mypage/list/live", common(handlers.MypageListLive))
 	mux.HandleFunc("/mypage/list/finish", common(handlers.MypageListFinish))
+	mux.HandleFunc("/mypage/list/temp", common(handlers.MypageListTemp))
+	mux.HandleFunc("/mypage/list/complete", common(handlers.MypageListComplete))
+
+	// 메인
+	mux.HandleFunc("/main", common(handlers.Main))
+	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.MainKeyword))
 }

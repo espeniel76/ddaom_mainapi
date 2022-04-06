@@ -37,6 +37,7 @@ type MemberDetail struct {
 	AltNewContent    bool      `gorm:"default:false" json:"alt_new_content"`
 	AltNightPush     bool      `gorm:"default:false" json:"alt_night_push"`
 	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
+	CntLike          int64     `gorm:"default:0" json:"cnt_like"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
@@ -190,6 +191,7 @@ type NovelFinish struct {
 	SeqNovelStep3  int64     `json:"seq_novel_step3"`
 	SeqNovelStep4  int64     `json:"seq_novel_step4"`
 	CntBookmark    int64     `gorm:"default:0" json:"cnt_bookmark"`
+	CntLike        int64     `gorm:"default:0" json:"cnt_like"`
 	SeqMemberStep1 int64     `gorm:"default:0" json:"seq_member_step1"`
 	SeqMemberStep2 int64     `gorm:"default:0" json:"seq_member_step2"`
 	SeqMemberStep3 int64     `gorm:"default:0" json:"seq_member_step3"`

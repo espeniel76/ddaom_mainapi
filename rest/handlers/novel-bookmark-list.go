@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
@@ -29,26 +28,25 @@ func NovelBookmarkList(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	masterDB := db.List[define.DSN_MASTER]
+	slaveDb := db.List[define.DSN_SLAVE1]
 	myLogDb := GetMyLogDb(userToken.Allocated)
 
 	var list []int64
 	result := myLogDb.
-		Raw("SELECT seq_novel_finish FROM member_bookmarks mb WHERE seq_member = ?", userToken.SeqMember).
+		Model(schemas.MemberBookmark{}).
+		Select("seq_novel_finish").
+		Where("seq_member = ?", userToken.SeqMember).
 		Scan(&list)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 
 	var totalData int64
-	result = masterDB.
-		Raw("SELECT ns.seq_novel_finish FROM novel_finishes ns WHERE ns.active_yn = true AND seq_novel_finish IN (?)", list).
+	result = slaveDb.
+		Model(schemas.NovelFinish{}).
+		Where("seq_novel_finish IN (?)", list).
 		Count(&totalData)
-	if result.Error != nil {
-		res.ResultCode = define.OK
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 	novelBookmarkListRes := NovelBookmarkListRes{
@@ -56,24 +54,24 @@ func NovelBookmarkList(req *domain.CommonRequest) domain.CommonResponse {
 		TotalPage: tools.GetTotalPage(totalData, _sizePerPage),
 		TotalData: int(totalData),
 	}
-	var query bytes.Buffer
-	query.WriteString(`
-		SELECT
-			nf.seq_novel_finish,
-			ns.seq_keyword,
-			ns.seq_genre,
-			ns.seq_image,
-			ns.seq_color,
-			ns.title
-		FROM novel_finishes nf 
-		INNER JOIN novel_step1 ns ON nf.seq_novel_step1 = ns.seq_novel_step1
-		WHERE ns.active_yn = true AND nf.seq_novel_finish IN (?)`)
-	query.WriteString(" ORDER BY nf.created_at DESC")
-	query.WriteString(" LIMIT ?, ?")
-	result = masterDB.Raw(query.String(), list, limitStart, _sizePerPage).Find(&novelBookmarkListRes.List)
-	if result.Error != nil {
-		res.ResultCode = define.OK
-		res.ErrorDesc = result.Error.Error()
+	query := `
+	SELECT
+		nf.seq_novel_finish,
+		ns.seq_keyword,
+		ns.seq_genre,
+		ns.seq_image,
+		ns.seq_color,
+		ns.title
+	FROM novel_finishes nf 
+	INNER JOIN novel_step1 ns ON nf.seq_novel_step1 = ns.seq_novel_step1
+	WHERE ns.active_yn = true AND nf.seq_novel_finish IN (?)
+	ORDER BY nf.created_at DESC
+	LIMIT ?, ?
+	`
+	result = slaveDb.
+		Raw(query, list, limitStart, _sizePerPage).
+		Scan(&novelBookmarkListRes.List)
+	if corm(result, &res) {
 		return res
 	}
 
@@ -87,11 +85,11 @@ type NovelBookmarkListRes struct {
 	TotalPage int `json:"total_page"`
 	TotalData int `json:"total_data"`
 	List      []struct {
-		SeqNovelFinish int64  `json:"seq_novel_finish"`
-		SeqKeyword     int64  `json:"seq_keyword"`
-		SeqGenre       int64  `json:"seq_genre"`
-		SeqImage       int64  `json:"seq_image"`
-		SeqColor       int64  `json:"seq_color"`
+		SeqNovelFinish int    `json:"seq_novel_finish"`
+		SeqKeyword     int    `json:"seq_keyword"`
+		SeqGenre       int    `json:"seq_genre"`
+		SeqImage       int    `json:"seq_image"`
+		SeqColor       int    `json:"seq_color"`
 		Title          string `json:"title"`
 	} `json:"list"`
 }
@@ -114,9 +112,7 @@ func NovelBookmarkDelete(req *domain.CommonRequest) domain.CommonResponse {
 	result := myLogDb.
 		Where("seq_member = ? AND seq_novel_finish IN (?)", userToken.SeqMember, tmpList).
 		Delete(&schemas.MemberBookmark{})
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 

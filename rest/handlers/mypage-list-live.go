@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
@@ -27,37 +26,34 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	masterDB := db.List[define.DSN_MASTER]
-	// myLogDb := GetMyLogDb(userToken.Allocated)
-
-	// var list []int64
-	// result := myLogDb.
-	// 	Raw("SELECT seq_novel_finish FROM member_bookmarks mb WHERE seq_member = ?", userToken.SeqMember).
-	// 	Scan(&list)
-	// if result.Error != nil {
-	// 	res.ResultCode = define.DB_ERROR_ORM
-	// 	res.ErrorDesc = result.Error.Error()
-	// 	return res
-	// }
+	slaveDb := db.List[define.DSN_SLAVE1]
 
 	var totalData int64
 	var cnt int64
-	result := masterDB.Model(schemas.NovelStep1{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result := slaveDb.Model(schemas.NovelStep1{}).
+		Where("seq_member = ? AND active_yn = true AND temp_yn = false", userToken.SeqMember).
+		Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
 	totalData += cnt
-	result = masterDB.Model(schemas.NovelStep2{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result = slaveDb.Model(schemas.NovelStep2{}).
+		Where("seq_member = ? AND active_yn = true AND temp_yn = false", userToken.SeqMember).
+		Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
 	totalData += cnt
-	result = masterDB.Model(schemas.NovelStep3{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result = slaveDb.Model(schemas.NovelStep3{}).
+		Where("seq_member = ? AND active_yn = true AND temp_yn = false", userToken.SeqMember).
+		Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
 	totalData += cnt
-	result = masterDB.Model(schemas.NovelStep4{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result = slaveDb.Model(schemas.NovelStep4{}).
+		Where("seq_member = ? AND active_yn = true AND temp_yn = false", userToken.SeqMember).
+		Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
@@ -68,8 +64,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		TotalPage: tools.GetTotalPage(totalData, _sizePerPage),
 		TotalData: int(totalData),
 	}
-	var query bytes.Buffer
-	query.WriteString(`
+	query := `
 	(SELECT
 		seq_novel_step1,
 		0 AS seq_novel_step2,
@@ -84,7 +79,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		cnt_like,
 		UNIX_TIMESTAMP(created_at) *1000 AS created_at,
 		1 AS step
-	FROM ddaom.novel_step1 ns WHERE seq_member = ?)
+	FROM novel_step1 ns WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
 	UNION 
 	(SELECT
 		0 AS seq_novel_step1,
@@ -100,8 +95,9 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		ns2.cnt_like,
 		UNIX_TIMESTAMP(ns2.created_at) *1000 AS created_at,
 		2 AS step
-	FROM ddaom.novel_step2 ns2 INNER JOIN ddaom.novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
-	WHERE ns2.seq_member = ?)
+	FROM novel_step2 ns2 
+	INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
+	WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.temp_yn = false)
 	UNION 
 	(SELECT
 		0 AS seq_novel_step1,
@@ -117,8 +113,9 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		ns3.cnt_like,
 		UNIX_TIMESTAMP(ns3.created_at) *1000 AS created_at,
 		3 AS step
-	FROM ddaom.novel_step3 ns3 INNER JOIN ddaom.novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
-	WHERE ns3.seq_member = ?)
+	FROM novel_step3 ns3 
+	INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
+	WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.temp_yn = false)
 	UNION 
 	(SELECT
 		0 AS seq_novel_step1,
@@ -134,12 +131,15 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		ns4.cnt_like,
 		UNIX_TIMESTAMP(ns4.created_at) *1000 AS created_at,
 		4 AS step
-	FROM ddaom.novel_step4 ns4 INNER JOIN ddaom.novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 
-	WHERE ns4.seq_member = ?)
-	`)
-	query.WriteString(" ORDER BY created_at DESC")
-	query.WriteString(" LIMIT ?, ?")
-	result = masterDB.Raw(query.String(), userToken.SeqMember, userToken.SeqMember, userToken.SeqMember, userToken.SeqMember, limitStart, _sizePerPage).Find(&novelMyListLiveRes.List)
+	FROM novel_step4 ns4 
+	INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 
+	WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.temp_yn = false)
+	ORDER BY created_at DESC
+	LIMIT ?, ?
+	`
+	result = slaveDb.
+		Raw(query, userToken.SeqMember, userToken.SeqMember, userToken.SeqMember, userToken.SeqMember, limitStart, _sizePerPage).
+		Scan(&novelMyListLiveRes.List)
 	if corm(result, &res) {
 		return res
 	}

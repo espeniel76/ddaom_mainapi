@@ -7,6 +7,28 @@ import (
 	"ddaom/domain/schemas"
 )
 
+func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+	_title := Cp(req.Parameters, "title")
+
+	slaveDb := db.List[define.DSN_SLAVE1]
+	var cnt int64
+	isExist := false
+	result := slaveDb.Model(schemas.NovelStep1{}).Where("title = ?", _title).Count(&cnt)
+	if corm(result, &res) {
+		return res
+	}
+	if cnt > 0 {
+		isExist = true
+	}
+	data := make(map[string]bool)
+	data["is_exist"] = isExist
+	res.Data = data
+
+	return res
+}
+
 func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
