@@ -110,7 +110,7 @@ func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 	_seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
 
 	slaveDb := db.List[define.DSN_SLAVE1]
-	mainRes := []ListLive{}
+	mainRes := ListLiveRes{}
 
 	query := `
 	SELECT
@@ -123,13 +123,17 @@ func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 	ORDER BY created_at DESC
 	LIMIT 10
 	`
-	result := slaveDb.Raw(query, _seqKeyword).Scan(&mainRes)
+	result := slaveDb.Raw(query, _seqKeyword).Scan(&mainRes.ListLive)
 	if corm(result, &res) {
 		return res
 	}
 	res.Data = mainRes
 
 	return res
+}
+
+type ListLiveRes struct {
+	ListLive []ListLive `json:"list_live"`
 }
 
 type ListLive struct {
