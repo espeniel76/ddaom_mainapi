@@ -59,6 +59,13 @@
 			}
 		]
 	},
+	"/main/temp/info": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
+	},
 	"/auth/login": {
 		"allow_method": "POST",
 		"data_type": "application/json",
@@ -627,6 +634,59 @@
 		"require_token": false,
 		"user_level": 5,
 		"require_parameters": [
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/visit/info/:seq_member": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
+	},
+	"/visit/list/live": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_member",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/visit/list/finish": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_member",
+				"type": "int",
+				"required": true
+			},
 			{
 				"name": "page",
 				"type": "int",

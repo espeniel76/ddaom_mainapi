@@ -66,7 +66,13 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/list/temp", common(handlers.MypageListTemp))
 	mux.HandleFunc("/mypage/list/complete", common(handlers.MypageListComplete))
 
+	// 다른 이용자 방문
+	mux.HandleFunc("/visit/info/{seq_member:[0-9]+}", common(handlers.VisitInfo))
+	mux.HandleFunc("/visit/list/live", common(handlers.VisitListLive))
+	mux.HandleFunc("/visit/list/finish", common(handlers.VisitListFinish))
+
 	// 메인
 	mux.HandleFunc("/main", common(handlers.Main))
 	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.MainKeyword))
+	mux.HandleFunc("/main/temp/info", common(handlers.MainTempInfo))
 }

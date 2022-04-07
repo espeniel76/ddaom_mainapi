@@ -4,7 +4,6 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
-	"ddaom/domain/schemas"
 	"ddaom/tools"
 )
 
@@ -26,46 +25,30 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	slaveDb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE1]
 
 	var totalData int64
-	var cnt int64
 	seq := userToken.SeqMember
-	result := slaveDb.Model(schemas.NovelStep1{}).
-		Where("seq_member = ? AND active_yn = true AND temp_yn = true", seq).
-		Count(&cnt)
-	if corm(result, &res) {
-		return res
-	}
-	totalData += cnt
-	result = slaveDb.Model(schemas.NovelStep2{}).
-		Where("seq_member = ? AND active_yn = true AND temp_yn = true", seq).
-		Count(&cnt)
-	if corm(result, &res) {
-		return res
-	}
-	totalData += cnt
-	result = slaveDb.Model(schemas.NovelStep3{}).
-		Where("seq_member = ? AND active_yn = true AND temp_yn = true", seq).
-		Count(&cnt)
-	if corm(result, &res) {
-		return res
-	}
-	totalData += cnt
-	result = slaveDb.Model(schemas.NovelStep4{}).
-		Where("seq_member = ? AND active_yn = true AND temp_yn = true", seq).
-		Count(&cnt)
-	if corm(result, &res) {
-		return res
-	}
-	totalData += cnt
-
+	query := `
+	SELECT SUM(cnt1) + SUM(cnt2) + SUM(cnt3) + SUM(cnt4) AS cnt
+	FROM
+	(
+		(SELECT COUNT(*) AS cnt1, 0 AS cnt2,0 AS cnt3, 0 AS cnt4 FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
+		UNION
+		(SELECT 0 AS cnt1, COUNT(*) AS cnt2, 0 AS cnt3, 0 AS cnt4 FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
+		UNION
+		(SELECT 0 AS cnt1, 0 AS cnt2, COUNT(*) AS cnt3, 0 AS cnt4 FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
+		UNION
+		(SELECT 0 AS cnt1, 0 AS cnt2, 0 AS cnt3, COUNT(*) AS cnt4 FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
+	) AS s
+	`
+	result := sdb.Raw(query, seq, seq, seq, seq).Scan(&totalData)
 	novelMyListTempRes := NovelMyListTempRes{
 		NowPage:   int(_page),
 		TotalPage: tools.GetTotalPage(totalData, _sizePerPage),
 		TotalData: int(totalData),
 	}
-	query := `
+	query = `
 	(
 		SELECT
 			seq_novel_step1,
@@ -131,7 +114,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 	ORDER BY created_at DESC
 	LIMIT ?, ?
 	`
-	result = slaveDb.
+	result = sdb.
 		Raw(query, seq, seq, seq, seq, limitStart, _sizePerPage).
 		Scan(&novelMyListTempRes.List)
 	if corm(result, &res) {
