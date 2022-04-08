@@ -43,7 +43,7 @@ func VisitInfo(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
-	ldb := getUserLogDb(sdb, _seqMember)
+	ldb := getUserLogDb(sdb, int64(_seqMember))
 
 	// 팔로잉
 	var cntFollowing int64
@@ -71,7 +71,7 @@ func VisitInfo(req *domain.CommonRequest) domain.CommonResponse {
 	return res
 }
 
-func getUserLogDb(_db *gorm.DB, seqMember int) *gorm.DB {
+func getUserLogDb(_db *gorm.DB, seqMember int64) *gorm.DB {
 	allocatedDb := 1
 	_db.Model(schemas.Member{}).
 		Select("allocated_db").

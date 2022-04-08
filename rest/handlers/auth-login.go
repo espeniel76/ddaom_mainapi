@@ -14,7 +14,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	masterDB := db.List[define.DSN_MASTER]
+	mdb := db.List[define.DSN_MASTER]
 
 	email := Cp(req.Parameters, "email")
 	token := Cp(req.Parameters, "token")
@@ -38,45 +38,44 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	isExist := db.ExistRow(masterDB, "members", "email", email)
+	isExist := db.ExistRow(mdb, "members", "email", email)
 	member := &schemas.Member{
 		Email:   email,
 		Token:   token,
 		SnsType: snsType,
 	}
 	if !isExist {
-		result = masterDB.Create(member)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		result = mdb.Create(member)
+		if corm(result, &res) {
 			return res
 		}
 	} else {
-		result = masterDB.Find(&member, "email", email)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		result = mdb.Find(&member, "email", email)
+		if corm(result, &res) {
 			return res
 		}
 
 		memberDetail := schemas.MemberDetail{}
-		masterDB.Select("nick_name").Where("seq_member = ?", member.SeqMember).Find(&memberDetail)
+		result = mdb.Select("nick_name").Where("seq_member = ?", member.SeqMember).Find(&memberDetail)
+		if corm(result, &res) {
+			return res
+		}
 		nickName = memberDetail.NickName
 	}
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
-	logDB1 := db.List[define.DSN_LOG1]
-	logDB2 := db.List[define.DSN_LOG2]
+	ldb1 := db.List[define.DSN_LOG1]
+	ldb2 := db.List[define.DSN_LOG2]
 	if !isExist {
 		var count1, count2 int64
-		result = logDB1.Table("member_exists").Count(&count1)
+		result = ldb1.Table("member_exists").Count(&count1)
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
 			res.ErrorDesc = result.Error.Error()
 			return res
 		}
-		result = logDB2.Table("member_exists").Count(&count2)
+		result = ldb2.Table("member_exists").Count(&count2)
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
 			res.ErrorDesc = result.Error.Error()
@@ -84,37 +83,31 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		if count1 > count2 {
-			myLogDB = logDB2
+			myLogDB = ldb2
 			allocatedDb = 2
 		} else {
-			myLogDB = logDB1
+			myLogDB = ldb1
 			allocatedDb = 1
 		}
 		result = myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		if corm(result, &res) {
 			return res
 		}
 
-		result = masterDB.Model(&member).Update("allocated_db", allocatedDb)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		result = mdb.Model(&member).Update("allocated_db", allocatedDb)
+		if corm(result, &res) {
 			return res
 		}
 	} else {
-		result = masterDB.Find(&member, "email", email)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		result = mdb.Find(&member, "email", email)
+		if corm(result, &res) {
 			return res
 		}
 		allocatedDb = member.AllocatedDb
 		if allocatedDb == 1 {
-			myLogDB = logDB1
+			myLogDB = ldb1
 		} else {
-			myLogDB = logDB2
+			myLogDB = ldb2
 		}
 	}
 
@@ -143,9 +136,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		Token:     refreshToken,
 		LoginAt:   time.Now(),
 	})
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 

@@ -7,6 +7,7 @@ import (
 	"ddaom/domain/schemas"
 	"ddaom/tools"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -14,33 +15,34 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	today := tools.TodayFormattedDate()
+	today, _ := strconv.Atoi(tools.TodayFormattedDate())
 	masterDB := db.List[define.DSN_MASTER]
 	query := `
 			SELECT
 			k.seq_keyword,
 			k.keyword,
-			kt.view_date,
+			kt.view_start_date,
+			kt.view_end_date,
 			k.start_date,
 			k.end_date,
 			k.cnt_total
 		FROM ddaom.keywords AS k
 		INNER JOIN ddaom.keyword_todays AS kt ON k.seq_keyword = kt.seq_keyword
 		WHERE k.active_yn = true AND NOW() BETWEEN k.start_date AND k.end_date
-		ORDER BY kt.view_date ASC
+		ORDER BY kt.view_start_date ASC
 	`
 	keywordDate := []KeywordDate{}
 	result := masterDB.Raw(query).Scan(&keywordDate)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 	assetRes := AssetRes{}
 	for i := 0; i < len(keywordDate); i++ {
 		o := keywordDate[i]
 		isToday := false
-		if o.ViewDate == today {
+		viewStartDate, _ := strconv.Atoi(o.ViewStartDate)
+		viewEndDate, _ := strconv.Atoi(o.ViewEndDate)
+		if viewStartDate <= today && viewEndDate >= today {
 			isToday = true
 		} else {
 			isToday = false
@@ -114,7 +116,7 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	// 오늘 날짜
-	today := tools.TodayFormattedDate()
+	today, _ := strconv.Atoi(tools.TodayFormattedDate())
 	fmt.Println(today)
 
 	// 데이터 가져온다.
@@ -123,14 +125,15 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 			SELECT
 			k.seq_keyword,
 			k.keyword,
-			kt.view_date,
+			kt.view_start_date,
+			kt.view_end_date,
 			k.start_date,
 			k.end_date,
 			k.cnt_total
 		FROM ddaom.keywords AS k
 		INNER JOIN ddaom.keyword_todays AS kt ON k.seq_keyword = kt.seq_keyword
 		WHERE k.active_yn = true AND NOW() BETWEEN k.start_date AND k.end_date
-		ORDER BY kt.view_date ASC
+		ORDER BY kt.view_start_date ASC
 	`
 	keywordDate := []KeywordDate{}
 	result := masterDB.Raw(query).Scan(&keywordDate)
@@ -143,7 +146,9 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 	for i := 0; i < len(keywordDate); i++ {
 		o := keywordDate[i]
 		isToday := false
-		if o.ViewDate == today {
+		viewStartDate, _ := strconv.Atoi(o.ViewStartDate)
+		viewEndDate, _ := strconv.Atoi(o.ViewEndDate)
+		if viewStartDate <= today && viewEndDate >= today {
 			isToday = true
 		} else {
 			isToday = false
@@ -164,13 +169,14 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 type KeywordDate struct {
-	SeqKeyword int64  `json:"seq_keyword"`
-	Keyword    string `json:"keyword"`
-	ViewDate   string `json:"view_date"`
-	IsToday    bool   `json:"is_today"`
-	StartDate  time.Time
-	EndDate    time.Time
-	CntTotal   int64 `json:"cnt_total"`
+	SeqKeyword    int64  `json:"seq_keyword"`
+	Keyword       string `json:"keyword"`
+	ViewStartDate string `json:"view_start_date"`
+	ViewEndDate   string `json:"view_end_date"`
+	IsToday       bool   `json:"is_today"`
+	StartDate     time.Time
+	EndDate       time.Time
+	CntTotal      int64 `json:"cnt_total"`
 }
 
 type KeywordRes struct {

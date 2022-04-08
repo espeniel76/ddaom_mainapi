@@ -12,12 +12,6 @@ import (
 func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	// userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	// if err != nil {
-	// 	res.ResultCode = define.INVALID_TOKEN
-	// 	res.ErrorDesc = err.Error()
-	// 	return res
-	// }
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.Atoi(req.Vars["seq_novel"])
 

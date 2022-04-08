@@ -60,17 +60,17 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/novel/bookmark/delete", common(handlers.NovelBookmarkDelete))
 
 	// 마이페이지
-	mux.HandleFunc("/mypage/info", common(handlers.MypageInfo))
+	mux.HandleFunc("/mypage/info/{seq_member:[0-9]+}", common(handlers.MypageInfo))
 	mux.HandleFunc("/mypage/list/live", common(handlers.MypageListLive))
 	mux.HandleFunc("/mypage/list/finish", common(handlers.MypageListFinish))
 	mux.HandleFunc("/mypage/list/temp", common(handlers.MypageListTemp))
 	mux.HandleFunc("/mypage/list/complete", common(handlers.MypageListComplete))
 	mux.HandleFunc("/mypage/view/complete/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewComplete))
 
-	// 다른 이용자 방문
-	mux.HandleFunc("/visit/info/{seq_member:[0-9]+}", common(handlers.VisitInfo))
-	mux.HandleFunc("/visit/list/live", common(handlers.VisitListLive))
-	mux.HandleFunc("/visit/list/finish", common(handlers.VisitListFinish))
+	// 다른 이용자 방문 (삭제 예정)
+	// mux.HandleFunc("/visit/info/{seq_member:[0-9]+}", common(handlers.VisitInfo))
+	// mux.HandleFunc("/visit/list/live", common(handlers.VisitListLive))
+	// mux.HandleFunc("/visit/list/finish", common(handlers.VisitListFinish))
 
 	// 메인
 	mux.HandleFunc("/main", common(handlers.Main))

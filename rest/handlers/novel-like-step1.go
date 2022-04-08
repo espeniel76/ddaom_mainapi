@@ -21,14 +21,12 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	myLike := false
 	var cnt int64
 
-	myLogDb := GetMyLogDb(userToken.Allocated)
-	masterDB := db.List[define.DSN_MASTER]
+	ldb := GetMyLogDb(userToken.Allocated)
+	mdb := db.List[define.DSN_MASTER]
 
 	// 소설 존재 여부
-	result := masterDB.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result := mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
+	if corm(result, &res) {
 		return res
 	}
 	if cnt == 0 {
@@ -38,65 +36,51 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 좋아요 상태 확인
 	memberLikeStep1 := schemas.MemberLikeStep1{}
-	result = myLogDb.Model(&memberLikeStep1).
+	result = ldb.Model(&memberLikeStep1).
 		Where("seq_novel_step1 = ? AND seq_member = ?", _seqNovelStep1, userToken.SeqMember).Scan(&memberLikeStep1)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 	if memberLikeStep1.SeqMemberLike == 0 { // 존재하지 않음
 		// 1. 로그넣기
-		result = myLogDb.Create(&schemas.MemberLikeStep1{
+		result = ldb.Create(&schemas.MemberLikeStep1{
 			SeqMember:     userToken.SeqMember,
 			SeqNovelStep1: int64(_seqNovelStep1),
 			LikeYn:        true,
 		})
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		if corm(result, &res) {
 			return res
 		}
 
 		// 2. 좋아요 카운트 업데이트
-		result = masterDB.Exec("UPDATE novel_step1 SET cnt_like = cnt_like + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		result = mdb.Exec("UPDATE novel_step1 SET cnt_like = cnt_like + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
+		if corm(result, &res) {
 			return res
 		}
 		myLike = true
 	} else { // 존재함
 		// 1. 좋아요 상태
 		if memberLikeStep1.LikeYn {
-			result = myLogDb.Model(&schemas.MemberLikeStep1{}).
+			result = ldb.Model(&schemas.MemberLikeStep1{}).
 				Where("seq_member = ? AND seq_novel_step1 = ?", userToken.SeqMember, _seqNovelStep1).
 				Update("like_yn", false)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			if corm(result, &res) {
 				return res
 			}
-			result = masterDB.Exec("UPDATE novel_step1 SET cnt_like = cnt_like - 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			result = mdb.Exec("UPDATE novel_step1 SET cnt_like = cnt_like - 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
+			if corm(result, &res) {
 				return res
 			}
 			myLike = false
 		} else {
-			result = myLogDb.Model(&schemas.MemberLikeStep1{}).
+			result = ldb.Model(&schemas.MemberLikeStep1{}).
 				Where("seq_member = ? AND seq_novel_step1 = ?", userToken.SeqMember, _seqNovelStep1).
 				Update("like_yn", true)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			if corm(result, &res) {
 				return res
 			}
-			result = masterDB.Exec("UPDATE novel_step1 SET cnt_like = cnt_like + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			result = mdb.Exec("UPDATE novel_step1 SET cnt_like = cnt_like + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
+			if corm(result, &res) {
 				return res
 			}
 			myLike = true

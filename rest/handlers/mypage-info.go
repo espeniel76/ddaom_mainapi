@@ -5,35 +5,62 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"strconv"
 )
 
 func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
+
+	_seqMember, _ := strconv.ParseInt(req.Vars["seq_member"], 10, 64)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	var seqMemberToken int64
+	if userToken != nil {
+		seqMemberToken = userToken.SeqMember
+	}
+	data := make(map[string]interface{})
+	if seqMemberToken == _seqMember {
+		data["is_you"] = true
+	} else {
+		if _seqMember == 0 && userToken != nil {
+			_seqMember = userToken.SeqMember
+			data["is_you"] = true
+		} else {
+			data["is_you"] = false
+		}
 	}
 
-	masterDB := db.List[define.DSN_MASTER]
-	data := make(map[string]interface{})
+	sdb := db.List[define.DSN_SLAVE1]
 
 	// 닉네임, 프로필
-	result := masterDB.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Select("nick_name, profile_photo").Scan(&data)
+	result := sdb.Model(schemas.MemberDetail{}).
+		Where("seq_member = ?", _seqMember).
+		Select("nick_name, profile_photo").Scan(&data)
 	if corm(result, &res) {
+		return res
+	}
+	if result.RowsAffected == 0 {
+		res.ResultCode = define.NO_EXIST_DATA
 		return res
 	}
 
 	// 임시저장, 작성완료
 	var isTemps []bool
-	result = masterDB.Model(schemas.NovelStep1{}).Where("seq_member = ?", userToken.SeqMember).Select("temp_yn").Scan(&isTemps)
+	query := `
+		(SELECT temp_yn FROM novel_step1 WHERE seq_member = ? AND active_yn = true)
+		UNION ALL
+		(SELECT temp_yn FROM novel_step2 WHERE seq_member = ? AND active_yn = true)
+		UNION ALL
+		(SELECT temp_yn FROM novel_step3 WHERE seq_member = ? AND active_yn = true)
+		UNION ALL
+		(SELECT temp_yn FROM novel_step4 WHERE seq_member = ? AND active_yn = true)
+	`
+	result = sdb.Raw(query, _seqMember, _seqMember, _seqMember, _seqMember).Scan(&isTemps)
 	if corm(result, &res) {
 		return res
 	}
-	var cntTemp int
-	var cntWrited int
+	cntTemp := 0
+	cntWrited := 0
 	for _, v := range isTemps {
 		if v == true {
 			cntTemp++
@@ -45,11 +72,13 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_writed"] = cntWrited
 
 	// 팔로잉, 팔로워
-	myLogDb := GetMyLogDb(userToken.Allocated)
+	ldb := getUserLogDb(sdb, _seqMember)
 
 	// 팔로잉
 	var cntFollowing int64
-	result = myLogDb.Model(schemas.MemberSubscribe{}).Where("seq_member = ?", userToken.SeqMember).Count(&cntFollowing)
+	result = ldb.Model(schemas.MemberSubscribe{}).
+		Where("seq_member = ?", _seqMember).
+		Count(&cntFollowing)
 	if corm(result, &res) {
 		return res
 	}
@@ -57,7 +86,9 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 팔로워
 	var cntFollower int64
-	result = myLogDb.Model(schemas.MemberSubscribe{}).Where("seq_member_following = ?", userToken.SeqMember).Count(&cntFollower)
+	result = ldb.Model(schemas.MemberSubscribe{}).
+		Where("seq_member_following = ?", _seqMember).
+		Count(&cntFollower)
 	if corm(result, &res) {
 		return res
 	}

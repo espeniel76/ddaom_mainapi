@@ -11,13 +11,8 @@ import (
 func MypageListFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
-	}
 
+	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 
@@ -29,7 +24,7 @@ func MypageListFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	var totalData int64
 	slaveDb := db.List[define.DSN_SLAVE1]
-	seq := userToken.SeqMember
+	seq := _seqMember
 	result := slaveDb.
 		Model(schemas.NovelFinish{}).
 		Where("active_yn = true").

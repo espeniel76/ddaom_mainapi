@@ -27,13 +27,13 @@ func MainTempInfo(req *domain.CommonRequest) domain.CommonResponse {
 	(
 		(SELECT 1 AS step, seq_novel_step1, 0 AS seq_novel_step2, 0 AS seq_novel_step3, 0 AS seq_novel_step4, created_at
 		FROM novel_step1 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-		UNION
+		UNION ALL
 		(SELECT 2 AS step, 0 AS seq_novel_step1, seq_novel_step2, 0 AS seq_novel_step3, 0 AS seq_novel_step4, created_at
 		FROM novel_step2 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-		UNION
+		UNION ALL
 		(SELECT 3 AS step, 0 AS seq_novel_step1, 0 AS seq_novel_step2, seq_novel_step3, 0 AS seq_novel_step4, created_at
 		FROM novel_step3 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-		UNION
+		UNION ALL
 		(SELECT 4 AS step, 0 AS seq_novel_step1, 0 AS seq_novel_step2, 0 AS seq_novel_step3, seq_novel_step4, created_at
 		FROM novel_step4 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
 	) AS s

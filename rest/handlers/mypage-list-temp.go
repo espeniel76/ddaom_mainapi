@@ -34,11 +34,11 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 	FROM
 	(
 		(SELECT COUNT(*) AS cnt1, 0 AS cnt2,0 AS cnt3, 0 AS cnt4 FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
-		UNION
+		UNION ALL
 		(SELECT 0 AS cnt1, COUNT(*) AS cnt2, 0 AS cnt3, 0 AS cnt4 FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
-		UNION
+		UNION ALL
 		(SELECT 0 AS cnt1, 0 AS cnt2, COUNT(*) AS cnt3, 0 AS cnt4 FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
-		UNION
+		UNION ALL
 		(SELECT 0 AS cnt1, 0 AS cnt2, 0 AS cnt3, COUNT(*) AS cnt4 FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND temp_yn = true)
 	) AS s
 	`
@@ -63,7 +63,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN keywords k ON k.seq_keyword = ns.seq_keyword
 		WHERE seq_member = ? AND ns.active_yn = true AND ns.temp_yn = true
 	)
-	UNION 
+	UNION ALL 
 	(
 		SELECT
 			0 AS seq_novel_step1,
@@ -79,7 +79,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
 		WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.temp_yn = true
 	)
-	UNION 
+	UNION ALL 
 	(
 		SELECT
 			0 AS seq_novel_step1,
@@ -95,7 +95,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
 		WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.temp_yn = true
 	)
-	UNION 
+	UNION ALL 
 	(
 		SELECT
 			0 AS seq_novel_step1,

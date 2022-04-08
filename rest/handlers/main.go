@@ -26,7 +26,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	FROM novel_step1 ns
 	INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword 
 	INNER JOIN keyword_todays kt ON kt.seq_keyword = k.seq_keyword
-	WHERE view_date = ? AND ns.active_yn = true
+	WHERE ? BETWEEN kt.view_start_date AND kt.view_end_date AND ns.active_yn = true
 	ORDER BY ns.created_at DESC
 	LIMIT 10
 	`

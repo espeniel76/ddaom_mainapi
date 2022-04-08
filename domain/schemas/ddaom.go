@@ -7,7 +7,7 @@ import (
 type Member struct {
 	SeqMember       int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member"`
 	Email           string    `gorm:"type:varchar(255);unique" json:"email"`
-	Token           string    `gorm:"type:varchar(1024)" json:"token"`
+	Token           string    `gorm:"type:varchar(5120)" json:"token"`
 	ProfileImageUrl string    `gorm:"type:varchar(512)" json:"profile_image_url"`
 	SnsType         string    `gorm:"type:ENUM('KAKAO','NAVER','FACEBOOK','GOOGLE','APPLE'); DEFAULT:'GOOGLE'" json:"sns_type"`
 	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
@@ -77,7 +77,8 @@ type Keyword struct {
 type KeywordToday struct {
 	SeqKeywordToday int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword_today"`
 	SeqKeyword      int64     `gorm:"index" json:"seq_keyword"`
-	ViewDate        string    `gorm:"unique;type:char(8)" json:"view_date"`
+	ViewStartDate   string    `gorm:"type:char(8)" json:"view_start_date"`
+	ViewEndDate     string    `gorm:"type:char(8)" json:"view_end_date"`
 	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`

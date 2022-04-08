@@ -10,13 +10,8 @@ import (
 func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
-	}
 
+	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 	if _page < 1 || _sizePerPage < 1 {
@@ -28,17 +23,17 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 	sdb := db.List[define.DSN_SLAVE1]
 
 	var totalData int64
-	seq := userToken.SeqMember
+	seq := _seqMember
 	query := `
 	SELECT SUM(cnt1) + SUM(cnt2) + SUM(cnt3) + SUM(cnt4) AS cnt
 	FROM
 	(
 		(SELECT COUNT(*) AS cnt1, 0 AS cnt2,0 AS cnt3, 0 AS cnt4 FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-		UNION
+		UNION ALL
 		(SELECT 0 AS cnt1, COUNT(*) AS cnt2, 0 AS cnt3, 0 AS cnt4 FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-		UNION
+		UNION ALL
 		(SELECT 0 AS cnt1, 0 AS cnt2, COUNT(*) AS cnt3, 0 AS cnt4 FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-		UNION
+		UNION ALL
 		(SELECT 0 AS cnt1, 0 AS cnt2, 0 AS cnt3, COUNT(*) AS cnt4 FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
 	) AS s
 	`
@@ -65,7 +60,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 			UNIX_TIMESTAMP(created_at) *1000 AS created_at,
 			1 AS step
 		FROM novel_step1 ns WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-	UNION 
+	UNION ALL 
 		(SELECT
 			0 AS seq_novel_step1,
 			ns2.seq_novel_step2,
@@ -83,7 +78,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step2 ns2 
 		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
 		WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.temp_yn = false)
-	UNION 
+	UNION ALL 
 		(SELECT
 			0 AS seq_novel_step1,
 			0 AS seq_novel_step2,
@@ -101,7 +96,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step3 ns3 
 		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
 		WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.temp_yn = false)
-	UNION 
+	UNION ALL 
 		(SELECT
 			0 AS seq_novel_step1,
 			0 AS seq_novel_step2,

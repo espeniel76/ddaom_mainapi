@@ -31,8 +31,6 @@ func TodayFormattedDateFull() string {
 
 func TodayFormattedDate() string {
 	t := time.Now()
-	formatted := fmt.Sprintf("%d%02d%02d",
-		t.Year(), t.Month(), t.Day(),
-	)
+	formatted := fmt.Sprintf("%d%02d%02d", t.Year(), t.Month(), t.Day())
 	return formatted
 }
