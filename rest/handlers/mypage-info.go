@@ -35,7 +35,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	// 닉네임, 프로필
 	result := sdb.Model(schemas.MemberDetail{}).
 		Where("seq_member = ?", _seqMember).
-		Select("nick_name, profile_photo").Scan(&data)
+		Select("nick_name, profile_photo, seq_member").Scan(&data)
 	if corm(result, &res) {
 		return res
 	}
