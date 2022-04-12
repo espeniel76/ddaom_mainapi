@@ -41,7 +41,7 @@ func MypageViewLiveStep(req *domain.CommonRequest) domain.CommonResponse {
 
 	} else if _seqNovelStep2 > 0 {
 		// 1,3,4
-		result := ldb.Model(schemas.NovelStep1{}).Select("seq_novel_step1").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&_seqNovelStep1)
+		result := ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step1").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&_seqNovelStep1)
 		if corm(result, &res) {
 			return res
 		}
@@ -55,7 +55,7 @@ func MypageViewLiveStep(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	} else if _seqNovelStep3 > 0 {
 		// 1,2,4
-		result := ldb.Model(schemas.NovelStep1{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep3)
+		result := ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep3)
 		if corm(result, &res) {
 			return res
 		}
