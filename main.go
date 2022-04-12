@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	fmt.Println("ddaom API v0.1")
+	fmt.Println("ddaom API v0.2")
 	setInitialize()
 }
 
