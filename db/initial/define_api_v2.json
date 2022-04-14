@@ -722,6 +722,24 @@
 			}
 		]
 	},
+	"/mypage/list/subscribe": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
 	"/mypage/list/complete": {
 		"allow_method": "POST",
 		"data_type": "application/json",

@@ -69,6 +69,8 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/view/complete/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewComplete))
 	mux.HandleFunc("/mypage/view/live/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewLive))
 	mux.HandleFunc("/mypage/view/finish/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewFinish))
+	mux.HandleFunc("/mypage/list/live", common(handlers.MypageListLive))
+	mux.HandleFunc("/mypage/list/subscribe", common(handlers.MypageListSubscribe))
 
 	// 메인
 	mux.HandleFunc("/main", common(handlers.Main))

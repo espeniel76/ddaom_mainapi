@@ -18,10 +18,6 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	// 	res.ErrorDesc = err.Error()
 	// 	return res
 	// }
-	// _seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
-	// _seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
-	// _seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
-	// _seqNovelStep4 := CpInt64(req.Parameters, "seq_novel_step4")
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
 
