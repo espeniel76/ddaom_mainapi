@@ -67,12 +67,8 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/list/temp", common(handlers.MypageListTemp))
 	mux.HandleFunc("/mypage/list/complete", common(handlers.MypageListComplete))
 	mux.HandleFunc("/mypage/view/complete/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewComplete))
-	mux.HandleFunc("/mypage/view/live/step", common(handlers.MypageViewLiveStep))
-
-	// 다른 이용자 방문 (삭제 예정)
-	// mux.HandleFunc("/visit/info/{seq_member:[0-9]+}", common(handlers.VisitInfo))
-	// mux.HandleFunc("/visit/list/live", common(handlers.VisitListLive))
-	// mux.HandleFunc("/visit/list/finish", common(handlers.VisitListFinish))
+	mux.HandleFunc("/mypage/view/live/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewLive))
+	mux.HandleFunc("/mypage/view/finish/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewFinish))
 
 	// 메인
 	mux.HandleFunc("/main", common(handlers.Main))

@@ -4,6 +4,7 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"ddaom/tools"
 	"fmt"
 	"io"
@@ -117,4 +118,13 @@ func corm(o *gorm.DB, res *domain.CommonResponse) bool {
 		isError = true
 	}
 	return isError
+}
+
+func getUserLogDb(_db *gorm.DB, seqMember int64) *gorm.DB {
+	allocatedDb := 1
+	_db.Model(schemas.Member{}).
+		Select("allocated_db").
+		Where("seq_member = ?", seqMember).Scan(&allocatedDb)
+	ldb := GetMyLogDb(int8(allocatedDb))
+	return ldb
 }
