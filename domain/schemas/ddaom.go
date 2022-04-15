@@ -32,10 +32,12 @@ type MemberDetail struct {
 	Zipcode          string    `gorm:"type:varchar(50)" json:"zipcode"`
 	AuthenticationCi string    `gorm:"type:varchar(255)" json:"authentication_ci"`
 	AuthenticationAt time.Time `json:"authentication_at"`
-	AltNewEvent      bool      `gorm:"default:false" json:"alt_new_event"`
-	AltSuccessfulBid bool      `gorm:"default:false" json:"alt_successful_bid"`
-	AltNewContent    bool      `gorm:"default:false" json:"alt_new_content"`
-	AltNightPush     bool      `gorm:"default:false" json:"alt_night_push"`
+	IsNewKeyword     bool      `gorm:"default:false" json:"is_new_keyword"`
+	IsLiked          bool      `gorm:"default:false" json:"is_liked"`
+	IsFinished       bool      `gorm:"default:false" json:"is_finished"`
+	IsNewFollower    bool      `gorm:"default:false" json:"is_new_follower"`
+	IsNewFollowing   bool      `gorm:"default:false" json:"is_new_following"`
+	IsNightPush      bool      `gorm:"default:false" json:"is_night_push"`
 	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
 	CntLike          int64     `gorm:"default:0" json:"cnt_like"`
 	CreatedAt        time.Time `json:"created_at"`
@@ -199,4 +201,15 @@ type NovelFinish struct {
 	SeqMemberStep4 int64     `gorm:"default:0" json:"seq_member_step4"`
 	ActiveYn       bool      `gorm:"default:true" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
+}
+
+type ServiceInquiry struct {
+	SeqServiceInquiry int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_service_inquiry"`
+	SeqMember         int64     `gorm:"index" json:"seq_member"`
+	Title             string    `json:"title"`
+	Content           string    `json:"content"`
+	EmailYn           bool      `gorm:"default:true" json:"email_yn"`
+	Status            int8      `gorm:"default:1" json:"status"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }

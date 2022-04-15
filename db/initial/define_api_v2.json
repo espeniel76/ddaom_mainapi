@@ -828,5 +828,91 @@
 				"required": true
 			}
 		]
+	},
+	"/config/alarm": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "is_new_keyword",
+				"type": "bool",
+				"required": true
+			},
+			{
+				"name": "is_liked",
+				"type": "bool",
+				"required": true
+			},
+			{
+				"name": "is_finished",
+				"type": "bool",
+				"required": true
+			},
+			{
+				"name": "is_new_follower",
+				"type": "bool",
+				"required": true
+			},
+			{
+				"name": "is_new_following",
+				"type": "bool",
+				"required": true
+			},
+			{
+				"name": "is_night_push",
+				"type": "bool",
+				"required": true
+			}
+		]
+	},
+	"/config/alarm/get": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
+	},
+	"/service/inquiry": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "title",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "email_yn",
+				"type": "bool",
+				"required": true
+			}
+		]
+	},
+	"/service/inquiry/list": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
 	}
 }

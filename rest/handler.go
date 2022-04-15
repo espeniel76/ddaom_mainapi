@@ -76,4 +76,13 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/main", common(handlers.Main))
 	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.MainKeyword))
 	mux.HandleFunc("/main/temp/info", common(handlers.MainTempInfo))
+
+	// 설정
+	mux.HandleFunc("/config/alarm", common(handlers.ConfigAlarm))
+	mux.HandleFunc("/config/alarm/get", common(handlers.ConfigAlarmGet))
+
+	// server
+	mux.HandleFunc("/service/inquiry", common(handlers.ServiceInquiry))
+	mux.HandleFunc("/service/inquiry/list", common(handlers.ServiceInquiryList))
+
 }

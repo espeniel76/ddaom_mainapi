@@ -46,6 +46,8 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	masterDB.AutoMigrate(schemas.NovelStep3{})
 	masterDB.AutoMigrate(schemas.NovelStep4{})
 
+	masterDB.AutoMigrate(schemas.ServiceInquiry{})
+
 	logDB1.AutoMigrate(schemas.MemberSubscribe{})
 	logDB2.AutoMigrate(schemas.MemberSubscribe{})
 	logDB1.AutoMigrate(schemas.MemberBookmark{})

@@ -28,11 +28,9 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	masterDB := db.List[define.DSN_MASTER]
-	result := masterDB.Model(schemas.NovelFinish{}).Where("active_yn = true").Count(&totalData)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	sdb := db.List[define.DSN_SLAVE1]
+	result := sdb.Model(schemas.NovelFinish{}).Where("active_yn = true").Count(&totalData)
+	if corm(result, &res) {
 		return res
 	}
 
@@ -59,10 +57,8 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	query.WriteString(" ORDER BY nf.seq_novel_finish DESC")
 	query.WriteString(" LIMIT ?, ?")
-	result = masterDB.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListFinishRes.List)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result = sdb.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListFinishRes.List)
+	if corm(result, &res) {
 		return res
 	}
 
