@@ -23,7 +23,7 @@ func MypageListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	slaveDb := db.List[define.DSN_SLAVE1]
+	slaveDb := db.List[define.DSN_SLAVE]
 	seq := _seqMember
 	result := slaveDb.
 		Model(schemas.NovelFinish{}).

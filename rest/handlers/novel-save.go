@@ -12,7 +12,7 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	_title := Cp(req.Parameters, "title")
 
-	slaveDb := db.List[define.DSN_SLAVE1]
+	slaveDb := db.List[define.DSN_SLAVE]
 	var cnt int64
 	isExist := false
 	result := slaveDb.Model(schemas.NovelStep1{}).Where("title = ?", _title).Count(&cnt)

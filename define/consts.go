@@ -1,5 +1,6 @@
 package define
 
+// DEFINE RESULT
 const (
 	OK                      = "OK"
 	SUCCESS                 = "SUCCESS"
@@ -37,3 +38,10 @@ const (
 // const LIST_PER_PAGE = 2
 const DATE_FORMAT_KST = "2006-02-01 15:04:05"
 const MAIN_LIST_SIZE = 5
+
+// SUCSCRIBE
+const (
+	FOLLOWING = "FOLLOWING"
+	FOLLOWER  = "FOLLOWER"
+	BOTH      = "BOTH"
+)

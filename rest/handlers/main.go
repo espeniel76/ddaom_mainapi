@@ -4,33 +4,31 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
-	"ddaom/tools"
 	"strconv"
 )
 
 func Main(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
+	_seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
 
-	slaveDb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 	mainRes := MainRes{}
 
 	// 연재중인 소설 (오늘 주제어 키워드)
-	today := tools.TodayFormattedDate()
+	// today := tools.TodayFormattedDate()
 	query := `
 	SELECT
-		ns.seq_novel_step1,
-		ns.seq_image,
-		ns.seq_color,
-		ns.title
-	FROM novel_step1 ns
-	INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword 
-	INNER JOIN keyword_todays kt ON kt.seq_keyword = k.seq_keyword
-	WHERE ? BETWEEN kt.view_start_date AND kt.view_end_date AND ns.active_yn = true
-	ORDER BY ns.created_at DESC
+		seq_novel_step1,
+		seq_image,
+		seq_color,
+		title
+	FROM novel_step1
+	WHERE seq_keyword = ? AND active_yn = true
+	ORDER BY created_at DESC
 	LIMIT 10
 	`
-	result := slaveDb.Raw(query, today).Scan(&mainRes.ListLive)
+	result := sdb.Raw(query, _seqKeyword).Scan(&mainRes.ListLive)
 	if corm(result, &res) {
 		return res
 	}
@@ -48,7 +46,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	ORDER BY nf.cnt_like DESC
 	LIMIT 10
 	`
-	result = slaveDb.Raw(query).Scan(&mainRes.ListPopular)
+	result = sdb.Raw(query).Scan(&mainRes.ListPopular)
 	if corm(result, &res) {
 		return res
 	}
@@ -66,14 +64,14 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	ORDER BY nf.created_at DESC
 	LIMIT 10
 	`
-	result = slaveDb.Raw(query).Scan(&mainRes.ListFinish)
+	result = sdb.Raw(query).Scan(&mainRes.ListFinish)
 	if corm(result, &res) {
 		return res
 	}
 
 	// 인기작가
 	query = "SELECT seq_member, nick_name, profile_photo FROM member_details ORDER BY cnt_like DESC LIMIT 10"
-	result = slaveDb.Raw(query).Scan(&mainRes.ListPopularWriter)
+	result = sdb.Raw(query).Scan(&mainRes.ListPopularWriter)
 	if corm(result, &res) {
 		return res
 	}
@@ -109,7 +107,7 @@ func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	_seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
 
-	slaveDb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 	mainRes := ListLiveRes{}
 
 	query := `
@@ -123,7 +121,7 @@ func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 	ORDER BY created_at DESC
 	LIMIT 10
 	`
-	result := slaveDb.Raw(query, _seqKeyword).Scan(&mainRes.ListLive)
+	result := sdb.Raw(query, _seqKeyword).Scan(&mainRes.ListLive)
 	if corm(result, &res) {
 		return res
 	}

@@ -28,7 +28,7 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 	result := sdb.Model(schemas.NovelFinish{}).Where("active_yn = true").Count(&totalData)
 	if corm(result, &res) {
 		return res

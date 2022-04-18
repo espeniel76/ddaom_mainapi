@@ -56,7 +56,7 @@ func ConfigAlarmGet(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 	m := schemas.MemberDetail{}
 	result := sdb.Model(&m).Where("seq_member = ?", userToken.SeqMember).Scan(&m)
 	if corm(result, &res) {

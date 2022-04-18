@@ -25,7 +25,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 
 	var totalData int64
 	seq := userToken.SeqMember

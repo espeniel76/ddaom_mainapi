@@ -13,7 +13,7 @@ const (
 	HTTP_PORT_SSL = "3012"
 	SOCKET_SERVER = "http://221.146.220.5:5150"
 	DSN_MASTER    = "espeniel:anjgkrp@tcp(221.146.220.5)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_SLAVE1    = "espeniel:anjgkrp@tcp(221.146.220.5)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_SLAVE     = "espeniel:anjgkrp@tcp(221.146.220.5)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
 	DSN_LOG1      = "espeniel:anjgkrp@tcp(221.146.220.5)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
 	DSN_LOG2      = "espeniel:anjgkrp@tcp(221.146.220.5)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
 

@@ -16,7 +16,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovel, _ := strconv.Atoi(req.Vars["seq_novel"])
 
 	fmt.Println(_step, _seqNovel)
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 	o := MypageViewCompleteRes{}
 	switch _step {
 	case 1:

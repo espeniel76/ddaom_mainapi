@@ -61,7 +61,7 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	case 4:
 		query += "nf.seq_novel_step4 = ?"
 	}
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 	n := NovelViewFinishData{}
 	result := sdb.Raw(query, _seqNovel).Scan(&n)
 	if corm(result, &res) {

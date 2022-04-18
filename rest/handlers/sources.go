@@ -16,7 +16,7 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	today, _ := strconv.Atoi(tools.TodayFormattedDate())
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	query := `
 			SELECT
 			k.seq_keyword,
@@ -32,7 +32,7 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 		ORDER BY kt.view_start_date ASC
 	`
 	keywordDate := []KeywordDate{}
-	result := masterDB.Raw(query).Scan(&keywordDate)
+	result := sdb.Raw(query).Scan(&keywordDate)
 	if corm(result, &res) {
 		return res
 	}
@@ -57,28 +57,39 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 		}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, IsToday: isToday, StartDate: o.StartDate.UnixMilli(), EndDate: o.EndDate.UnixMilli(), CntTotal: o.CntTotal})
 	}
 
-	result = masterDB.Model(&schemas.Image{}).Where("active_yn = true").Find(&assetRes.ListImage)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result = sdb.Model(&schemas.Image{}).
+		Where("active_yn = true").
+		Select("seq_image, image").
+		Find(&assetRes.ListImage)
+	if corm(result, &res) {
 		return res
 	}
-	result = masterDB.Model(&schemas.Color{}).Where("active_yn = true").Find(&assetRes.ListColor)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result = sdb.Model(&schemas.Color{}).
+		Where("active_yn = true").
+		Select("seq_color, color").
+		Find(&assetRes.ListColor)
+	if corm(result, &res) {
 		return res
 	}
-	result = masterDB.Model(&schemas.Genre{}).Where("active_yn = true").Find(&assetRes.ListGenre)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result = sdb.Model(&schemas.Genre{}).
+		Where("active_yn = true").
+		Select("seq_genre, genre").
+		Find(&assetRes.ListGenre)
+	if corm(result, &res) {
 		return res
 	}
-	result = masterDB.Model(&schemas.Slang{}).Where("active_yn = true").Select("slang").Find(&assetRes.ListSlang)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result = sdb.Model(&schemas.Slang{}).
+		Where("active_yn = true").
+		Select("slang").
+		Find(&assetRes.ListSlang)
+	if corm(result, &res) {
+		return res
+	}
+	result = sdb.Model(&schemas.CategoryFaq{}).
+		Where("active_yn = true").
+		Select("seq_category_faq, category_faq").
+		Find(&assetRes.ListCategoryFaq)
+	if corm(result, &res) {
 		return res
 	}
 
@@ -108,7 +119,13 @@ type AssetRes struct {
 		SeqGenre int64  `json:"seq_genre"`
 		Genre    string `json:"genre"`
 	} `json:"list_genre"`
-	ListSlang []string `json:"list_slang"`
+	ListSlang       []string `json:"list_slang"`
+	ListCategoryFaq []struct {
+		SeqCategoryFaq int64  `json:"seq_category_faq"`
+		CategoryFaq    string `json:"category_faq"`
+	} `json:"list_category_faq"`
+	UrlPrivicyPolicy  string `json:"url_privicy_policy"`
+	UrlTermsOfService string `json:"url_terms_of_service"`
 }
 
 func Keyword(req *domain.CommonRequest) domain.CommonResponse {
@@ -120,7 +137,7 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 	fmt.Println(today)
 
 	// 데이터 가져온다.
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	query := `
 			SELECT
 			k.seq_keyword,
@@ -136,10 +153,8 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 		ORDER BY kt.view_start_date ASC
 	`
 	keywordDate := []KeywordDate{}
-	result := masterDB.Raw(query).Scan(&keywordDate)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result := sdb.Raw(query).Scan(&keywordDate)
+	if corm(result, &res) {
 		return res
 	}
 	keywordRes := KeywordRes{}
@@ -195,12 +210,10 @@ func Skin(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	// 데이터 가져온다.
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	skinRes := SkinRes{}
-	result := masterDB.Model(&schemas.Image{}).Where("active_yn = true").Find(&skinRes.List)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result := sdb.Model(&schemas.Image{}).Where("active_yn = true").Find(&skinRes.List)
+	if corm(result, &res) {
 		return res
 	}
 
@@ -221,12 +234,10 @@ func Genre(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	// 데이터 가져온다.
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	genreRes := GenreRes{}
-	result := masterDB.Model(&schemas.Genre{}).Where("active_yn = true").Find(&genreRes.List)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result := sdb.Model(&schemas.Genre{}).Where("active_yn = true").Find(&genreRes.List)
+	if corm(result, &res) {
 		return res
 	}
 

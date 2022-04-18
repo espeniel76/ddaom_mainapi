@@ -73,8 +73,8 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/list/subscribe", common(handlers.MypageListSubscribe))
 
 	// 메인
-	mux.HandleFunc("/main", common(handlers.Main))
-	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.MainKeyword))
+	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.Main))
+	mux.HandleFunc("/main/keyword/{seq_keyword:[0-9]+}", common(handlers.MainKeyword))
 	mux.HandleFunc("/main/temp/info", common(handlers.MainTempInfo))
 
 	// 설정
@@ -84,5 +84,6 @@ func Handlers(mux *mux.Router) {
 	// server
 	mux.HandleFunc("/service/inquiry", common(handlers.ServiceInquiry))
 	mux.HandleFunc("/service/inquiry/list", common(handlers.ServiceInquiryList))
-
+	mux.HandleFunc("/service/notice/list", common(handlers.ServiceNoticeList))
+	mux.HandleFunc("/service/faq/list", common(handlers.ServiceFaqList))
 }

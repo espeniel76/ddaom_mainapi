@@ -30,7 +30,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 
 	// 닉네임, 프로필
 	result := sdb.Model(schemas.MemberDetail{}).
@@ -71,27 +71,28 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_temp"] = cntTemp
 	data["cnt_writed"] = cntWrited
 
-	// 팔로잉, 팔로워
+	// 구독현황
 	ldb := getUserLogDb(sdb, _seqMember)
-
-	// 팔로잉
-	var cntFollowing int64
-	result = ldb.Model(schemas.MemberSubscribe{}).
-		Where("seq_member = ?", _seqMember).
-		Count(&cntFollowing)
+	listStatus := []string{}
+	result = ldb.Model(&schemas.MemberSubscribe{}).Select("status").
+		Where("seq_member = ?", userToken.SeqMember).Scan(&listStatus)
 	if corm(result, &res) {
 		return res
+	}
+	cntFollower := 0
+	cntFollowing := 0
+	for _, v := range listStatus {
+		switch v {
+		case define.FOLLOWING:
+			cntFollowing++
+		case define.FOLLOWER:
+			cntFollower++
+		case define.BOTH:
+			cntFollowing++
+			cntFollower++
+		}
 	}
 	data["cnt_following"] = cntFollowing
-
-	// 팔로워
-	var cntFollower int64
-	result = ldb.Model(schemas.MemberSubscribe{}).
-		Where("seq_member_following = ?", _seqMember).
-		Count(&cntFollower)
-	if corm(result, &res) {
-		return res
-	}
 	data["cnt_follower"] = cntFollower
 
 	res.Data = data

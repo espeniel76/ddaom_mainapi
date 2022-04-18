@@ -4,6 +4,7 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"ddaom/tools"
 	"fmt"
 	"time"
@@ -29,33 +30,28 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
+	ldb := GetMyLogDb(userToken.Allocated)
 
-	// 받은/보낸구독
-	query := `
-	SELECT A.seq_member, A.seq_member_following 
-	FROM
-	(
-		(SELECT seq_member, seq_member_following, created_at FROM ddaom_user1.member_subscribes WHERE subscribe_yn = true AND seq_member = ? OR seq_member_following = ?)
-		UNION ALL
-		(SELECT seq_member, seq_member_following, created_at FROM ddaom_user2.member_subscribes WHERE subscribe_yn = true AND seq_member = ? OR seq_member_following = ?)
-	) AS A
-	`
+	// 구독현황
 	var totalData int64
-	seq := userToken.SeqMember
 	info := []SubscribeInfo{}
-	result := sdb.Raw(query, seq, seq, seq, seq).Scan(&info)
+	result := ldb.Model(&schemas.MemberSubscribe{}).Select("seq_member, seq_member_opponent, status, created_at").
+		Where("seq_member = ?", userToken.SeqMember).Scan(&info)
 	if corm(result, &res) {
 		return res
 	}
 	cntFollower := 0
 	cntFollowing := 0
-
 	for _, v := range info {
 		totalData++
-		if v.SeqMember == userToken.SeqMember {
+		switch v.Status {
+		case define.FOLLOWING:
 			cntFollowing++
-		} else {
+		case define.FOLLOWER:
+			cntFollower++
+		case define.BOTH:
+			cntFollowing++
 			cntFollower++
 		}
 	}
@@ -67,73 +63,43 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		TotalData:    int(totalData),
 	}
 
-	query = `
-	SELECT A.seq_member, A.seq_member_following, A.created_at
-	FROM
-	(
-		(SELECT seq_member, seq_member_following, created_at FROM ddaom_user1.member_subscribes WHERE subscribe_yn = true AND seq_member = ? OR seq_member_following = ?)
-		UNION ALL
-		(SELECT seq_member, seq_member_following, created_at FROM ddaom_user2.member_subscribes WHERE subscribe_yn = true AND seq_member = ? OR seq_member_following = ?)
-	) AS A
-	ORDER BY A.created_at DESC
-	LIMIT ?, ?
-	`
-	info = []SubscribeInfo{}
-	result = sdb.Raw(query, seq, seq, seq, seq, limitStart, _sizePerPage).Scan(&info)
+	result = ldb.Model(&schemas.MemberSubscribe{}).
+		Select("seq_member, seq_member_opponent, status").
+		Where("seq_member = ?", userToken.SeqMember).
+		Order("updated_at DESC").
+		Limit(int(_sizePerPage)).
+		Offset(int(limitStart)).
+		Scan(&info)
 	if corm(result, &res) {
 		return res
 	}
 	seqs := []int64{}
 	for _, v := range info {
-		seqs = append(seqs, v.SeqMember)
-		seqs = append(seqs, v.SeqMemberFollowing)
+		seqs = append(seqs, v.SeqMemberOpponent)
 	}
-	keys := make(map[int64]bool)
-	ue := []int64{}
-	for _, value := range seqs {
-		if _, saveValue := keys[value]; !saveValue {
-			keys[value] = true
-			ue = append(ue, value)
-		}
-	}
-	fmt.Println(ue)
-	query = "SELECT seq_member, nick_name FROM ddaom.member_details WHERE seq_member IN (?)"
 	nicks := []TmpMembinfo{}
-	sdb.Raw(query, ue).Scan(&nicks)
+	sdb.Raw("SELECT seq_member, nick_name FROM member_details WHERE seq_member IN (?)", seqs).Scan(&nicks)
+	if corm(result, &res) {
+		return res
+	}
 	fmt.Println(nicks)
 
-	isFollower := false
-	seqMember := 0
 	nickName := ""
 	for _, v := range info {
-		if v.SeqMember != userToken.SeqMember {
-			seqMember = int(v.SeqMember)
-			isFollower = true
-		} else {
-			seqMember = int(v.SeqMemberFollowing)
-			isFollower = false
-		}
 		for _, k := range nicks {
-			if isFollower {
-				if v.SeqMember == k.SeqMember {
-					nickName = k.NickName
-					break
-				}
-			} else {
-				if v.SeqMemberFollowing == k.SeqMember {
-					nickName = k.NickName
-					break
-				}
+			if v.SeqMemberOpponent == k.SeqMember {
+				nickName = k.NickName
+				break
 			}
 		}
 		o.List = append(o.List, struct {
-			SeqMember  int64  "json:\"seq_member\""
-			NickName   string "json:\"nick_name\""
-			IsFollower bool   "json:\"is_follower\""
+			SeqMember   int64  "json:\"seq_member\""
+			NickName    string "json:\"nick_name\""
+			MySubscribe string "json:\"my_subscribe\""
 		}{
-			SeqMember:  int64(seqMember),
-			NickName:   nickName,
-			IsFollower: isFollower,
+			SeqMember:   int64(v.SeqMemberOpponent),
+			NickName:    nickName,
+			MySubscribe: v.Status,
 		})
 	}
 
@@ -147,9 +113,10 @@ type TmpMembinfo struct {
 	NickName  string
 }
 type SubscribeInfo struct {
-	SeqMember          int64
-	SeqMemberFollowing int64
-	CreatedAt          time.Time
+	SeqMember         int64
+	SeqMemberOpponent int64
+	Status            string
+	CreatedAt         time.Time
 }
 type MypageListSubscribeRes struct {
 	CntFollower  int64 `json:"cnt_follower"`
@@ -158,8 +125,8 @@ type MypageListSubscribeRes struct {
 	TotalPage    int   `json:"total_page"`
 	TotalData    int   `json:"total_data"`
 	List         []struct {
-		SeqMember  int64  `json:"seq_member"`
-		NickName   string `json:"nick_name"`
-		IsFollower bool   `json:"is_follower"`
+		SeqMember   int64  `json:"seq_member"`
+		NickName    string `json:"nick_name"`
+		MySubscribe string `json:"my_subscribe"`
 	} `json:"list"`
 }

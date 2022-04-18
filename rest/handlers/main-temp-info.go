@@ -18,7 +18,7 @@ func MainTempInfo(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	fmt.Println(userToken)
 
-	sdb := db.List[define.DSN_SLAVE1]
+	sdb := db.List[define.DSN_SLAVE]
 
 	// 1. 스텝별로 데이터 존재 체크 후 최상의 존재 가져옴
 	query := `

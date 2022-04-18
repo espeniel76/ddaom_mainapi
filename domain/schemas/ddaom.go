@@ -210,6 +210,38 @@ type ServiceInquiry struct {
 	Content           string    `json:"content"`
 	EmailYn           bool      `gorm:"default:true" json:"email_yn"`
 	Status            int8      `gorm:"default:1" json:"status"`
+	Anaswer           string    `json:"answer"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+type Notice struct {
+	SeqNotice      int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_notice"`
+	SeqMemberAdmin int64     `gorm:"index" json:"seq_member_admin"`
+	Title          string    `json:"title"`
+	Content        string    `json:"content"`
+	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type CategoryFaq struct {
+	SeqCategoryFaq int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_category_faq"`
+	CategoryFaq    string    `gorm:"type:varchar(50)" json:"category_faq"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
+	Creator        string    `gorm:"type:varchar(50)" json:"creator"`
+	Updator        string    `gorm:"type:varchar(50)" json:"updator"`
+}
+
+type Faq struct {
+	SeqFaq         int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_faq"`
+	SeqMemberAdmin int64     `gorm:"index" json:"seq_member_admin"`
+	SeqCategoryFaq int64     `gorm:"index" json:"seq_category_faq"`
+	Title          string    `json:"title"`
+	Content        string    `json:"content"`
+	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }

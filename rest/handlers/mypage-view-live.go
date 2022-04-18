@@ -27,7 +27,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	var seqNovelStep3 int64
 	var seqNovelStep4 int64
 
-	ldb := db.List[define.DSN_SLAVE1]
+	ldb := db.List[define.DSN_SLAVE]
 	switch _step {
 	case 1:
 		seqNovelStep1 = _seqNovel

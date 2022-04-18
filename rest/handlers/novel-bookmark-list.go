@@ -28,7 +28,7 @@ func NovelBookmarkList(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	slaveDb := db.List[define.DSN_SLAVE1]
+	slaveDb := db.List[define.DSN_SLAVE]
 	myLogDb := GetMyLogDb(userToken.Allocated)
 
 	var list []int64
