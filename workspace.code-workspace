@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "."
+		},
+		{
+			"path": "..\\donuts_front_admin"
 		}
 	],
 	"settings": {}
