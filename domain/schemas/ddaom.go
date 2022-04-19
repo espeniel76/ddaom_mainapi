@@ -208,7 +208,7 @@ type ServiceInquiry struct {
 	SeqMember         int64     `gorm:"index" json:"seq_member"`
 	Title             string    `json:"title"`
 	Content           string    `json:"content"`
-	EmailYn           bool      `gorm:"default:true" json:"email_yn"`
+	EmailYn           bool      `gorm:"default:false" json:"email_yn"`
 	Status            int8      `gorm:"default:1" json:"status"`
 	Anaswer           string    `json:"answer"`
 	CreatedAt         time.Time `json:"created_at"`

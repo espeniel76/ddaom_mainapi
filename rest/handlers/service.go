@@ -6,6 +6,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -23,6 +24,7 @@ func ServiceInquiry(req *domain.CommonRequest) domain.CommonResponse {
 	_title := Cp(req.Parameters, "title")
 	_content := Cp(req.Parameters, "content")
 	_emailYn := CpBool(req.Parameters, "email_yn")
+	fmt.Println(_emailYn)
 
 	mdb := db.List[define.DSN_MASTER]
 	m := schemas.ServiceInquiry{
@@ -31,7 +33,80 @@ func ServiceInquiry(req *domain.CommonRequest) domain.CommonResponse {
 		Content:   _content,
 		EmailYn:   _emailYn,
 	}
+	fmt.Println(m)
 	result := mdb.Model(&m).Create(&m)
+	if corm(result, &res) {
+		return res
+	}
+
+	return res
+}
+
+func ServiceInquiryEdit(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	_seqServiceInquiry := CpInt64(req.Parameters, "seq_service_inquiry")
+	_title := Cp(req.Parameters, "title")
+	_content := Cp(req.Parameters, "content")
+	_emailYn := CpBool(req.Parameters, "email_yn")
+
+	mdb := db.List[define.DSN_MASTER]
+	m := schemas.ServiceInquiry{}
+	result := mdb.Model(&m).Where("seq_service_inquiry = ?", _seqServiceInquiry).Scan(&m)
+	if corm(result, &res) {
+		return res
+	}
+	if m.SeqServiceInquiry == 0 {
+		res.ResultCode = define.NO_EXIST_DATA
+		return res
+	}
+	if m.SeqMember != userToken.SeqMember {
+		res.ResultCode = define.OTHER_USER
+		return res
+	}
+	result = mdb.Exec("UPDATE service_inquiries SET title = ?, content = ?, email_yn = ? WHERE seq_service_inquiry = ?",
+		_title, _content, _emailYn, _seqServiceInquiry)
+	if corm(result, &res) {
+		return res
+	}
+
+	return res
+}
+
+func ServiceInquiryDelete(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	_seqServiceInquiry := CpInt64(req.Parameters, "seq_service_inquiry")
+
+	mdb := db.List[define.DSN_MASTER]
+	m := schemas.ServiceInquiry{}
+	result := mdb.Model(&m).Where("seq_service_inquiry = ?", _seqServiceInquiry).Scan(&m)
+	if corm(result, &res) {
+		return res
+	}
+	if m.SeqServiceInquiry == 0 {
+		res.ResultCode = define.NO_EXIST_DATA
+		return res
+	}
+	if m.SeqMember != userToken.SeqMember {
+		res.ResultCode = define.OTHER_USER
+		return res
+	}
+	result = mdb.Exec("DELETE FROM service_inquiries WHERE seq_service_inquiry = ?", _seqServiceInquiry)
 	if corm(result, &res) {
 		return res
 	}

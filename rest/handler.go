@@ -83,6 +83,8 @@ func Handlers(mux *mux.Router) {
 
 	// server
 	mux.HandleFunc("/service/inquiry", common(handlers.ServiceInquiry))
+	mux.HandleFunc("/service/inquiry/edit", common(handlers.ServiceInquiryEdit))
+	mux.HandleFunc("/service/inquiry/delete", common(handlers.ServiceInquiryDelete))
 	mux.HandleFunc("/service/inquiry/list", common(handlers.ServiceInquiryList))
 	mux.HandleFunc("/service/notice/list", common(handlers.ServiceNoticeList))
 	mux.HandleFunc("/service/faq/list", common(handlers.ServiceFaqList))

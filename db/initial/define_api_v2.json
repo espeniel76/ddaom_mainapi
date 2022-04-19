@@ -903,6 +903,47 @@
 			}
 		]
 	},
+	"/service/inquiry/edit": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_service_inquiry",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "title",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "content",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "email_yn",
+				"type": "bool",
+				"required": true
+			}
+		]
+	},
+	"/service/inquiry/delete": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_service_inquiry",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
 	"/service/inquiry/list": {
 		"allow_method": "POST",
 		"data_type": "application/json",
