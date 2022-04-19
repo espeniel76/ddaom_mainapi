@@ -31,13 +31,8 @@ func ConfigAlarm(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
-	m.IsNewKeyword = _isNewKeyword
-	m.IsLiked = _isLiked
-	m.IsFinished = _isFinished
-	m.IsNewFollower = _isNewFollower
-	m.IsNewFollowing = _isNewFollowing
-	m.IsNightPush = _isNightPush
-	result = mdb.Model(&m).Updates(&m)
+	query := `UPDATE member_details SET is_new_keyword=?,is_liked=?,is_finished=?,is_new_follower=?,is_new_following=?,is_night_push=? WHERE seq_member = ?`
+	result = mdb.Exec(query, _isNewKeyword, _isLiked, _isFinished, _isNewFollower, _isNewFollowing, _isNightPush, userToken.SeqMember)
 	if corm(result, &res) {
 		return res
 	}

@@ -206,11 +206,11 @@ type NovelFinish struct {
 type ServiceInquiry struct {
 	SeqServiceInquiry int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_service_inquiry"`
 	SeqMember         int64     `gorm:"index" json:"seq_member"`
-	Title             string    `json:"title"`
-	Content           string    `json:"content"`
+	Title             string    `gorm:"type:varchar(150)" json:"title"`
+	Content           string    `gorm:"type:varchar(1024)" json:"content"`
 	EmailYn           bool      `gorm:"default:false" json:"email_yn"`
 	Status            int8      `gorm:"default:1" json:"status"`
-	Anaswer           string    `json:"answer"`
+	Answer            string    `gorm:"type:varchar(1024)" json:"answer"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }

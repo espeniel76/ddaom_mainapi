@@ -146,6 +146,7 @@ func ServiceInquiryList(req *domain.CommonRequest) domain.CommonResponse {
 			title,
 			content,
 			status,
+			answer,
 			UNIX_TIMESTAMP(created_at) * 1000 AS created_at,
 			UNIX_TIMESTAMP(updated_at) * 1000 AS updated_at
 		`).
@@ -172,6 +173,7 @@ type ServiceInquiryListRes struct {
 		Title             string  `json:"title"`
 		Content           string  `json:"content"`
 		Status            int8    `json:"status"`
+		Answer            string  `json:"answer"`
 		CreatedAt         float64 `json:"created_at"`
 		UpdatedAt         float64 `json:"updated_at"`
 	} `json:"list"`
