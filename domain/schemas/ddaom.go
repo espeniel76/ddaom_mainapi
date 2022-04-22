@@ -74,6 +74,10 @@ type Keyword struct {
 	StartDate  time.Time `json:"start_date"`
 	EndDate    time.Time `json:"end_date"`
 	CntTotal   int64     `gorm:"default:0" json:"cnt_total"`
+	CreatedAt  time.Time `json:"created_at"`
+	Creator    string    `gorm:"type:varchar(50)" json:"creator"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	Updator    string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type KeywordToday struct {
@@ -103,6 +107,8 @@ type Image struct {
 	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt time.Time `json:"created_at"`
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Updator   string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type Slang struct {
@@ -111,7 +117,9 @@ type Slang struct {
 	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
 	SeqMemberAdmin string    `gorm:"index" json:"seq_member_admin"`
 	CreatedAt      time.Time `json:"created_at"`
+	Creator        string    `gorm:"type:varchar(50)" json:"creator"`
 	UpdatedAt      time.Time `json:"updated_at"`
+	Updator        string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type Color struct {
@@ -120,6 +128,8 @@ type Color struct {
 	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt time.Time `json:"created_at"`
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Updator   string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type NovelStep1 struct {
@@ -213,6 +223,8 @@ type ServiceInquiry struct {
 	Answer            string    `gorm:"type:varchar(1024)" json:"answer"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
+	Creator           string    `gorm:"type:varchar(50)" json:"creator"`
+	Updator           string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type Notice struct {
@@ -223,6 +235,8 @@ type Notice struct {
 	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
+	Creator        string    `gorm:"type:varchar(50)" json:"creator"`
+	Updator        string    `gorm:"type:varchar(50)" json:"updator"`
 }
 
 type CategoryFaq struct {
@@ -244,4 +258,6 @@ type Faq struct {
 	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
+	Creator        string    `gorm:"type:varchar(50)" json:"creator"`
+	Updator        string    `gorm:"type:varchar(50)" json:"updator"`
 }

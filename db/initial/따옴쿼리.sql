@@ -6,3 +6,4 @@ SELECT * FROM ddaom_user1.member_subscribes;
 SELECT * FROM ddaom_user2.member_subscribes;
 
 SELECT seq_member, cnt_subscribe FROM ddaom.member_details;
+

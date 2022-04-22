@@ -103,9 +103,16 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		result = mdb.Model(&novelStep).
-			Where("seq_novel_step1 = ?", _seqNovelStep1).
-			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn})
+		query := `UPDATE novel_step1 SET
+			seq_genre = ?,
+			seq_image = ?,
+			seq_color = ?,
+			title = ?,
+			content = ?,
+			temp_yn = ?
+		WHERE seq_novel_step1 = ?
+		`
+		result = mdb.Exec(query, _seqGenre, _seqImage, _seqColor, _title, _content, _tempYn, _seqNovelStep1)
 		if corm(result, &res) {
 			return res
 		}
@@ -140,6 +147,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	// step 2 단계 글 신규
 	if _seqNovelStep2 == 0 {
 		result = mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
 		if corm(result, &res) {
@@ -163,10 +171,12 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+
+		// step 2 단계 글 기존
 	} else {
 
 		novelStep := schemas.NovelStep2{}
-		result := mdb.Model(&novelStep).Where("seq_novel_step2 = ?", _seqNovelStep1).Scan(&novelStep)
+		result := mdb.Model(&novelStep).Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep)
 		if corm(result, &res) {
 			return res
 		}
