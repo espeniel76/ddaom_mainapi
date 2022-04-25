@@ -728,6 +728,11 @@
 		"user_level": 5,
 		"require_parameters": [
 			{
+				"name": "is_live",
+				"type": "int",
+				"required": true
+			},
+			{
 				"name": "page",
 				"type": "int",
 				"required": true

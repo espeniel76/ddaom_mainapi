@@ -95,6 +95,8 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_following"] = cntFollowing
 	data["cnt_follower"] = cntFollower
 
+	data["is_new_alarm"] = true
+
 	res.Data = data
 
 	return res

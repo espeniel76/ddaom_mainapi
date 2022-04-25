@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/tools"
+	"fmt"
 )
 
 func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
@@ -17,8 +18,12 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	_isLive := CpInt64(req.Parameters, "is_live")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
+
+	fmt.Println(_isLive)
+
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
 		return res
@@ -56,7 +61,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step3,
 			0 AS seq_novel_step4,
 			title,
-			UNIX_TIMESTAMP(created_at) * 1000 AS created_at,
+			UNIX_TIMESTAMP(k.created_at) * 1000 AS created_at,
 			1 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live
 		FROM novel_step1 ns
