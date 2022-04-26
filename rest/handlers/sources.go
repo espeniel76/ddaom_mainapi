@@ -19,17 +19,16 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 	sdb := db.List[define.DSN_SLAVE]
 	query := `
 			SELECT
-			k.seq_keyword,
-			k.keyword,
-			kt.view_start_date,
-			kt.view_end_date,
-			k.start_date,
-			k.end_date,
-			k.cnt_total
-		FROM ddaom.keywords AS k
-		INNER JOIN ddaom.keyword_todays AS kt ON k.seq_keyword = kt.seq_keyword
-		WHERE k.active_yn = true AND NOW() BETWEEN k.start_date AND k.end_date
-		ORDER BY kt.view_start_date ASC
+			seq_keyword,
+			keyword,
+			start_date AS view_start_date,
+			end_date AS view_end_date,
+			start_date,
+			end_date,
+			cnt_total
+		FROM ddaom.keywords
+		WHERE active_yn = true AND NOW() BETWEEN start_date AND end_date
+		ORDER BY seq_keyword DESC
 	`
 	keywordDate := []KeywordDate{}
 	result := sdb.Raw(query).Scan(&keywordDate)
@@ -139,18 +138,17 @@ func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 	// 데이터 가져온다.
 	sdb := db.List[define.DSN_SLAVE]
 	query := `
-			SELECT
-			k.seq_keyword,
-			k.keyword,
-			kt.view_start_date,
-			kt.view_end_date,
-			k.start_date,
-			k.end_date,
-			k.cnt_total
-		FROM ddaom.keywords AS k
-		INNER JOIN ddaom.keyword_todays AS kt ON k.seq_keyword = kt.seq_keyword
-		WHERE k.active_yn = true AND NOW() BETWEEN k.start_date AND k.end_date
-		ORDER BY kt.view_start_date ASC
+		SELECT
+			seq_keyword,
+			keyword,
+			start_date AS view_start_date,
+			end_date AS view_end_date,
+			start_date,
+			end_date,
+			cnt_total
+		FROM ddaom.keywords
+		WHERE active_yn = true AND NOW() BETWEEN start_date AND end_date
+		ORDER BY seq_keyword DESC
 	`
 	keywordDate := []KeywordDate{}
 	result := sdb.Raw(query).Scan(&keywordDate)

@@ -93,7 +93,7 @@ type KeywordToday struct {
 // 장르
 type Genre struct {
 	SeqGenre  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_genre"`
-	Genre     string    `gorm:"type:varchar(50)" json:"keyword"`
+	Genre     string    `gorm:"unique;type:varchar(50)" json:"keyword"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
@@ -113,7 +113,7 @@ type Image struct {
 
 type Slang struct {
 	SeqSlang       int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_slang"`
-	Slang          string    `gorm:"type:varchar(50)" json:"slang"`
+	Slang          string    `gorm:"unique;type:varchar(50)" json:"slang"`
 	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
 	SeqMemberAdmin string    `gorm:"index" json:"seq_member_admin"`
 	CreatedAt      time.Time `json:"created_at"`
