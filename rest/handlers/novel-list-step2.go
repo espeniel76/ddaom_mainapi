@@ -48,7 +48,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step2 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
 		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false`)
-	query.WriteString(" ORDER BY ns.seq_novel_step2")
+	query.WriteString(" ORDER BY ns.seq_novel_step2 DESC")
 	query.WriteString(" LIMIT ?, ?")
 	step2ResTmp := []Step2ResTmp{}
 	result = masterDB.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step2ResTmp)

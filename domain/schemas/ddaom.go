@@ -74,6 +74,8 @@ type Keyword struct {
 	StartDate  time.Time `json:"start_date"`
 	EndDate    time.Time `json:"end_date"`
 	CntTotal   int64     `gorm:"default:0" json:"cnt_total"`
+	CntLike    int64     `gorm:"default:0" json:"cnt_like"`
+	CntFinish  int64     `gorm:"default:0" json:"cnt_finish"`
 	CreatedAt  time.Time `json:"created_at"`
 	Creator    string    `gorm:"type:varchar(50)" json:"creator"`
 	UpdatedAt  time.Time `json:"updated_at"`
@@ -103,6 +105,7 @@ type Genre struct {
 
 type Image struct {
 	SeqImage  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_image"`
+	Name      string    `gorm:"unique;type:varchar(50)" json:"name"`
 	Image     string    `gorm:"type:varchar(1024)" json:"image"`
 	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt time.Time `json:"created_at"`
@@ -124,7 +127,8 @@ type Slang struct {
 
 type Color struct {
 	SeqColor  int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_color"`
-	Color     string    `gorm:"unique type:varchar(12)" json:"color"`
+	Name      string    `gorm:"unique;type:varchar(50)" json:"name"`
+	Color     string    `gorm:"type:varchar(12)" json:"color"`
 	ActiveYn  bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt time.Time `json:"created_at"`
 	Creator   string    `gorm:"type:varchar(50)" json:"creator"`

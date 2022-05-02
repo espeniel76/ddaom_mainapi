@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"strconv"
 )
 
@@ -73,9 +74,10 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 구독현황
 	ldb := getUserLogDb(sdb, _seqMember)
+	fmt.Println(ldb)
 	listStatus := []string{}
 	result = ldb.Model(&schemas.MemberSubscribe{}).Select("status").
-		Where("seq_member = ?", userToken.SeqMember).Scan(&listStatus)
+		Where("seq_member = ?", _seqMember).Scan(&listStatus)
 	if corm(result, &res) {
 		return res
 	}
@@ -96,6 +98,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_follower"] = cntFollower
 
 	data["is_new_alarm"] = true
+	data["my_subscribe"] = false
 
 	res.Data = data
 
