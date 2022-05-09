@@ -729,7 +729,7 @@
 		"require_parameters": [
 			{
 				"name": "is_live",
-				"type": "int",
+				"type": "bool",
 				"required": true
 			},
 			{
@@ -751,6 +751,11 @@
 		"user_level": 5,
 		"require_parameters": [
 			{
+				"name": "seq_member",
+				"type": "int",
+				"required": true
+			},
+			{
 				"name": "page",
 				"type": "int",
 				"required": true
@@ -768,6 +773,11 @@
 		"require_token": false,
 		"user_level": 5,
 		"require_parameters": [
+			{
+				"name": "seq_member",
+				"type": "int",
+				"required": true
+			},
 			{
 				"name": "page",
 				"type": "int",
