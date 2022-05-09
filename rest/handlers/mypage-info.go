@@ -98,7 +98,11 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_follower"] = cntFollower
 
 	data["is_new_alarm"] = true
+	status := getMySubscribe(userToken, _seqMember)
 	data["my_subscribe"] = false
+	if status == define.FOLLOWING || status == define.BOTH {
+		data["my_subscribe"] = true
+	}
 
 	res.Data = data
 

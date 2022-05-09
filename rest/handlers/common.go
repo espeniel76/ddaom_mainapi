@@ -128,3 +128,36 @@ func getUserLogDb(_db *gorm.DB, seqMember int64) *gorm.DB {
 	ldb := GetMyLogDb(int8(allocatedDb))
 	return ldb
 }
+
+func getMyLike(userToken *domain.UserToken, step int8) bool {
+	if userToken == nil {
+		return false
+	}
+	ldb := GetMyLogDb(userToken.Allocated)
+	likeYn := false
+	switch step {
+	case 1:
+		ldb.Model(schemas.MemberLikeStep1{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		return likeYn
+	case 2:
+		ldb.Model(schemas.MemberLikeStep2{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		return likeYn
+	case 3:
+		ldb.Model(schemas.MemberLikeStep3{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		return likeYn
+	case 4:
+		ldb.Model(schemas.MemberLikeStep4{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		return likeYn
+	}
+	return false
+}
+
+func getMySubscribe(userToken *domain.UserToken, seqMember int64) string {
+	if userToken == nil {
+		return "NONE"
+	}
+	ldb := GetMyLogDb(userToken.Allocated)
+	status := "NONE"
+	ldb.Model(schemas.MemberSubscribe{}).Select("status").Where("seq_member = ? AND seq_member_opponent = ?", userToken.SeqMember, seqMember).Scan(&status)
+	return status
+}

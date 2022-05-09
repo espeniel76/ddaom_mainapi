@@ -10,15 +10,15 @@ import (
 func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
-	}
 
+	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if _seqMember == 0 && userToken != nil {
+		_seqMember = userToken.SeqMember
+	}
+
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
 		return res
@@ -28,7 +28,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 	sdb := db.List[define.DSN_SLAVE]
 
 	var totalData int64
-	seq := userToken.SeqMember
+	seq := _seqMember
 	query := `
 	SELECT SUM(cnt1) + SUM(cnt2) + SUM(cnt3) + SUM(cnt4) AS cnt
 	FROM
@@ -59,7 +59,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step3,
 			0 AS seq_novel_step4,
 			title,
-			UNIX_TIMESTAMP(created_at) * 1000 AS created_at,
+			UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
 			1 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live,
 			false AS my_like,

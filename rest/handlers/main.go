@@ -24,7 +24,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 		seq_color,
 		title
 	FROM novel_step1
-	WHERE seq_keyword = ? AND active_yn = true
+	WHERE seq_keyword = ? AND active_yn = true AND temp_yn = false
 	ORDER BY created_at DESC
 	LIMIT 10
 	`

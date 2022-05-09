@@ -14,16 +14,14 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
-	}
-	fmt.Println(userToken)
-
+	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if _seqMember == 0 && userToken != nil {
+		_seqMember = userToken.SeqMember
+	}
+
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
 		return res
@@ -31,13 +29,14 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	sdb := db.List[define.DSN_SLAVE]
-	ldb := GetMyLogDb(userToken.Allocated)
+	// ldb := GetMyLogDb(userToken.Allocated)
+	ldb := getUserLogDb(sdb, _seqMember)
 
 	// 구독현황
 	var totalData int64
 	info := []SubscribeInfo{}
 	result := ldb.Model(&schemas.MemberSubscribe{}).Select("seq_member, seq_member_opponent, status, created_at").
-		Where("seq_member = ?", userToken.SeqMember).Scan(&info)
+		Where("seq_member = ?", _seqMember).Scan(&info)
 	if corm(result, &res) {
 		return res
 	}
@@ -65,7 +64,7 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 
 	result = ldb.Model(&schemas.MemberSubscribe{}).
 		Select("seq_member, seq_member_opponent, status").
-		Where("seq_member = ?", userToken.SeqMember).
+		Where("seq_member = ?", _seqMember).
 		Order("updated_at DESC").
 		Limit(int(_sizePerPage)).
 		Offset(int(limitStart)).
