@@ -12,12 +12,7 @@ import (
 func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	// userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	// if err != nil {
-	// 	res.ResultCode = define.INVALID_TOKEN
-	// 	res.ErrorDesc = err.Error()
-	// 	return res
-	// }
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
 
@@ -90,7 +85,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	step1["nick_name"] = step1Res.NickName
 	step1["content"] = step1Res.Content
 	step1["cnt_like"] = step1Res.CntLike
-	step1["my_like"] = true
+	step1["my_like"] = getMyLike(userToken, 1, step1Res.SeqNovelStep1)
 	data["step1"] = step1
 
 	query = `
@@ -117,7 +112,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		step["created_at"] = step2Res.CreatedAt.UnixMilli()
 		step["content"] = step2Res.Content
 		step["cnt_like"] = step2Res.CntLike
-		step["my_like"] = true
+		step["my_like"] = getMyLike(userToken, 2, step2Res.SeqNovelStep2)
 		result = ldb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ?", seqNovelStep2).Count(&cntTotal)
 		if corm(result, &res) {
 			return res
@@ -152,7 +147,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		step["created_at"] = step3Res.CreatedAt.UnixMilli()
 		step["content"] = step3Res.Content
 		step["cnt_like"] = step3Res.CntLike
-		step["my_like"] = true
+		step["my_like"] = getMyLike(userToken, 3, step3Res.SeqNovelStep3)
 		result = ldb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ?", seqNovelStep3).Count(&cntTotal)
 		if corm(result, &res) {
 			return res
@@ -187,7 +182,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		step["created_at"] = step4Res.CreatedAt.UnixMilli()
 		step["content"] = step4Res.Content
 		step["cnt_like"] = step4Res.CntLike
-		step["my_like"] = true
+		step["my_like"] = getMyLike(userToken, 4, step4Res.SeqNovelStep4)
 		result = ldb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ?", seqNovelStep4).Count(&cntTotal)
 		if corm(result, &res) {
 			return res

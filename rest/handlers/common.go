@@ -129,7 +129,7 @@ func getUserLogDb(_db *gorm.DB, seqMember int64) *gorm.DB {
 	return ldb
 }
 
-func getMyLike(userToken *domain.UserToken, step int8) bool {
+func getMyLike(userToken *domain.UserToken, step int8, seqNovel int64) bool {
 	if userToken == nil {
 		return false
 	}
@@ -137,16 +137,16 @@ func getMyLike(userToken *domain.UserToken, step int8) bool {
 	likeYn := false
 	switch step {
 	case 1:
-		ldb.Model(schemas.MemberLikeStep1{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		ldb.Model(schemas.MemberLikeStep1{}).Select("like_yn").Where("seq_member = ? AND seq_novel_step1 = ?", userToken.SeqMember, seqNovel).Scan(&likeYn)
 		return likeYn
 	case 2:
-		ldb.Model(schemas.MemberLikeStep2{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		ldb.Model(schemas.MemberLikeStep2{}).Select("like_yn").Where("seq_member = ? AND seq_novel_step2 = ?", userToken.SeqMember, seqNovel).Scan(&likeYn)
 		return likeYn
 	case 3:
-		ldb.Model(schemas.MemberLikeStep3{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		ldb.Model(schemas.MemberLikeStep3{}).Select("like_yn").Where("seq_member = ? AND seq_novel_step3 = ?", userToken.SeqMember, seqNovel).Scan(&likeYn)
 		return likeYn
 	case 4:
-		ldb.Model(schemas.MemberLikeStep4{}).Select("like_yn").Where("seq_member = ?", userToken.SeqMember).Scan(&likeYn)
+		ldb.Model(schemas.MemberLikeStep4{}).Select("like_yn").Where("seq_member = ? AND seq_novel_step4 = ?", userToken.SeqMember, seqNovel).Scan(&likeYn)
 		return likeYn
 	}
 	return false

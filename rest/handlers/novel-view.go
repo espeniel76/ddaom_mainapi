@@ -53,7 +53,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 	step1["nick_name"] = step1Res.NickName
 	step1["content"] = step1Res.Content
 	step1["cnt_like"] = step1Res.CntLike
-	step1["my_like"] = getMyLike(userToken, 1)
+	step1["my_like"] = getMyLike(userToken, 1, step1Res.SeqNovelStep1)
 	data["step1"] = step1
 
 	query = `
@@ -81,7 +81,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		step["created_at"] = step2Res.CreatedAt.UnixMilli()
 		step["content"] = step2Res.Content
 		step["cnt_like"] = step2Res.CntLike
-		step["my_like"] = getMyLike(userToken, 2)
+		step["my_like"] = getMyLike(userToken, 2, step2Res.SeqNovelStep2)
 		result = mdb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", _seqNovelStep1).Count(&cntTotal)
 		if corm(result, &res) {
 			return res
@@ -117,7 +117,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		step["created_at"] = step3Res.CreatedAt.UnixMilli()
 		step["content"] = step3Res.Content
 		step["cnt_like"] = step3Res.CntLike
-		step["my_like"] = getMyLike(userToken, 3)
+		step["my_like"] = getMyLike(userToken, 3, step3Res.SeqNovelStep3)
 		result = mdb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", _seqNovelStep1).Count(&cntTotal)
 		if corm(result, &res) {
 			return res
@@ -153,7 +153,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		step["created_at"] = step4Res.CreatedAt.UnixMilli()
 		step["content"] = step4Res.Content
 		step["cnt_like"] = step4Res.CntLike
-		step["my_like"] = getMyLike(userToken, 4)
+		step["my_like"] = getMyLike(userToken, 4, step4Res.SeqNovelStep4)
 		result = mdb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", _seqNovelStep1).Count(&cntTotal)
 		if corm(result, &res) {
 			return res

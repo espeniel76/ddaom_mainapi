@@ -5,17 +5,16 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"strconv"
 )
 
 func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.Atoi(req.Vars["seq_novel"])
 
-	fmt.Println(_step, _seqNovel)
 	sdb := db.List[define.DSN_SLAVE]
 	o := MypageViewCompleteRes{}
 	switch _step {
@@ -27,6 +26,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		o.MyLike = getMyLike(userToken, 1, int64(_seqNovel))
 		res.Data = o
 	case 2:
 		query := `
@@ -45,6 +45,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		o.MyLike = getMyLike(userToken, 2, int64(_seqNovel))
 		res.Data = o
 	case 3:
 		query := `
@@ -63,6 +64,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		o.MyLike = getMyLike(userToken, 3, int64(_seqNovel))
 		res.Data = o
 	case 4:
 		query := `
@@ -81,6 +83,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		o.MyLike = getMyLike(userToken, 4, int64(_seqNovel))
 		res.Data = o
 	}
 

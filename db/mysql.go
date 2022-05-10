@@ -35,8 +35,8 @@ func createInstance(dsn string) *gorm.DB {
 	gormLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold: time.Second,  // Slow SQL threshold
-			LogLevel:      logger.Error, // Log level
+			SlowThreshold: time.Second, // Slow SQL threshold
+			LogLevel:      logger.Warn, // Log level
 			// LogLevel:                  logger.Silent, // Log level
 			// LogLevel:                  logger.Error, // Log level
 			IgnoreRecordNotFoundError: true,  // Ignore ErrRecordNotFound error for logger

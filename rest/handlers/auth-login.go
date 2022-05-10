@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -16,10 +15,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	mdb := db.List[define.DSN_MASTER]
-
-	fmt.Println("##################################################")
-	fmt.Println(req.Parameters)
-	fmt.Println("##################################################")
 
 	email := Cp(req.Parameters, "email")
 	token := Cp(req.Parameters, "token")

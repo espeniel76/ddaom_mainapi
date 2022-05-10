@@ -5,19 +5,17 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 )
 
 func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
-	}
-	fmt.Println(userToken)
+	// userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	// if err != nil {
+	// 	res.ResultCode = define.INVALID_TOKEN
+	// 	res.ErrorDesc = err.Error()
+	// 	return res
+	// }
 
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")

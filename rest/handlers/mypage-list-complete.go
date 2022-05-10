@@ -4,9 +4,11 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"ddaom/tools"
 )
 
+// 마이페이지 - 작성완료리스트
 func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
@@ -130,6 +132,87 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 		Scan(&novelMyListCompleteRes.List)
 	if corm(result, &res) {
 		return res
+	}
+
+	// 나의 좋아요 구한다. (로그인 시 에만)
+	// 미안하다.. 무식하다...
+	if userToken != nil {
+		var seqNovelStep1s []int64
+		var seqNovelStep2s []int64
+		var seqNovelStep3s []int64
+		var seqNovelStep4s []int64
+		for _, v := range novelMyListCompleteRes.List {
+			if v.SeqNovelStep1 > 0 {
+				seqNovelStep1s = append(seqNovelStep1s, v.SeqNovelStep1)
+			}
+			if v.SeqNovelStep2 > 0 {
+				seqNovelStep2s = append(seqNovelStep2s, v.SeqNovelStep2)
+			}
+			if v.SeqNovelStep3 > 0 {
+				seqNovelStep3s = append(seqNovelStep3s, v.SeqNovelStep3)
+			}
+			if v.SeqNovelStep4 > 0 {
+				seqNovelStep4s = append(seqNovelStep4s, v.SeqNovelStep4)
+			}
+		}
+		// fmt.Println(seqNovelStep1s)
+		// fmt.Println(seqNovelStep2s)
+		// fmt.Println(seqNovelStep3s)
+		// fmt.Println(seqNovelStep4s)
+		ldb := GetMyLogDb(userToken.Allocated)
+		mls1 := []schemas.MemberLikeStep1{}
+		mls2 := []schemas.MemberLikeStep2{}
+		mls3 := []schemas.MemberLikeStep3{}
+		mls4 := []schemas.MemberLikeStep4{}
+		ldb.Model(&mls1).Select("seq_novel_step1, like_yn").Where("seq_member = ? AND seq_novel_step1 IN (?)", userToken.SeqMember, seqNovelStep1s).Scan(&mls1)
+		ldb.Model(&mls2).Select("seq_novel_step2, like_yn").Where("seq_member = ? AND seq_novel_step2 IN (?)", userToken.SeqMember, seqNovelStep2s).Scan(&mls2)
+		ldb.Model(&mls3).Select("seq_novel_step3, like_yn").Where("seq_member = ? AND seq_novel_step3 IN (?)", userToken.SeqMember, seqNovelStep3s).Scan(&mls3)
+		ldb.Model(&mls4).Select("seq_novel_step4, like_yn").Where("seq_member = ? AND seq_novel_step4 IN (?)", userToken.SeqMember, seqNovelStep4s).Scan(&mls4)
+
+		// fmt.Println(mls1)
+		// fmt.Println(mls2)
+		// fmt.Println(mls3)
+		// fmt.Println(mls4)
+		for _, v := range mls1 {
+			if v.LikeYn {
+				for i := 0; i < len(novelMyListCompleteRes.List); i++ {
+					if v.SeqNovelStep1 == novelMyListCompleteRes.List[i].SeqNovelStep1 {
+						novelMyListCompleteRes.List[i].MyLike = true
+						break
+					}
+				}
+			}
+		}
+		for _, v := range mls2 {
+			if v.LikeYn {
+				for i := 0; i < len(novelMyListCompleteRes.List); i++ {
+					if v.SeqNovelStep2 == novelMyListCompleteRes.List[i].SeqNovelStep2 {
+						novelMyListCompleteRes.List[i].MyLike = true
+						break
+					}
+				}
+			}
+		}
+		for _, v := range mls3 {
+			if v.LikeYn {
+				for i := 0; i < len(novelMyListCompleteRes.List); i++ {
+					if v.SeqNovelStep3 == novelMyListCompleteRes.List[i].SeqNovelStep3 {
+						novelMyListCompleteRes.List[i].MyLike = true
+						break
+					}
+				}
+			}
+		}
+		for _, v := range mls4 {
+			if v.LikeYn {
+				for i := 0; i < len(novelMyListCompleteRes.List); i++ {
+					if v.SeqNovelStep4 == novelMyListCompleteRes.List[i].SeqNovelStep4 {
+						novelMyListCompleteRes.List[i].MyLike = true
+						break
+					}
+				}
+			}
+		}
 	}
 
 	res.Data = novelMyListCompleteRes
