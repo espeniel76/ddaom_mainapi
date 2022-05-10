@@ -20,16 +20,17 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep1, _ := strconv.Atoi(req.Vars["seq_novel_step1"])
 	myLike := false
 	var cnt int64
+	var scanCount int64
 
 	ldb := GetMyLogDb(userToken.Allocated)
 	mdb := db.List[define.DSN_MASTER]
 
 	// 소설 존재 여부
-	result := mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
+	result := mdb.Model(schemas.NovelStep1{}).Select("cnt_like").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&cnt).Count(&scanCount)
 	if corm(result, &res) {
 		return res
 	}
-	if cnt == 0 {
+	if scanCount == 0 {
 		res.ResultCode = define.NO_EXIST_DATA
 		return res
 	}
@@ -58,6 +59,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 		myLike = true
+		cnt++
 	} else { // 존재함
 		// 1. 좋아요 상태
 		if memberLikeStep1.LikeYn {
@@ -72,6 +74,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 				return res
 			}
 			myLike = false
+			cnt--
 		} else {
 			result = ldb.Model(&schemas.MemberLikeStep1{}).
 				Where("seq_member = ? AND seq_novel_step1 = ?", userToken.SeqMember, _seqNovelStep1).
@@ -84,11 +87,14 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 				return res
 			}
 			myLike = true
+			cnt++
 		}
+
 	}
 
-	data := make(map[string]bool)
+	data := make(map[string]interface{})
 	data["my_like"] = myLike
+	data["cnt_like"] = cnt
 	res.Data = data
 
 	return res

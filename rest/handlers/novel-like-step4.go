@@ -20,17 +20,16 @@ func NovelLikeStep4(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep4, _ := strconv.Atoi(req.Vars["seq_novel_step4"])
 	myLike := false
 	var cnt int64
+	var scanCount int64
 
 	myLogDb := GetMyLogDb(userToken.Allocated)
 	masterDB := db.List[define.DSN_MASTER]
 
-	result := masterDB.Model(schemas.NovelStep4{}).Where("seq_novel_step4 = ?", _seqNovelStep4).Count(&cnt)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	result := masterDB.Model(schemas.NovelStep4{}).Select("cnt_like").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&cnt).Count(&scanCount)
+	if corm(result, &res) {
 		return res
 	}
-	if cnt == 0 {
+	if scanCount == 0 {
 		res.ResultCode = define.NO_EXIST_DATA
 		return res
 	}
@@ -38,9 +37,7 @@ func NovelLikeStep4(req *domain.CommonRequest) domain.CommonResponse {
 	MemberLikeStep4 := schemas.MemberLikeStep4{}
 	result = myLogDb.Model(&MemberLikeStep4).
 		Where("seq_novel_step4 = ? AND seq_member = ?", _seqNovelStep4, userToken.SeqMember).Scan(&MemberLikeStep4)
-	if result.Error != nil {
-		res.ResultCode = define.DB_ERROR_ORM
-		res.ErrorDesc = result.Error.Error()
+	if corm(result, &res) {
 		return res
 	}
 	if MemberLikeStep4.SeqMemberLike == 0 { // 존재하지 않음
@@ -49,57 +46,49 @@ func NovelLikeStep4(req *domain.CommonRequest) domain.CommonResponse {
 			SeqNovelStep4: int64(_seqNovelStep4),
 			LikeYn:        true,
 		})
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		if corm(result, &res) {
 			return res
 		}
 
 		result = masterDB.Exec("UPDATE novel_step4 SET cnt_like = cnt_like + 1 WHERE seq_novel_step4 = ?", _seqNovelStep4)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		if corm(result, &res) {
 			return res
 		}
 		myLike = true
+		cnt++
 	} else { // 존재함
 		if MemberLikeStep4.LikeYn {
 			result = myLogDb.Model(&schemas.MemberLikeStep4{}).
 				Where("seq_member = ? AND seq_novel_step4 = ?", userToken.SeqMember, _seqNovelStep4).
 				Update("like_yn", false)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			if corm(result, &res) {
 				return res
 			}
 			result = masterDB.Exec("UPDATE novel_step4 SET cnt_like = cnt_like - 1 WHERE seq_novel_step4 = ?", _seqNovelStep4)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			if corm(result, &res) {
 				return res
 			}
 			myLike = false
+			cnt--
 		} else {
 			result = myLogDb.Model(&schemas.MemberLikeStep4{}).
 				Where("seq_member = ? AND seq_novel_step4 = ?", userToken.SeqMember, _seqNovelStep4).
 				Update("like_yn", true)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			if corm(result, &res) {
 				return res
 			}
 			result = masterDB.Exec("UPDATE novel_step4 SET cnt_like = cnt_like + 1 WHERE seq_novel_step4 = ?", _seqNovelStep4)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
+			if corm(result, &res) {
 				return res
 			}
 			myLike = true
+			cnt++
 		}
 	}
 
-	data := make(map[string]bool)
+	data := make(map[string]interface{})
 	data["my_like"] = myLike
+	data["cnt_like"] = cnt
 	res.Data = data
 
 	return res

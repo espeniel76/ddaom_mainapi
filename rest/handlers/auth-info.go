@@ -102,19 +102,31 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 
 	masterDB := db.List[define.DSN_MASTER]
 	memberDetail := &schemas.MemberDetail{}
-	result := masterDB.Where("nick_name = ?", _nickName).Find(&memberDetail)
-	if corm(result, &res) {
-		return res
-	}
-	if memberDetail.SeqMember > 0 {
-		if memberDetail.SeqMember != userToken.SeqMember {
+	if len(_nickName) > 0 {
+		result := masterDB.Where("nick_name = ? AND seq_member != ?", _nickName, userToken.SeqMember).Find(&memberDetail)
+		if corm(result, &res) {
+			return res
+		}
+		if memberDetail.SeqMember > 0 {
 			res.ResultCode = define.ALREADY_EXISTS_NICKNAME
 			res.ErrorDesc = "Nickname that already exists"
 			return res
 		}
 	}
 
-	result = masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Scan(&memberDetail)
+	if len(_email) > 0 {
+		result := masterDB.Where("email = ? AND seq_member != ?", _email, userToken.SeqMember).Find(&memberDetail)
+		if corm(result, &res) {
+			return res
+		}
+		if memberDetail.SeqMember > 0 {
+			res.ResultCode = define.ALREADY_EXISTS_EMAIL
+			res.ErrorDesc = "Email that already exists"
+			return res
+		}
+	}
+
+	result := masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Scan(&memberDetail)
 	if corm(result, &res) {
 		return res
 	}

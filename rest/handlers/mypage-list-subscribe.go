@@ -84,6 +84,7 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	fmt.Println(nicks)
 
 	nickName := ""
+	isYou := false
 	for _, v := range info {
 		for _, k := range nicks {
 			if v.SeqMemberOpponent == k.SeqMember {
@@ -91,13 +92,21 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 				break
 			}
 		}
+		isYou = false
+		if userToken != nil {
+			if v.SeqMemberOpponent == userToken.SeqMember {
+				isYou = true
+			}
+		}
 		o.List = append(o.List, struct {
 			SeqMember   int64  "json:\"seq_member\""
 			NickName    string "json:\"nick_name\""
+			IsYou       bool   "json:\"is_you\""
 			MySubscribe string "json:\"my_subscribe\""
 		}{
 			SeqMember:   int64(v.SeqMemberOpponent),
 			NickName:    nickName,
+			IsYou:       isYou,
 			MySubscribe: v.Status,
 		})
 	}
@@ -126,6 +135,7 @@ type MypageListSubscribeRes struct {
 	List         []struct {
 		SeqMember   int64  `json:"seq_member"`
 		NickName    string `json:"nick_name"`
+		IsYou       bool   `json:"is_you"`
 		MySubscribe string `json:"my_subscribe"`
 	} `json:"list"`
 }
