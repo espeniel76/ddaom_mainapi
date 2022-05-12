@@ -102,6 +102,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step4,
 			title,
 			UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
+			ns.updated_at,
 			1 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live
 		FROM novel_step1 ns
@@ -118,6 +119,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step4,
 			ns1.title,
 			UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
+			ns2.updated_at,
 			2 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live
 		FROM novel_step2 ns2
@@ -135,6 +137,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step4,
 			ns1.title,
 			UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
+			ns3.updated_at,
 			3 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live
 		FROM novel_step3 ns3
@@ -152,6 +155,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			ns4.seq_novel_step4,
 			ns1.title,
 			UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
+			ns4.updated_at,
 			4 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live
 		FROM novel_step4 ns4
@@ -160,7 +164,7 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 		WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.temp_yn = true
 		AND ns1.seq_keyword IN (?)
 	)
-	ORDER BY created_at DESC
+	ORDER BY updated_at DESC
 	LIMIT ?, ?
 	`
 	result = sdb.

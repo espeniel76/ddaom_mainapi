@@ -67,5 +67,9 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	mdb.AutoMigrate(schemas.CategoryFaq{})
 	mdb.AutoMigrate(schemas.Faq{})
 
+	mdb.AutoMigrate(schemas.KeywordChoiceFirst{})
+	mdb.AutoMigrate(schemas.KeywordChoiceSecond{})
+	mdb.AutoMigrate(schemas.NovelFinishBatchRunLog{})
+
 	return res
 }

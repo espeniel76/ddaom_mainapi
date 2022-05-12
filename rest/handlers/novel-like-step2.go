@@ -22,10 +22,10 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	var cnt int64
 	var scanCount int64
 
-	myLogDb := GetMyLogDb(userToken.Allocated)
-	masterDB := db.List[define.DSN_MASTER]
+	ldb := GetMyLogDb(userToken.Allocated)
+	mdb := db.List[define.DSN_MASTER]
 
-	result := masterDB.Model(schemas.NovelStep2{}).Select("cnt_like").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&cnt).Count(&scanCount)
+	result := mdb.Model(schemas.NovelStep2{}).Select("cnt_like").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&cnt).Count(&scanCount)
 	if corm(result, &res) {
 		return res
 	}
@@ -35,13 +35,14 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	MemberLikeStep2 := schemas.MemberLikeStep2{}
-	result = myLogDb.Model(&MemberLikeStep2).
+	result = ldb.Model(&MemberLikeStep2).
 		Where("seq_novel_step2 = ? AND seq_member = ?", _seqNovelStep2, userToken.SeqMember).Scan(&MemberLikeStep2)
+	seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
 	if corm(result, &res) {
 		return res
 	}
 	if MemberLikeStep2.SeqMemberLike == 0 { // 존재하지 않음
-		result = myLogDb.Create(&schemas.MemberLikeStep2{
+		result = ldb.Create(&schemas.MemberLikeStep2{
 			SeqMember:     userToken.SeqMember,
 			SeqNovelStep2: int64(_seqNovelStep2),
 			LikeYn:        true,
@@ -50,39 +51,42 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		result = masterDB.Exec("UPDATE novel_step2 SET cnt_like = cnt_like + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
+		result = mdb.Exec("UPDATE novel_step2 SET cnt_like = cnt_like + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
 		if corm(result, &res) {
 			return res
 		}
 		myLike = true
 		cnt++
+		mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
 	} else { // 존재함
 		if MemberLikeStep2.LikeYn {
-			result = myLogDb.Model(&schemas.MemberLikeStep2{}).
+			result = ldb.Model(&schemas.MemberLikeStep2{}).
 				Where("seq_member = ? AND seq_novel_step2 = ?", userToken.SeqMember, _seqNovelStep2).
 				Update("like_yn", false)
 			if corm(result, &res) {
 				return res
 			}
-			result = masterDB.Exec("UPDATE novel_step2 SET cnt_like = cnt_like - 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
+			result = mdb.Exec("UPDATE novel_step2 SET cnt_like = cnt_like - 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
 			if corm(result, &res) {
 				return res
 			}
 			myLike = false
 			cnt--
+			mdb.Exec("UPDATE keywords SET cnt_like = cnt_like - 1 WHERE seq_keyword = ?", seqKeyword)
 		} else {
-			result = myLogDb.Model(&schemas.MemberLikeStep2{}).
+			result = ldb.Model(&schemas.MemberLikeStep2{}).
 				Where("seq_member = ? AND seq_novel_step2 = ?", userToken.SeqMember, _seqNovelStep2).
 				Update("like_yn", true)
 			if corm(result, &res) {
 				return res
 			}
-			result = masterDB.Exec("UPDATE novel_step2 SET cnt_like = cnt_like + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
+			result = mdb.Exec("UPDATE novel_step2 SET cnt_like = cnt_like + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
 			if corm(result, &res) {
 				return res
 			}
 			myLike = true
 			cnt++
+			mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
 		}
 	}
 

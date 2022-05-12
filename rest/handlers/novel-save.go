@@ -171,6 +171,11 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
+		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
+		if corm(result, &res) {
+			return res
+		}
 
 		// step 2 단계 글 기존
 	} else {
@@ -257,6 +262,11 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 			TempYn:        _tempYn,
 		}
 		result = mdb.Save(&novelStep3)
+		if corm(result, &res) {
+			return res
+		}
+		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
+		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
 		if corm(result, &res) {
 			return res
 		}
@@ -350,6 +360,11 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 			TempYn:        _tempYn,
 		}
 		result = mdb.Save(&novelStep4)
+		if corm(result, &res) {
+			return res
+		}
+		seqKeyword := getSeqKeyword(4, int64(_seqNovelStep4))
+		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
 		if corm(result, &res) {
 			return res
 		}

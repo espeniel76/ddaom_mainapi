@@ -62,6 +62,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step4,
 			title,
 			UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
+			ns.updated_at,
 			1 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live,
 			false AS my_like,
@@ -79,6 +80,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step4,
 			ns1.title,
 			UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
+			ns2.updated_at,
 			2 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live,
 			false AS my_like,
@@ -97,6 +99,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 			0 AS seq_novel_step4,
 			ns1.title,
 			UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
+			ns3.updated_at,
 			3 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live,
 			false AS my_like,
@@ -115,6 +118,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 			ns4.seq_novel_step4,
 			ns1.title,
 			UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
+			ns4.updated_at,
 			4 AS step,
 			IF (k.end_date > NOW(), true, false) AS is_live,
 			false AS my_like,
@@ -124,7 +128,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
 		WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.temp_yn = false
 	)
-	ORDER BY created_at DESC
+	ORDER BY updated_at DESC
 	LIMIT ?, ?
 	`
 	result = sdb.

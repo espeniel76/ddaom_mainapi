@@ -71,6 +71,7 @@ type Keyword struct {
 	SeqKeyword int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword"`
 	Keyword    string    `gorm:"unique;type:varchar(1024)" json:"keyword"`
 	ActiveYn   bool      `gorm:"default:false" json:"active_yn"`
+	FinishYn   bool      `gorm:"default:false" json:"finish_yn"`
 	StartDate  time.Time `json:"start_date"`
 	EndDate    time.Time `json:"end_date"`
 	CntTotal   int64     `gorm:"default:0" json:"cnt_total"`
@@ -80,6 +81,7 @@ type Keyword struct {
 	Creator    string    `gorm:"type:varchar(50)" json:"creator"`
 	UpdatedAt  time.Time `json:"updated_at"`
 	Updator    string    `gorm:"type:varchar(50)" json:"updator"`
+	FinishedAt bool      `json:"finished_at"`
 }
 
 type KeywordToday struct {
@@ -203,18 +205,60 @@ type NovelStep4 struct {
 
 type NovelFinish struct {
 	SeqNovelFinish int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_finish"`
-	SeqNovelStep1  int64     `json:"seq_novel_step1"`
-	SeqNovelStep2  int64     `json:"seq_novel_step2"`
-	SeqNovelStep3  int64     `json:"seq_novel_step3"`
-	SeqNovelStep4  int64     `json:"seq_novel_step4"`
-	CntBookmark    int64     `gorm:"default:0" json:"cnt_bookmark"`
-	CntLike        int64     `gorm:"default:0" json:"cnt_like"`
+	SeqKeyword     int64     `gorm:"index" json:"seq_keyword"`
+	SeqImage       int64     `gorm:"index" json:"seq_image"`
+	SeqColor       int64     `gorm:"index" json:"seq_color"`
+	SeqGenre       int64     `gorm:"index" json:"seq_genre"`
 	SeqMemberStep1 int64     `gorm:"default:0" json:"seq_member_step1"`
 	SeqMemberStep2 int64     `gorm:"default:0" json:"seq_member_step2"`
 	SeqMemberStep3 int64     `gorm:"default:0" json:"seq_member_step3"`
 	SeqMemberStep4 int64     `gorm:"default:0" json:"seq_member_step4"`
+	Title          string    `gorm:"unique;type:varchar(1024)" json:"title"`
+	Content1       string    `gorm:"type:varchar(5120)" json:"content1"`
+	Content2       string    `gorm:"type:varchar(5120)" json:"content2"`
+	Content3       string    `gorm:"type:varchar(5120)" json:"content3"`
+	Content4       string    `gorm:"type:varchar(5120)" json:"content4"`
+	CntLike        int64     `gorm:"default:0" json:"cnt_like"`
+	CntBookmark    int64     `gorm:"default:0" json:"cnt_bookmark"`
+	CntView        int64     `gorm:"default:0" json:"cnt_view"`
+	SeqNovelStep1  int64     `json:"seq_novel_step1"`
+	SeqNovelStep2  int64     `json:"seq_novel_step2"`
+	SeqNovelStep3  int64     `json:"seq_novel_step3"`
+	SeqNovelStep4  int64     `json:"seq_novel_step4"`
 	ActiveYn       bool      `gorm:"default:true" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type NovelFinishBatchRunLog struct {
+	SeqNovelFinishBatchRunLog int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_finish_batch_run_log"`
+	CreatedAt                 time.Time `json:"created_at"`
+	UpdatedAt                 time.Time `json:"updated_at"`
+}
+
+type KeywordChoiceFirst struct {
+	SeqKeywordChoiceFirst int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword_choice_first"`
+	SeqKeyword            int64     `gorm:"index:uk_choice_first,unique" json:"seq_keyword"`
+	SeqNovelStep1         int64     `gorm:"index:uk_choice_first,unique" json:"seq_novel_step1"`
+	SeqNovelStep2         int64     `gorm:"default:0" json:"seq_novel_step2"`
+	SeqNovelStep3         int64     `gorm:"default:0" json:"seq_novel_step3"`
+	SeqNovelStep4         int64     `gorm:"default:0" json:"seq_novel_step4"`
+	CntLikeStep1          int64     `gorm:"default:0" json:"cnt_like_step1"`
+	CntLikeStep2          int64     `gorm:"default:0" json:"cnt_like_step2"`
+	CntLikeStep3          int64     `gorm:"default:0" json:"cnt_like_step3"`
+	CntLikeStep4          int64     `gorm:"default:0" json:"cnt_like_step4"`
+	CntLikeTotal          int64     `gorm:"default:0" json:"cnt_like_total"`
+	SuccessYn             bool      `gorm:"default:false" json:"success_yn"`
+	FinishYn              bool      `gorm:"default:false" json:"finish_yn"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+}
+
+type KeywordChoiceSecond struct {
+	SeqKeywordChoiceSecond int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword_choice_second"`
+	SeqKeywordChoiceFirst  int64     `gorm:"index" json:"seq_keyword_choice_first"`
+	SeqNovelFinish         int64     `gorm:"index" json:"seq_novel_finish"`
+	CreatedAt              time.Time `json:"created_at"`
 }
 
 type ServiceInquiry struct {
