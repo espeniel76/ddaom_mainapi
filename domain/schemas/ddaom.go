@@ -213,6 +213,10 @@ type NovelFinish struct {
 	SeqMemberStep2 int64     `gorm:"default:0" json:"seq_member_step2"`
 	SeqMemberStep3 int64     `gorm:"default:0" json:"seq_member_step3"`
 	SeqMemberStep4 int64     `gorm:"default:0" json:"seq_member_step4"`
+	NickNameStep1  string    `gorm:"type:varchar(50)" json:"nick_name_step1"`
+	NickNameStep2  string    `gorm:"type:varchar(50)" json:"nick_name_step2"`
+	NickNameStep3  string    `gorm:"type:varchar(50)" json:"nick_name_step3"`
+	NickNameStep4  string    `gorm:"type:varchar(50)" json:"nick_name_step4"`
 	Title          string    `gorm:"unique;type:varchar(1024)" json:"title"`
 	Content1       string    `gorm:"type:varchar(5120)" json:"content1"`
 	Content2       string    `gorm:"type:varchar(5120)" json:"content2"`

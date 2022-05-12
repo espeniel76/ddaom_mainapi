@@ -30,9 +30,8 @@ if (!$keyword) {
 }
 
 // 추출이 되든 안되든, 1회만 실행 시켜야 하므로 플래그 업데이트
-// $sql = "UPDATE keywords SET finish_yn = true, finished_at = NOW() WHERE seq_keyword = {$keyword["seq_keyword"]}";
-// mysqli_query($conn, $sql);
-// 일단 주석처리
+$sql = "UPDATE keywords SET finish_yn = true, finished_at = NOW() WHERE seq_keyword = {$keyword["seq_keyword"]}";
+mysqli_query($conn, $sql);
 
 $list = [];
 
@@ -157,7 +156,8 @@ if ($isRun) {
 	}
 
 	// 6. 실 데이터 넣기 작업
-	for ($i = 0; $i < sizeof($listTmp); $i++) {
+	$cntFinish = sizeof($listTmp);
+	for ($i = 0; $i < $cntFinish; $i++) {
 		$oChoice = $listTmp[$i];
 		$oNovelInfo = $list[$oChoice["seq_novel_step1"]];
 
@@ -170,6 +170,10 @@ if ($isRun) {
 		$seq_member_step2 = $oNovelInfo["2"]["seq_member"];
 		$seq_member_step3 = $oNovelInfo["3"]["seq_member"];
 		$seq_member_step4 = $oNovelInfo["4"]["seq_member"];
+		$nick_name_step1 = getNickName($conn, $seq_member_step1);
+		$nick_name_step2 = getNickName($conn, $seq_member_step2);
+		$nick_name_step3 = getNickName($conn, $seq_member_step3);
+		$nick_name_step4 = getNickName($conn, $seq_member_step4);
 		$title = $oNovelInfo["1"]["title"];
 		$content1 = $oNovelInfo["1"]["content"];
 		$content2 = $oNovelInfo["2"]["content"];
@@ -197,6 +201,10 @@ if ($isRun) {
 			seq_member_step2,
 			seq_member_step3,
 			seq_member_step4,
+			nick_name_step1,
+			nick_name_step2,
+			nick_name_step3,
+			nick_name_step4,
 			title,
 			content1,
 			content2,
@@ -221,6 +229,10 @@ if ($isRun) {
 			{$seq_member_step2},
 			{$seq_member_step3},
 			{$seq_member_step4},
+			'{$nick_name_step1}',
+			'{$nick_name_step2}',
+			'{$nick_name_step3}',
+			'{$nick_name_step4}',
 			'{$title}',
 			'{$content1}',
 			'{$content2}',
@@ -257,6 +269,10 @@ if ($isRun) {
 		$sql = "UPDATE keyword_choice_firsts SET finish_yn = true, updated_at = NOW() WHERE seq_keyword_choice_first = {$oChoice["seq_keyword_choice_first"]}";
 		mysqli_query($conn, $sql);
 	}
+
+	// 6.4. count finish novel
+	$sql = "UPDATE keywords SET cnt_finish = {$cntFinish} WHERE seq_keyword = {$keyword["seq_keyword"]}";
+	mysqli_query($conn, $sql);
 }
 
 $sql = "UPDATE novel_finish_batch_run_logs SET updated_at = NOW() WHERE seq_novel_finish_batch_run_log = {$lastInsertId}";
@@ -268,4 +284,12 @@ exit();
 function println($s)
 {
 	echo "{$s}\n";
+}
+
+function getNickName($conn, $seqMember)
+{
+	$sql = "SELECT nick_name FROM member_details WHERE seq_member = {$seqMember}";
+	$result = mysqli_query($conn, $sql);
+	$o = mysqli_fetch_assoc($result);
+	return $o["nick_name"];
 }

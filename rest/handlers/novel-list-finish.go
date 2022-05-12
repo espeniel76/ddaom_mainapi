@@ -43,19 +43,23 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	var query bytes.Buffer
 	query.WriteString(`
 	SELECT
-		nf.seq_novel_finish,
-		ns.seq_genre,
-		ns.seq_image,
-		ns.seq_color,
-		ns.title,
+		seq_novel_finish,
+		seq_genre,
+		seq_image,
+		seq_color,
+		title,
 		true AS my_bookmark
 	FROM novel_finishes nf
-	INNER JOIN novel_step1 ns ON nf.seq_novel_step1 = ns.seq_novel_step1
-	WHERE nf.active_yn = true`)
+	WHERE active_yn = true`)
 	if _seqGenre > 0 {
-		query.WriteString(" AND ns.seq_genre = " + strconv.Itoa(int(_seqGenre)))
+		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}
-	query.WriteString(" ORDER BY nf.seq_novel_finish DESC")
+	switch _sort {
+	case "RECENT":
+		query.WriteString(" ORDER BY seq_novel_finish DESC")
+	case "LIKE":
+		query.WriteString(" ORDER BY cnt_like DESC")
+	}
 	query.WriteString(" LIMIT ?, ?")
 	result = sdb.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListFinishRes.List)
 	if corm(result, &res) {
