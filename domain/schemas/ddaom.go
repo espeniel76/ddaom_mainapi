@@ -313,3 +313,27 @@ type Faq struct {
 	Creator        string    `gorm:"type:varchar(50)" json:"creator"`
 	Updator        string    `gorm:"type:varchar(50)" json:"updator"`
 }
+
+type NovelDelete struct {
+	SeqNovel     int64     `gorm:"index" json:"seq_novel"`
+	Step         int8      `gorm:"index" json:"step"`
+	SeqKeyword   int64     `gorm:"index" json:"seq_keyword"`
+	SeqImage     int64     `gorm:"index" json:"seq_image"`
+	SeqColor     int64     `gorm:"index" json:"seq_color"`
+	SeqGenre     int64     `gorm:"index" json:"seq_genre"`
+	SeqMember    int64     `gorm:"index" json:"seq_member"`
+	Title        string    `gorm:"unique;type:varchar(1024)" json:"title"`
+	Content      string    `gorm:"type:varchar(5120)" json:"content"`
+	CntLike      int64     `gorm:"default:0" json:"cnt_like"`
+	CntView      int64     `gorm:"default:0" json:"cnt_view"`
+	CntStep2     int64     `gorm:"default:0" json:"cnt_step2"`
+	CntStep3     int64     `gorm:"default:0" json:"cnt_step3"`
+	CntStep4     int64     `gorm:"default:0" json:"cnt_step4"`
+	ActiveYn     bool      `gorm:"default:true" json:"active_yn"`
+	TempYn       bool      `gorm:"default:false" json:"temp_yn"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	DeletedAt    time.Time `json:"deleted_at"`
+	TypeDelete   int8      `json:"type_delete"`
+	ReasonDelete string    `gorm:"type:varchar(1024)" json:"reason_delete"`
+}

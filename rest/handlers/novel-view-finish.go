@@ -23,6 +23,9 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	SELECT
 		seq_novel_finish,
 		seq_novel_step1,
+		seq_novel_step2,
+		seq_novel_step3,
+		seq_novel_step4,
 		title,
 		seq_genre,
 		seq_keyword ,
@@ -62,9 +65,9 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	myLike := false
 	myBookmark := false
 	ldb.Model(schemas.MemberLikeStep1{}).Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).Count(&cnt1)
-	ldb.Model(schemas.MemberLikeStep2{}).Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).Count(&cnt2)
-	ldb.Model(schemas.MemberLikeStep3{}).Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).Count(&cnt3)
-	ldb.Model(schemas.MemberLikeStep4{}).Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).Count(&cnt4)
+	ldb.Model(schemas.MemberLikeStep2{}).Where("seq_member = ? AND seq_novel_step2 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep2).Count(&cnt2)
+	ldb.Model(schemas.MemberLikeStep3{}).Where("seq_member = ? AND seq_novel_step3 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep3).Count(&cnt3)
+	ldb.Model(schemas.MemberLikeStep4{}).Where("seq_member = ? AND seq_novel_step4 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep4).Count(&cnt4)
 	if cnt1 > 0 || cnt2 > 0 || cnt3 > 0 || cnt4 > 0 {
 		myLike = true
 	}
@@ -139,6 +142,9 @@ type NovelViewFinishData struct {
 	SeqNovelFinish int64     `json:"seq_novel_finish"`
 	Title          string    `json:"title"`
 	SeqNovelStep1  int64     `json:"seq_novel_step1"`
+	SeqNovelStep2  int64     `json:"seq_novel_step2"`
+	SeqNovelStep3  int64     `json:"seq_novel_step3"`
+	SeqNovelStep4  int64     `json:"seq_novel_step4"`
 	SeqGenre       int64     `json:"seq_genre"`
 	SeqKeyword     int64     `json:"seq_keyword"`
 	SeqImage       int64     `json:"seq_image"`
