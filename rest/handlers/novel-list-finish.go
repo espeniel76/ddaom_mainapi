@@ -48,7 +48,7 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 		seq_image,
 		seq_color,
 		title,
-		true AS my_bookmark
+		false AS my_bookmark
 	FROM novel_finishes nf
 	WHERE active_yn = true`)
 	if _seqGenre > 0 {
@@ -64,6 +64,32 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	result = sdb.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListFinishRes.List)
 	if corm(result, &res) {
 		return res
+	}
+
+	//finish seq 구한다
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if userToken != nil {
+		var seqNovelFinishes []int64
+		var listMy []int64
+		for _, v := range novelListFinishRes.List {
+			seqNovelFinishes = append(seqNovelFinishes, v.SeqNovelFinish)
+		}
+		fmt.Println(seqNovelFinishes)
+		ldb := GetMyLogDb(userToken.Allocated)
+		ldb.Model(schemas.MemberBookmark{}).
+			Where("seq_novel_finish IN (?) AND bookmark_yn = true", seqNovelFinishes).
+			Select("seq_novel_finish").
+			Scan(&listMy)
+		// fmt.Println(listMy)
+		for i := 0; i < len(novelListFinishRes.List); i++ {
+			o := novelListFinishRes.List[i]
+			for _, v := range listMy {
+				if o.SeqNovelFinish == v {
+					novelListFinishRes.List[i].MyBookmark = true
+					break
+				}
+			}
+		}
 	}
 
 	res.Data = novelListFinishRes

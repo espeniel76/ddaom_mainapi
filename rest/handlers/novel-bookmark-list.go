@@ -28,21 +28,21 @@ func NovelBookmarkList(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	slaveDb := db.List[define.DSN_SLAVE]
-	myLogDb := GetMyLogDb(userToken.Allocated)
+	sdb := db.List[define.DSN_SLAVE]
+	ldb := GetMyLogDb(userToken.Allocated)
 
 	var list []int64
-	result := myLogDb.
+	result := ldb.
 		Model(schemas.MemberBookmark{}).
 		Select("seq_novel_finish").
-		Where("seq_member = ?", userToken.SeqMember).
+		Where("seq_member = ? AND bookmark_yn = true", userToken.SeqMember).
 		Scan(&list)
 	if corm(result, &res) {
 		return res
 	}
 
 	var totalData int64
-	result = slaveDb.
+	result = sdb.
 		Model(schemas.NovelFinish{}).
 		Where("seq_novel_finish IN (?)", list).
 		Count(&totalData)
@@ -68,7 +68,7 @@ func NovelBookmarkList(req *domain.CommonRequest) domain.CommonResponse {
 	ORDER BY nf.created_at DESC
 	LIMIT ?, ?
 	`
-	result = slaveDb.
+	result = sdb.
 		Raw(query, list, limitStart, _sizePerPage).
 		Scan(&novelBookmarkListRes.List)
 	if corm(result, &res) {
@@ -108,8 +108,8 @@ func NovelBookmarkDelete(req *domain.CommonRequest) domain.CommonResponse {
 	tmp = strings.ReplaceAll(tmp, "[", "")
 	tmp = strings.ReplaceAll(tmp, "]", "")
 	tmpList := strings.Split(tmp, " ")
-	myLogDb := GetMyLogDb(userToken.Allocated)
-	result := myLogDb.
+	ldb := GetMyLogDb(userToken.Allocated)
+	result := ldb.
 		Where("seq_member = ? AND seq_novel_finish IN (?)", userToken.SeqMember, tmpList).
 		Delete(&schemas.MemberBookmark{})
 	if corm(result, &res) {

@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"strconv"
 )
 
@@ -18,6 +19,8 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 	_seqNovelStep2, _ := strconv.Atoi(req.Vars["seq_novel_step2"])
+	fmt.Println(_seqNovelStep2)
+
 	myLike := false
 	var cnt int64
 	var scanCount int64

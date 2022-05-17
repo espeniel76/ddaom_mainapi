@@ -159,10 +159,6 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 				seqNovelStep4s = append(seqNovelStep4s, v.SeqNovelStep4)
 			}
 		}
-		// fmt.Println(seqNovelStep1s)
-		// fmt.Println(seqNovelStep2s)
-		// fmt.Println(seqNovelStep3s)
-		// fmt.Println(seqNovelStep4s)
 		ldb := GetMyLogDb(userToken.Allocated)
 		mls1 := []schemas.MemberLikeStep1{}
 		mls2 := []schemas.MemberLikeStep2{}
@@ -173,10 +169,6 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 		ldb.Model(&mls3).Select("seq_novel_step3, like_yn").Where("seq_member = ? AND seq_novel_step3 IN (?)", userToken.SeqMember, seqNovelStep3s).Scan(&mls3)
 		ldb.Model(&mls4).Select("seq_novel_step4, like_yn").Where("seq_member = ? AND seq_novel_step4 IN (?)", userToken.SeqMember, seqNovelStep4s).Scan(&mls4)
 
-		// fmt.Println(mls1)
-		// fmt.Println(mls2)
-		// fmt.Println(mls3)
-		// fmt.Println(mls4)
 		for _, v := range mls1 {
 			if v.LikeYn {
 				for i := 0; i < len(novelMyListCompleteRes.List); i++ {

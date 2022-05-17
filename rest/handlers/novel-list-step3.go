@@ -5,6 +5,7 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"ddaom/tools"
 	"time"
 )
@@ -12,7 +13,12 @@ import (
 func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
@@ -63,9 +69,10 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	isBool := false
+	var seqs []int64
 	for i := 0; i < len(step3ResTmp); i++ {
 		o := step3ResTmp[i]
-		isBool = !isBool
+		seqs = append(seqs, o.SeqNovelStep3)
 		novelListStep3Res.List = append(novelListStep3Res.List, struct {
 			SeqNovelStep3 int64  "json:\"seq_novel_step3\""
 			SeqMember     int64  "json:\"seq_member\""
@@ -83,6 +90,25 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 			MyLike:        isBool,
 			Content:       o.Content,
 		})
+	}
+
+	if userToken != nil {
+		var listSeq []int64
+		ldb := GetMyLogDb(userToken.Allocated)
+		ldb.Model(schemas.MemberLikeStep3{}).
+			Select("seq_novel_step3").
+			Where("seq_member = ? AND seq_novel_step3 IN (?) AND like_yn = true", userToken.SeqMember, seqs).
+			Scan(&listSeq)
+
+		for i := 0; i < len(novelListStep3Res.List); i++ {
+			o := novelListStep3Res.List[i]
+			for _, v := range listSeq {
+				if v == o.SeqNovelStep3 {
+					novelListStep3Res.List[i].MyLike = true
+					break
+				}
+			}
+		}
 	}
 
 	res.Data = novelListStep3Res

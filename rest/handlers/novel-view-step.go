@@ -5,17 +5,20 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 )
 
 func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	// userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	// if err != nil {
-	// 	res.ResultCode = define.INVALID_TOKEN
-	// 	res.ErrorDesc = err.Error()
-	// 	return res
-	// }
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+
+	fmt.Println("호출됨?")
 
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
@@ -32,7 +35,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		o.MyLike = true
+		o.MyLike = getMyLike(userToken, 1, _seqNovelStep1)
 		o.Step = 1
 	} else if _seqNovelStep2 > 0 {
 		query = `
@@ -49,7 +52,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		o.MyLike = true
+		o.MyLike = getMyLike(userToken, 2, _seqNovelStep2)
 		o.Step = 2
 	} else if _seqNovelStep3 > 0 {
 		query = `
@@ -66,7 +69,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		o.MyLike = true
+		o.MyLike = getMyLike(userToken, 3, _seqNovelStep3)
 		o.Step = 3
 	} else if _seqNovelStep4 > 0 {
 		query = `
@@ -83,7 +86,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		o.MyLike = true
+		o.MyLike = getMyLike(userToken, 4, _seqNovelStep4)
 		o.Step = 4
 	}
 	res.Data = o
