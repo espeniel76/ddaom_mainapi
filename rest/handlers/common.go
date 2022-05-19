@@ -177,3 +177,16 @@ func getSeqKeyword(step int8, seqNovel int64) int64 {
 	}
 	return seq
 }
+
+func isAbleKeyword(seqKeyword int64) bool {
+	sdb := db.List[define.DSN_SLAVE]
+	keyword := schemas.Keyword{}
+	sdb.Model(&keyword).
+		Where("seq_keyword = ? AND active_yn = true AND NOW() BETWEEN start_date AND end_date", seqKeyword).
+		Scan(&keyword)
+	if keyword.SeqKeyword > 0 {
+		return true
+	} else {
+		return false
+	}
+}

@@ -12,6 +12,7 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	refreshToken := Cp(req.Parameters, "refresh_token")
+	pushToken := Cp(req.Parameters, "push_token")
 	verifyResult, err := define.VerifyToken(refreshToken, define.JWT_REFRESH_SECRET)
 	if err != nil {
 		res.ResultCode = verifyResult
@@ -25,6 +26,11 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
 		return res
+	}
+
+	mdb := db.List[define.DSN_MASTER]
+	if pushToken != "<nil>" || pushToken != "" {
+		mdb.Model(schemas.Member{}).Where("seq_member = ?", userToken.SeqMember).Update("push_token", pushToken)
 	}
 
 	// 2. 신규 access_token 과 refresh_token 을 발급한다.
@@ -42,9 +48,8 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	masterDB := db.List[define.DSN_MASTER]
 	memberDetail := schemas.MemberDetail{}
-	result := masterDB.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
+	result := mdb.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()

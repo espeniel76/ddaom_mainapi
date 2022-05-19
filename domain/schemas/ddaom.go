@@ -15,6 +15,7 @@ type Member struct {
 	AllocatedDb     int8      `json:"allocted_db"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+	PushToken       string    `gorm:"type:varchar(5120)" json:"push_token"`
 }
 
 type MemberDetail struct {
@@ -67,6 +68,13 @@ type MemberAdminLoginLog struct {
 }
 
 // 주저에
+type KeywordAlarmLog struct {
+	SeqKeywordAlarmLog int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword_alarm_log"`
+	SeqKeyword         string    `gorm:"index" json:"seq_keyword"`
+	CreatedAt          time.Time `json:"created_at"`
+	CntPush            int64     `gorm:"default:0" json:"cnt_push"`
+}
+
 type Keyword struct {
 	SeqKeyword int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_keyword"`
 	Keyword    string    `gorm:"unique;type:varchar(1024)" json:"keyword"`
@@ -336,4 +344,16 @@ type NovelDelete struct {
 	DeletedAt    time.Time `json:"deleted_at"`
 	TypeDelete   int8      `json:"type_delete"`
 	ReasonDelete string    `gorm:"type:varchar(1024)" json:"reason_delete"`
+}
+
+type Alarm struct {
+	SeqAlarm   int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_alarm"`
+	SeqMember  int64     `gorm:"index" json:"seq_member"`
+	Title      string    `gorm:"type:varchar(50)" json:"title"`
+	Content    string    `gorm:"type:varchar(1024)" json:"content"`
+	TypeAlarm  int8      `json:"type_alarm"`
+	ValueAlarm int       `json:"value_alarm"`
+	CreatedAt  time.Time `json:"created_at"`
+	IsRead     bool      `gorm:"default:false" json:"is_read"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }

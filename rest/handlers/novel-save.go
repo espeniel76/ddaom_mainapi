@@ -60,6 +60,12 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	// 가용 키워드 검사
+	if isAbleKeyword(_seqKeyword) != true {
+		res.ResultCode = define.INACTIVE_KEYWORD
+		return res
+	}
+
 	if _seqNovelStep1 == 0 { // 신규 작성
 		novelWriteStep1 := schemas.NovelStep1{
 			SeqKeyword: _seqKeyword,
@@ -71,6 +77,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			Content:    _content,
 			TempYn:     _tempYn,
 		}
+
 		result = mdb.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
 		if corm(result, &res) {
 			return res
@@ -149,6 +156,13 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	// step 2 단계 글 신규
 	if _seqNovelStep2 == 0 {
+		// 가용 키워드 검사
+		seqKeyword := getSeqKeyword(1, int64(_seqNovelStep1))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
+		}
+
 		result = mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
 		if corm(result, &res) {
 			return res
@@ -171,7 +185,6 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
 		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
 		if corm(result, &res) {
 			return res
@@ -179,6 +192,11 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 		// step 2 단계 글 기존
 	} else {
+		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
+		}
 
 		novelStep := schemas.NovelStep2{}
 		result := mdb.Model(&novelStep).Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep)
@@ -232,6 +250,12 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if _seqNovelStep3 == 0 {
+		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
+		}
+
 		result = mdb.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", _seqNovelStep2).Count(&cnt)
 		if corm(result, &res) {
 			return res
@@ -265,12 +289,16 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
 		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
 		if corm(result, &res) {
 			return res
 		}
 	} else {
+		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
+		}
 
 		novelStep := schemas.NovelStep3{}
 		result := mdb.Model(&novelStep).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep)
@@ -325,6 +353,12 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if _seqNovelStep4 == 0 {
+		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
+		}
+
 		result = mdb.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Count(&cnt)
 		if corm(result, &res) {
 			return res
@@ -363,13 +397,16 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		seqKeyword := getSeqKeyword(4, int64(_seqNovelStep4))
 		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
 		if corm(result, &res) {
 			return res
 		}
 	} else {
-
+		seqKeyword := getSeqKeyword(4, int64(_seqNovelStep4))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
+		}
 		novelStep := schemas.NovelStep4{}
 		result := mdb.Model(&novelStep).Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&novelStep)
 		if corm(result, &res) {

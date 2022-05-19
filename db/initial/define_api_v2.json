@@ -100,6 +100,11 @@
 				"required": true
 			},
 			{
+				"name": "push_token",
+				"type": "string",
+				"required": false
+			},
+			{
 				"name": "sns_type",
 				"type": "string",
 				"required": true
@@ -127,6 +132,11 @@
 		"require_parameters": [
 			{
 				"name": "refresh_token",
+				"type": "string",
+				"required": true
+			},
+			{
+				"name": "push_token",
 				"type": "string",
 				"required": true
 			}

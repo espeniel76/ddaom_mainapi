@@ -18,6 +18,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	email := Cp(req.Parameters, "email")
 	token := Cp(req.Parameters, "token")
+	pushToken := Cp(req.Parameters, "push_token")
 	snsType := Cp(req.Parameters, "sns_type")
 	var result *gorm.DB
 	nickName := ""
@@ -40,9 +41,10 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	isExist := db.ExistRow(mdb, "members", "email", email)
 	member := &schemas.Member{
-		Email:   email,
-		Token:   token,
-		SnsType: snsType,
+		Email:     email,
+		Token:     token,
+		SnsType:   snsType,
+		PushToken: pushToken,
 	}
 	if !isExist {
 		result = mdb.Create(member)
@@ -53,6 +55,13 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		result = mdb.Find(&member, "email", email)
 		if corm(result, &res) {
 			return res
+		}
+
+		if pushToken != "<nil>" || pushToken != "" {
+			result = mdb.Model(&member).Where("seq_member = ?", member.SeqMember).Update("push_token", pushToken)
+			if corm(result, &res) {
+				return res
+			}
 		}
 
 		memberDetail := schemas.MemberDetail{}

@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"time"
 )
 
@@ -87,6 +88,12 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 				Size:        handler.Size,
 			}
 		}
+
+		fmt.Println(_nickName)
+		fmt.Println(_email)
+		fmt.Println(isExistImage)
+		fmt.Println(_isDefaultImage)
+		fmt.Println(profilePhoto)
 
 		if isExistImage {
 			fullPath, err = SaveFile("profile", &profilePhoto)
