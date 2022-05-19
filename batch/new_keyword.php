@@ -57,7 +57,7 @@ for ($i = 0; $i < sizeof($listToken); $i++) {
 	// 4. 푸시 테이블 삽입
 	$sql = "INSERT INTO alarms (seq_member, title, content, type_alarm, value_alarm, created_at)
 	VALUES ({$o["seq_member"]}, '따옴', '{$body}', 1, {$newKeyword["seq_keyword"]}, NOW())";
-	echo "{$sql}\n\r";
+	// echo "{$sql}\n\r";
 	mysqli_query($conn, $sql);
 	$seqAlarm = mysqli_insert_id($conn);
 

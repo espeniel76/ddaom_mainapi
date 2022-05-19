@@ -95,5 +95,10 @@ func NovelLikeStep3(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_like"] = cnt
 	res.Data = data
 
+	// push 날리기
+	if myLike {
+		pushLike(3, int64(_seqNovelStep3), userToken.SeqMember)
+	}
+
 	return res
 }

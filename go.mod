@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/appleboy/go-fcm v0.1.5 // indirect
 	github.com/gomodule/redigo v1.8.8 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect

@@ -178,6 +178,39 @@ func getSeqKeyword(step int8, seqNovel int64) int64 {
 	return seq
 }
 
+func getNovel(step int8, seqNovel int64) GetNovelRes {
+	sdb := db.List[define.DSN_SLAVE]
+	m := GetNovelRes{}
+	sql := ""
+	switch step {
+	case 1:
+		sql = `SELECT ns1.title, ns1.seq_member, m.push_token, md.is_night_push
+		FROM novel_step1 ns1 INNER JOIN members m ON ns1.seq_member = m.seq_member INNER JOIN member_details md ON ns1.seq_member = md.seq_member
+		WHERE seq_novel_step1 = ? AND md.is_liked = true`
+	case 2:
+		sql = `SELECT ns1.title, ns2.seq_member, m.push_token, md.is_night_push
+		FROM novel_step2 ns2 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 INNER JOIN members m ON ns2.seq_member = m.seq_member INNER JOIN member_details md ON ns2.seq_member = md.seq_member
+		WHERE ns2.seq_novel_step2 = ? AND md.is_liked = true`
+	case 3:
+		sql = `SELECT ns1.title, ns3.seq_member, m.push_token, md.is_night_push
+		FROM novel_step3 ns3 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 INNER JOIN members m ON ns3.seq_member = m.seq_member INNER JOIN member_details md ON ns3.seq_member = md.seq_member
+		WHERE ns3.seq_novel_step3 = ? AND md.is_liked = true`
+	case 4:
+		sql = `SELECT ns1.title, ns4.seq_member, m.push_token, md.is_night_push
+		FROM novel_step4 ns4 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 INNER JOIN members m ON ns4.seq_member = m.seq_member INNER JOIN member_details md ON ns4.seq_member = md.seq_member
+		WHERE ns4.seq_novel_step4 = ? AND md.is_liked = true`
+	}
+	sdb.Raw(sql, seqNovel).Scan(&m)
+	return m
+}
+
+type GetNovelRes struct {
+	Title       string `json:"title"`
+	SeqMember   int64  `json:"seq_member"`
+	PushToken   string `json:"push_token"`
+	IsNightPush bool   `json:"is_night_push"`
+}
+
 func isAbleKeyword(seqKeyword int64) bool {
 	sdb := db.List[define.DSN_SLAVE]
 	keyword := schemas.Keyword{}
@@ -189,4 +222,37 @@ func isAbleKeyword(seqKeyword int64) bool {
 	} else {
 		return false
 	}
+}
+
+func getUserInfo(seqMember int64) schemas.MemberDetail {
+	sdb := db.List[define.DSN_SLAVE]
+	md := schemas.MemberDetail{}
+	sdb.Model(&md).Where("seq_member = ?", seqMember).Scan(&md)
+	return md
+}
+
+func getUserInfoPush(seqMember int64) GetUserInfoPushRes {
+	sdb := db.List[define.DSN_SLAVE]
+	res := GetUserInfoPushRes{}
+	sql := `SELECT
+		m.seq_member,
+		m.push_token,
+		md.is_liked,
+		md.is_finished,
+		md.is_new_follower,
+		md.is_new_following,
+		md.is_night_push
+	FROM members m INNER JOIN member_details md ON m.seq_member = md.seq_member WHERE m.seq_member = ?`
+	sdb.Raw(sql, seqMember).Scan(&res)
+	return res
+}
+
+type GetUserInfoPushRes struct {
+	SeqMember      int64  `json:"seq_member"`
+	PushToken      string `json:"push_token"`
+	IsLiked        bool   `json:"is_liked"`
+	IsFinished     bool   `json:"is_finished"`
+	IsNewFollower  bool   `json:"is_new_follower"`
+	IsNewFollowing bool   `json:"is_new_following"`
+	IsNightPush    bool   `json:"is_night_push"`
 }

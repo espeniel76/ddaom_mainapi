@@ -5,7 +5,12 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
+	"log"
 	"strconv"
+	"time"
+
+	"github.com/appleboy/go-fcm"
 )
 
 func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
@@ -101,5 +106,74 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_like"] = cnt
 	res.Data = data
 
+	// push 날리기
+	if myLike {
+		pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
+	}
+
 	return res
+}
+
+func pushLike(step int8, seqNovel int64, seqMember int64) {
+
+	info := getNovel(step, seqNovel)
+	isNight := false
+	if info.SeqMember > 0 {
+
+		// 야간 푸쉬는 받지 않는다
+		if info.IsNightPush == false {
+			// 낮인지 체크
+			now := time.Now()
+			if now.Hour() >= 9 && now.Hour() <= 20 {
+				isNight = false
+			} else {
+				isNight = true
+			}
+		}
+		fmt.Println(isNight)
+
+		if !isNight {
+			userInfoFrom := getUserInfo(seqMember)
+
+			// 1. 푸쉬 테이블 삽입
+			alarm := schemas.Alarm{
+				SeqMember:  info.SeqMember,
+				Title:      "따옴",
+				TypeAlarm:  2,
+				ValueAlarm: int(seqNovel),
+				Step:       step,
+				Content:    "\"" + info.Title + " - step" + fmt.Sprintf("%d", step) + "\"를 " + userInfoFrom.NickName + " 님이 좋아합니다.",
+			}
+			mdb := db.List[define.DSN_MASTER]
+			mdb.Create(&alarm)
+
+			msg := &fcm.Message{
+				To: info.PushToken,
+				Data: map[string]interface{}{
+					"seq_alarm":   alarm.SeqAlarm,
+					"type_alarm":  2,
+					"value_alarm": seqNovel,
+					"step":        step,
+				},
+				Notification: &fcm.Notification{
+					Title: alarm.Title,
+					Body:  alarm.Content,
+				},
+			}
+
+			// Create a FCM client to send the message.
+			client, err := fcm.NewClient(define.PUSH_SERVER_KEY)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			// Send the message and receive the response without retries.
+			response, err := client.Send(msg)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			log.Printf("%#v\n", response)
+		}
+	}
 }

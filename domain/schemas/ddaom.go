@@ -353,6 +353,7 @@ type Alarm struct {
 	Content    string    `gorm:"type:varchar(1024)" json:"content"`
 	TypeAlarm  int8      `json:"type_alarm"`
 	ValueAlarm int       `json:"value_alarm"`
+	Step       int8      `gorm:"default:0" json:"step"`
 	CreatedAt  time.Time `json:"created_at"`
 	IsRead     bool      `gorm:"default:false" json:"is_read"`
 	UpdatedAt  time.Time `json:"updated_at"`

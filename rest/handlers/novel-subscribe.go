@@ -5,7 +5,11 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"log"
 	"strconv"
+	"time"
+
+	"github.com/appleboy/go-fcm"
 )
 
 func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
@@ -143,61 +147,77 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	// if memberSubscribe.SeqMemberSubscribe == 0 { // 존재하지 않음
-	// 	// 1. 로그넣기
-	// 	result = ldbMe.Create(&schemas.MemberSubscribe{
-	// 		SeqMember:         userToken.SeqMember,
-	// 		SeqMemberOpponent: int64(_seqMember),
-	// 		Status:            define.FOLLOWING,
-	// 	})
-	// 	if corm(result, &res) {
-	// 		return res
-	// 	}
-
-	// 	// 2. 구독 카운트 업데이트
-	// 	result = mdb.Exec("UPDATE member_details SET cnt_subscribe = cnt_subscribe + 1 WHERE seq_member = ?", _seqMember)
-	// 	if corm(result, &res) {
-	// 		return res
-	// 	}
-	// 	mySubscribe = true
-	// } else { // 존재함
-	// 	// 1. 그냥 삭제
-	// 	result = ldbMe.Where("seq_member = ? AND seq_member_opponent = ?", userToken.SeqMember, _seqMember).Delete(&memberSubscribe)
-	// 	if corm(result, &res) {
-	// 		return res
-	// 	}
-	// 	result = mdb.Exec("UPDATE member_details SET cnt_subscribe = cnt_subscribe - 1 WHERE seq_member = ?", _seqMember)
-	// 		if corm(result, &res) {
-	// 			return res
-	// 		}
-	// 		mySubscribe = false
-
-	// 	if memberSubscribe.SubscribeYn {
-	// 		result = ldbMe.Model(&schemas.MemberSubscribe{}).
-	// 			Where("seq_member = ? AND seq_member_following = ?", userToken.SeqMember, _seqMember).
-	// 			Update("subscribe_yn", false)
-	// 		if corm(result, &res) {
-	// 			return res
-	// 		}
-
-	// 	} else {
-	// 		result = ldbMe.Model(&schemas.MemberSubscribe{}).
-	// 			Where("seq_member = ? AND seq_member_following = ?", userToken.SeqMember, _seqMember).
-	// 			Update("subscribe_yn", true)
-	// 		if corm(result, &res) {
-	// 			return res
-	// 		}
-	// 		result = mdb.Exec("UPDATE member_details SET cnt_subscribe = cnt_subscribe + 1 WHERE seq_member = ?", _seqMember)
-	// 		if corm(result, &res) {
-	// 			return res
-	// 		}
-	// 		mySubscribe = true
-	// 	}
-	// }
-
 	data := make(map[string]string)
 	data["my_subscribe"] = mySubscribe
 	res.Data = data
 
+	switch mySubscribe {
+	case define.FOLLOWING:
+		fallthrough
+	case define.BOTH:
+		pushSubscribe(userToken.SeqMember, int64(_seqMember))
+	}
+
 	return res
+}
+
+func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
+
+	userInfoTo := getUserInfoPush(seqMemberTo)
+	isNight := false
+	if userInfoTo.SeqMember > 0 && userInfoTo.IsNewFollower {
+
+		if userInfoTo.IsNightPush == false {
+			now := time.Now()
+			if now.Hour() >= 9 && now.Hour() <= 20 {
+				isNight = false
+			} else {
+				isNight = true
+			}
+		}
+
+		if !isNight {
+			userInfoFrom := getUserInfo(seqMemberFrom)
+
+			// 1. 푸쉬 테이블 삽입
+			alarm := schemas.Alarm{
+				SeqMember:  userInfoTo.SeqMember,
+				Title:      "따옴",
+				TypeAlarm:  4,
+				ValueAlarm: int(seqMemberFrom),
+				Step:       0,
+				Content:    userInfoFrom.NickName + "님이 나를 구독하였습니다",
+			}
+			mdb := db.List[define.DSN_MASTER]
+			mdb.Create(&alarm)
+
+			msg := &fcm.Message{
+				To: userInfoTo.PushToken,
+				Data: map[string]interface{}{
+					"seq_alarm":   alarm.SeqAlarm,
+					"type_alarm":  4,
+					"value_alarm": seqMemberFrom,
+					"step":        0,
+				},
+				Notification: &fcm.Notification{
+					Title: alarm.Title,
+					Body:  alarm.Content,
+				},
+			}
+
+			// Create a FCM client to send the message.
+			client, err := fcm.NewClient(define.PUSH_SERVER_KEY)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			// Send the message and receive the response without retries.
+			response, err := client.Send(msg)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			log.Printf("%#v\n", response)
+		}
+	}
 }
