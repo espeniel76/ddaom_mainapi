@@ -8,6 +8,7 @@ import (
 	"ddaom/tools"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/appleboy/go-fcm"
 	"gorm.io/gorm"
 )
 
@@ -255,4 +257,36 @@ type GetUserInfoPushRes struct {
 	IsNewFollower  bool   `json:"is_new_follower"`
 	IsNewFollowing bool   `json:"is_new_following"`
 	IsNightPush    bool   `json:"is_night_push"`
+}
+
+func sendPush(pushToken string, alarm *schemas.Alarm) {
+	mdb := db.List[define.DSN_MASTER]
+	mdb.Create(&alarm)
+	msg := &fcm.Message{
+		To: pushToken,
+		Data: map[string]interface{}{
+			"seq_alarm":   alarm.SeqAlarm,
+			"type_alarm":  alarm.TypeAlarm,
+			"value_alarm": alarm.ValueAlarm,
+			"step":        alarm.Step,
+		},
+		Notification: &fcm.Notification{
+			Title: alarm.Title,
+			Body:  alarm.Content,
+		},
+	}
+
+	// Create a FCM client to send the message.
+	client, err := fcm.NewClient(define.PUSH_SERVER_KEY)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Send the message and receive the response without retries.
+	response, err := client.Send(msg)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Printf("%#v\n", response)
 }

@@ -39,6 +39,7 @@ type MemberDetail struct {
 	IsNewFollower    bool      `gorm:"default:false" json:"is_new_follower"`
 	IsNewFollowing   bool      `gorm:"default:false" json:"is_new_following"`
 	IsNightPush      bool      `gorm:"default:false" json:"is_night_push"`
+	IsDeleted        bool      `gorm:"default:false" json:"is_deleted"`
 	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
 	CntLike          int64     `gorm:"default:0" json:"cnt_like"`
 	CreatedAt        time.Time `json:"created_at"`

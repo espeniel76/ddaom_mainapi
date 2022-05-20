@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"ddaom/tools"
 )
 
 func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
@@ -94,6 +95,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		_seqNovelStep1 = novelWriteStep1.SeqNovelStep1
 	} else { // 업데이트
 
 		novelStep := schemas.NovelStep1{}
@@ -123,6 +125,10 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+	}
+
+	if !_tempYn {
+		pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -211,6 +217,8 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 			res.ResultCode = define.OTHER_USER
 			return res
 		}
+		// for push
+		_seqNovelStep1 = novelStep.SeqNovelStep1
 
 		result = mdb.Model(&novelStep).
 			Where("seq_novel_step2 = ?", _seqNovelStep2).
@@ -218,6 +226,10 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+	}
+
+	if !_tempYn {
+		pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -293,6 +305,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		_seqNovelStep3 = novelStep3.SeqNovelStep3
 	} else {
 		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
 		if isAbleKeyword(seqKeyword) != true {
@@ -320,6 +333,12 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+	}
+
+	var _seqNovelStep1 int64
+	mdb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep1)
+	if !_tempYn {
+		pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -401,6 +420,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		_seqNovelStep4 = novelStep4.SeqNovelStep4
 	} else {
 		seqKeyword := getSeqKeyword(4, int64(_seqNovelStep4))
 		if isAbleKeyword(seqKeyword) != true {
@@ -429,5 +449,63 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
+	var _seqNovelStep1 int64
+	mdb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&_seqNovelStep1)
+	if !_tempYn {
+		pushWrite(userToken, 1, _seqNovelStep1)
+	}
+
 	return res
+}
+
+func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
+
+	if seqNovel < 1 {
+		return
+	}
+
+	// 1. 작가 정보 로딩
+	userInfo := getUserInfo(userToken.SeqMember)
+
+	// 2. 구독자 정보 로딩
+	ldb := GetMyLogDb(userToken.Allocated)
+	var listMsSeq []int64
+	ldb.Model(schemas.MemberSubscribe{}).
+		Where("seq_member = ? AND status IN ('BOTH', 'FOLLOWER')", userInfo.SeqMember).
+		Select("seq_member_opponent").
+		Scan(&listMsSeq)
+	// fmt.Println(listMsSeq)
+	sdb := db.List[define.DSN_SLAVE]
+	listFollower := []FollowerInfo{}
+	sql := `
+	SELECT m.seq_member, m.push_token, md.is_night_push
+	FROM members m INNER JOIN member_details md ON m.seq_member = md.seq_member
+	WHERE m.seq_member IN (?) AND md.is_new_following = true
+	`
+	sdb.Raw(sql, listMsSeq).Scan(&listFollower)
+
+	isNight := false
+	for _, o := range listFollower {
+		isNight = false
+		if o.IsNightPush == false {
+			isNight = tools.IsNight()
+		}
+		if !isNight {
+			alarm := schemas.Alarm{
+				SeqMember:  o.SeqMember,
+				Title:      "따옴",
+				TypeAlarm:  5,
+				ValueAlarm: int(seqNovel),
+				Step:       step,
+				Content:    userInfo.NickName + "님의 신규 소설이 등록되었습니다",
+			}
+			sendPush(o.PushToken, &alarm)
+		}
+	}
+}
+
+type FollowerInfo struct {
+	SeqMember   int64  `json:"seq_member"`
+	PushToken   string `json:"push_token"`
+	IsNightPush bool   `json:"is_night_push"`
 }

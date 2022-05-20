@@ -71,6 +71,8 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/view/finish/{step:[0-9]+}/{seq_novel:[0-9]+}", common(handlers.MypageViewFinish))
 	mux.HandleFunc("/mypage/list/live", common(handlers.MypageListLive))
 	mux.HandleFunc("/mypage/list/subscribe", common(handlers.MypageListSubscribe))
+	mux.HandleFunc("/mypage/list/alarm", common(handlers.MypageListAlarm))
+	mux.HandleFunc("/mypage/alarm/{seq_alarm:[0-9]+}", common(handlers.MypageAlarmReceiveSet))
 
 	// 메인
 	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.Main))

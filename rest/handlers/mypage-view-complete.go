@@ -69,7 +69,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 	case 4:
 		query := `
 			SELECT
-				ns4.title,
+				ns1.title,
 				ns4.content,
 				true AS my_like,
 				ns4.cnt_like,

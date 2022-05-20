@@ -16,6 +16,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	_seqMember, _ := strconv.ParseInt(req.Vars["seq_member"], 10, 64)
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
 	var seqMemberToken int64
+	itsMe := false
 	if userToken != nil {
 		seqMemberToken = userToken.SeqMember
 	}
@@ -24,9 +25,11 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 		data["is_you"] = true
 	} else {
 		if _seqMember == 0 && userToken != nil {
+			itsMe = true
 			_seqMember = userToken.SeqMember
 			data["is_you"] = true
 		} else {
+			itsMe = false
 			data["is_you"] = false
 		}
 	}
@@ -97,7 +100,18 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_following"] = cntFollowing
 	data["cnt_follower"] = cntFollower
 
-	data["is_new_alarm"] = true
+	data["is_new_alarm"] = false
+	data["cnt_alarm"] = 0
+	if itsMe {
+		// 읽지 않은 메시지 조회
+		var cntAlarm int64
+		sdb.Model(schemas.Alarm{}).Select("COUNT(*)").Where("seq_member = ? AND is_read = false", userToken.SeqMember).Scan(&cntAlarm)
+		data["cnt_alarm"] = cntAlarm
+		if cntAlarm > 0 {
+			data["is_new_alarm"] = true
+		}
+	}
+
 	status := getMySubscribe(userToken, _seqMember)
 	data["my_subscribe"] = false
 	if status == define.FOLLOWING || status == define.BOTH {
