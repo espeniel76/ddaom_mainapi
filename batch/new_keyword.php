@@ -70,7 +70,6 @@ $sql =
 	"INSERT INTO keyword_alarm_logs (seq_keyword, created_at, cnt_push) VALUES ({$newKeyword["seq_keyword"]}, NOW(), " .
 	sizeof($listToken) .
 	")";
-// echo $sql;
 mysqli_query($conn, $sql);
 mysqli_close($conn);
 

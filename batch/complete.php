@@ -268,6 +268,12 @@ if ($isRun) {
 		// 6.3. flag update
 		$sql = "UPDATE keyword_choice_firsts SET finish_yn = true, updated_at = NOW() WHERE seq_keyword_choice_first = {$oChoice["seq_keyword_choice_first"]}";
 		mysqli_query($conn, $sql);
+
+		// 6.3.1. push
+		sendPushBefore($conn, $seq_member_step1, $title, 1, $seqNovelFinish);
+		sendPushBefore($conn, $seq_member_step2, $title, 2, $seqNovelFinish);
+		sendPushBefore($conn, $seq_member_step3, $title, 3, $seqNovelFinish);
+		sendPushBefore($conn, $seq_member_step4, $title, 4, $seqNovelFinish);
 	}
 
 	// 6.4. count finish novel
@@ -277,8 +283,8 @@ if ($isRun) {
 
 $sql = "UPDATE novel_finish_batch_run_logs SET updated_at = NOW() WHERE seq_novel_finish_batch_run_log = {$lastInsertId}";
 mysqli_query($conn, $sql);
-
 mysqli_close($conn);
+
 exit();
 
 function println($s)
@@ -292,4 +298,61 @@ function getNickName($conn, $seqMember)
 	$result = mysqli_query($conn, $sql);
 	$o = mysqli_fetch_assoc($result);
 	return $o["nick_name"];
+}
+
+function getToken($conn, $seqMember)
+{
+	$sql = "SELECT push_token FROM members WHERE seq_member = {$seqMember}";
+	$result = mysqli_query($conn, $sql);
+	$o = mysqli_fetch_assoc($result);
+	return $o["push_token"];
+}
+
+function sendPushBefore($conn, $seqMember, $title, $step, $seqNovelFinish)
+{
+	$body = "와우!! \"{$title} - Step{$step}\"가 완결 소설로 등록되었습니다.";
+	$sql = "INSERT INTO alarms (seq_member, title, content, type_alarm, value_alarm, created_at)
+	VALUES ({$seqMember}, '따옴', '{$body}', 3, {$seqNovelFinish}, NOW())";
+	mysqli_query($conn, $sql);
+	$seqAlarm = mysqli_insert_id($conn);
+
+	// 5. 발송
+	$token = getToken($conn, $seqMember);
+	sendPush($token, $body, $seqAlarm, $seqNovelFinish);
+
+	$sql = "SELECT push_token FROM members WHERE seq_member = {$seqMember}";
+	$result = mysqli_query($conn, $sql);
+	$o = mysqli_fetch_assoc($result);
+}
+
+function sendPush($token, $body, $seqAlarm, $valueAlarm)
+{
+	$notification = [
+		"title" => "따옴",
+		"body" => $body,
+		"sound" => "default",
+	];
+	$data = ["seq_alarm" => $seqAlarm, "type_alram" => 3, "value_alarm" => $valueAlarm];
+	$fcmNotification = [
+		"to" => $token,
+		"notification" => $notification,
+		"data" => $data,
+	];
+	$headers = [
+		"Authorization: key=AAAAs8DEFV4:APA91bHjJF63wpyefl-6IBMhJ0PVb0VPePwirNxes3PzRgMxg7wb1Q8ykTyzxnTrCVVMX8cE5ROxvjWJLLZ9cRw8pt5daXUsd-mxiK4jqgdVkR_XWaUW1snEXBSFFnebSR_D2L-Pn-wY",
+		"Content-Type: application/json",
+	];
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/fcm/send");
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+	$result = curl_exec($ch);
+	curl_close($ch);
+
+	echo $result;
+	echo '\n\r';
 }
