@@ -57,7 +57,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		if pushToken != "<nil>" || pushToken != "" {
+		if pushToken != "<nil>" && pushToken != "" {
 			result = mdb.Model(&member).Where("seq_member = ?", member.SeqMember).Update("push_token", pushToken)
 			if corm(result, &res) {
 				return res

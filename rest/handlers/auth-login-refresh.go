@@ -29,7 +29,7 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	mdb := db.List[define.DSN_MASTER]
-	if pushToken != "<nil>" || pushToken != "" {
+	if pushToken != "<nil>" && pushToken != "" {
 		mdb.Model(schemas.Member{}).Where("seq_member = ?", userToken.SeqMember).Update("push_token", pushToken)
 	}
 
