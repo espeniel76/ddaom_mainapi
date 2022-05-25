@@ -37,7 +37,7 @@ $list = [];
 
 // 2. 당 키워드 관련 글 조회
 // 2.1. STEP1
-$sql = "SELECT * FROM novel_step1 ns WHERE seq_keyword = {$keyword["seq_keyword"]}";
+$sql = "SELECT * FROM novel_step1 ns WHERE seq_keyword = {$keyword["seq_keyword"]} active_yn = true AND temp_yn = false AND deleted_yn = false";
 $result = mysqli_query($conn, $sql);
 $isRun = false;
 while ($novelStep1 = mysqli_fetch_assoc($result)) {
@@ -48,17 +48,17 @@ while ($novelStep1 = mysqli_fetch_assoc($result)) {
 		$novelStep4 = null;
 
 		// 2.2. STEP2
-		$sql = "SELECT * FROM novel_step2 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
+		$sql = "SELECT * FROM novel_step2 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
 		$result = mysqli_query($conn, $sql);
 		$novelStep2 = mysqli_fetch_assoc($result);
 		if ($novelStep2 && intval($novelStep2["cnt_like"]) > 0) {
 			// 2.3. STEP3
-			$sql = "SELECT * FROM novel_step3 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
+			$sql = "SELECT * FROM novel_step3 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
 			$result = mysqli_query($conn, $sql);
 			$novelStep3 = mysqli_fetch_assoc($result);
 			if ($novelStep3 && intval($novelStep3["cnt_like"]) > 0) {
 				// 2.4. STEP4
-				$sql = "SELECT * FROM novel_step4 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
+				$sql = "SELECT * FROM novel_step4 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
 				$result = mysqli_query($conn, $sql);
 				$novelStep4 = mysqli_fetch_assoc($result);
 				if (!$novelStep4 || intval($novelStep4["cnt_like"]) == 0) {
