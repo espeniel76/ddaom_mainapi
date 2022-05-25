@@ -50,7 +50,9 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 임시저장, 작성완료
 	var isTemps []bool
-	query := `
+	query := ""
+	if itsMe {
+		query = `
 		(SELECT temp_yn FROM novel_step1 WHERE seq_member = ? AND active_yn = true)
 		UNION ALL
 		(SELECT temp_yn FROM novel_step2 WHERE seq_member = ? AND active_yn = true)
@@ -58,7 +60,18 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 		(SELECT temp_yn FROM novel_step3 WHERE seq_member = ? AND active_yn = true)
 		UNION ALL
 		(SELECT temp_yn FROM novel_step4 WHERE seq_member = ? AND active_yn = true)
-	`
+		`
+	} else {
+		query = `
+		(SELECT temp_yn FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND deleted_yn = false)
+		UNION ALL
+		(SELECT temp_yn FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND deleted_yn = false)
+		UNION ALL
+		(SELECT temp_yn FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND deleted_yn = false)
+		UNION ALL
+		(SELECT temp_yn FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND deleted_yn = false)
+		`
+	}
 	result = sdb.Raw(query, _seqMember, _seqMember, _seqMember, _seqMember).Scan(&isTemps)
 	if corm(result, &res) {
 		return res

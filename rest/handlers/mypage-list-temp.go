@@ -47,8 +47,6 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	fmt.Println(seqKeywords)
-
 	var totalData int64
 	seq := userToken.SeqMember
 	query := `
@@ -104,7 +102,8 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
 			ns.updated_at,
 			1 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live
+			IF (k.end_date > NOW(), true, false) AS is_live,
+			deleted_yn
 		FROM novel_step1 ns
 		INNER JOIN keywords k ON k.seq_keyword = ns.seq_keyword
 		WHERE seq_member = ? AND ns.active_yn = true AND ns.temp_yn = true
@@ -121,7 +120,8 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
 			ns2.updated_at,
 			2 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live
+			IF (k.end_date > NOW(), true, false) AS is_live,
+			ns2.deleted_yn
 		FROM novel_step2 ns2
 		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
 		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
@@ -139,7 +139,8 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
 			ns3.updated_at,
 			3 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live
+			IF (k.end_date > NOW(), true, false) AS is_live,
+			ns3.deleted_yn
 		FROM novel_step3 ns3
 		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
 		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
@@ -157,7 +158,8 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
 			ns4.updated_at,
 			4 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live
+			IF (k.end_date > NOW(), true, false) AS is_live,
+			ns4.deleted_yn
 		FROM novel_step4 ns4
 		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 
 		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
@@ -192,5 +194,6 @@ type NovelMyListTempRes struct {
 		CreatedAt     float64 `json:"created_at"`
 		Step          int8    `json:"step"`
 		IsLive        bool    `json:"is_live"`
+		DeletedYn     bool    `json:"deleted_yn"`
 	} `json:"list"`
 }

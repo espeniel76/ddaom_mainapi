@@ -233,6 +233,29 @@ func getUserInfo(seqMember int64) schemas.MemberDetail {
 	return md
 }
 
+func isMineByStepNovelSeq(step int, seqNovel int64, seqMember int64) bool {
+	sdb := db.List[define.DSN_SLAVE]
+	var _seqMember int64
+	switch step {
+	case 1:
+		sdb.Model(schemas.NovelStep1{}).Select("seq_member").Where("seq_novel_step1 = ?", seqNovel).Scan(&_seqMember)
+	case 2:
+		sdb.Model(schemas.NovelStep2{}).Select("seq_member").Where("seq_novel_step2 = ?", seqNovel).Scan(&_seqMember)
+	case 3:
+		sdb.Model(schemas.NovelStep3{}).Select("seq_member").Where("seq_novel_step3 = ?", seqNovel).Scan(&_seqMember)
+	case 4:
+		sdb.Model(schemas.NovelStep4{}).Select("seq_member").Where("seq_novel_step4 = ?", seqNovel).Scan(&_seqMember)
+	}
+
+	fmt.Println(_seqMember, seqMember)
+
+	if _seqMember == seqMember {
+		return true
+	} else {
+		return false
+	}
+}
+
 func getUserInfoPush(seqMember int64) GetUserInfoPushRes {
 	sdb := db.List[define.DSN_SLAVE]
 	res := GetUserInfoPushRes{}

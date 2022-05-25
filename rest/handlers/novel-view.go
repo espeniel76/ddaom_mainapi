@@ -32,7 +32,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.seq_color
 	FROM novel_step1 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false`
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`
 	step1Res := Step1Res{}
 	result := mdb.Raw(query, _seqNovelStep1).Scan(&step1Res)
 	if corm(result, &res) {
@@ -66,8 +66,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like
 	FROM novel_step2 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
-	ORDER BY ns.seq_novel_step2 DESC`
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
+	ORDER BY ns.updated_at DESC`
 	step2Res := Step2Res{}
 	result = mdb.Raw(query, _seqNovelStep1).Scan(&step2Res)
 	if corm(result, &res) {
@@ -102,8 +102,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like
 	FROM novel_step3 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
-	ORDER BY ns.seq_novel_step3 DESC`
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
+	ORDER BY ns.updated_at DESC`
 	step3Res := Step3Res{}
 	result = mdb.Raw(query, _seqNovelStep1).Scan(&step3Res)
 	if corm(result, &res) {
@@ -138,8 +138,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like
 	FROM novel_step4 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
-	ORDER BY ns.seq_novel_step4 DESC`
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
+	ORDER BY ns.updated_at DESC`
 	step4Res := Step4Res{}
 	result = mdb.Raw(query, _seqNovelStep1).Scan(&step4Res)
 	if corm(result, &res) {

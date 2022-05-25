@@ -24,7 +24,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 		seq_color,
 		title
 	FROM novel_step1
-	WHERE seq_keyword = ? AND active_yn = true AND temp_yn = false
+	WHERE seq_keyword = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false
 	ORDER BY created_at DESC
 	LIMIT 10
 	`
@@ -42,7 +42,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 		ns.title
 	FROM novel_finishes nf
 	INNER JOIN novel_step1 ns ON nf.seq_novel_step1 = ns.seq_novel_step1
-	WHERE nf.active_yn
+	WHERE nf.active_yn = true
 	ORDER BY nf.cnt_like DESC
 	LIMIT 10
 	`
@@ -117,7 +117,7 @@ func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 		seq_color,
 		title
 	FROM novel_step1
-	WHERE active_yn = true AND seq_keyword = ?
+	WHERE active_yn = true AND seq_keyword = ? AND temp_yn = false AND deleted_yn = false
 	ORDER BY created_at DESC
 	LIMIT 10
 	`

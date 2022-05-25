@@ -35,7 +35,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 	var totalData int64
 	masterDB := db.List[define.DSN_MASTER]
 	var query bytes.Buffer
-	query.WriteString("SELECT COUNT(seq_novel_step2) FROM novel_step2 WHERE active_yn = true AND seq_novel_step1 = ? AND temp_yn = false")
+	query.WriteString("SELECT COUNT(seq_novel_step2) FROM novel_step2 WHERE active_yn = true AND seq_novel_step1 = ? AND temp_yn = false AND deleted_yn = false")
 	result := masterDB.Raw(query.String(), _seqNovelStep1).Count(&totalData)
 	if result.Error != nil {
 		res.ResultCode = define.OK
@@ -54,7 +54,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			ns.content
 		FROM novel_step2 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
-		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false`)
+		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`)
 	query.WriteString(" ORDER BY ns.seq_novel_step2 DESC")
 	query.WriteString(" LIMIT ?, ?")
 	step2ResTmp := []Step2ResTmp{}

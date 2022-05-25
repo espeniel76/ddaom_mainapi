@@ -6,6 +6,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
+	"time"
 )
 
 func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
@@ -77,6 +78,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			Title:      _title,
 			Content:    _content,
 			TempYn:     _tempYn,
+			DeletedAt:  time.Now(),
 		}
 
 		result = mdb.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
@@ -186,6 +188,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 			SeqMember:     userToken.SeqMember,
 			Content:       _content,
 			TempYn:        _tempYn,
+			DeletedAt:     time.Now(),
 		}
 		result = mdb.Save(&novelStep2)
 		if corm(result, &res) {
@@ -296,6 +299,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 			SeqMember:     userToken.SeqMember,
 			Content:       _content,
 			TempYn:        _tempYn,
+			DeletedAt:     time.Now(),
 		}
 		result = mdb.Save(&novelStep3)
 		if corm(result, &res) {
@@ -411,6 +415,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 			SeqMember:     userToken.SeqMember,
 			Content:       _content,
 			TempYn:        _tempYn,
+			DeletedAt:     time.Now(),
 		}
 		result = mdb.Save(&novelStep4)
 		if corm(result, &res) {
@@ -474,13 +479,17 @@ func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
 		Where("seq_member = ? AND status IN ('BOTH', 'FOLLOWER')", userInfo.SeqMember).
 		Select("seq_member_opponent").
 		Scan(&listMsSeq)
-	// fmt.Println(listMsSeq)
 	sdb := db.List[define.DSN_SLAVE]
 	listFollower := []FollowerInfo{}
 	sql := `
-	SELECT m.seq_member, m.push_token, md.is_night_push
-	FROM members m INNER JOIN member_details md ON m.seq_member = md.seq_member
-	WHERE m.seq_member IN (?) AND md.is_new_following = true
+	SELECT
+		m.seq_member,
+		m.push_token,
+		md.is_night_push
+	FROM
+		members m INNER JOIN member_details md ON m.seq_member = md.seq_member
+	WHERE
+		m.seq_member IN (?) AND md.is_new_following = true
 	`
 	sdb.Raw(sql, listMsSeq).Scan(&listFollower)
 

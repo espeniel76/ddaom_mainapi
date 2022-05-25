@@ -23,30 +23,31 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	var seqNovelStep4 int64
 
 	ldb := db.List[define.DSN_SLAVE]
+
 	switch _step {
 	case 1:
 		seqNovelStep1 = _seqNovel
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ?", seqNovelStep1).Scan(&seqNovelStep2)
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep3)
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep4)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
 	case 2:
 		// 1,3,4
 		seqNovelStep2 = _seqNovel
 		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step1").Where("seq_novel_step2 = ?", seqNovelStep2).Scan(&seqNovelStep1)
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep3)
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep4)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
 	case 3:
 		// 1,2,4
 		seqNovelStep3 = _seqNovel
 		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", seqNovelStep3).Scan(&seqNovelStep1)
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep2)
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep4)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
 	case 4:
 		// 1,2,3
 		seqNovelStep4 = _seqNovel
 		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ?", seqNovelStep4).Scan(&seqNovelStep1)
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep2)
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ?", seqNovelStep1).Order("cnt_like DESC").Scan(&seqNovelStep3)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
 	}
 	fmt.Println(seqNovelStep1, seqNovelStep2, seqNovelStep3, seqNovelStep4)
 

@@ -17,7 +17,9 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	itsMe := false
 	if _seqMember == 0 && userToken != nil {
+		itsMe = true
 		_seqMember = userToken.SeqMember
 	}
 
@@ -31,19 +33,37 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var totalData int64
 	seq := _seqMember
-	query := `
-	SELECT SUM(cnt1) + SUM(cnt2) + SUM(cnt3) + SUM(cnt4) AS cnt
-	FROM
-	(
-		(SELECT COUNT(*) AS cnt1, 0 AS cnt2,0 AS cnt3, 0 AS cnt4 FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-		UNION ALL
-		(SELECT 0 AS cnt1, COUNT(*) AS cnt2, 0 AS cnt3, 0 AS cnt4 FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-		UNION ALL
-		(SELECT 0 AS cnt1, 0 AS cnt2, COUNT(*) AS cnt3, 0 AS cnt4 FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-		UNION ALL
-		(SELECT 0 AS cnt1, 0 AS cnt2, 0 AS cnt3, COUNT(*) AS cnt4 FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
-	) AS s
-	`
+	query := ""
+	if itsMe {
+		query = `
+		SELECT SUM(cnt1) + SUM(cnt2) + SUM(cnt3) + SUM(cnt4) AS cnt
+		FROM
+		(
+			(SELECT COUNT(*) AS cnt1, 0 AS cnt2,0 AS cnt3, 0 AS cnt4 FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
+			UNION ALL
+			(SELECT 0 AS cnt1, COUNT(*) AS cnt2, 0 AS cnt3, 0 AS cnt4 FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
+			UNION ALL
+			(SELECT 0 AS cnt1, 0 AS cnt2, COUNT(*) AS cnt3, 0 AS cnt4 FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
+			UNION ALL
+			(SELECT 0 AS cnt1, 0 AS cnt2, 0 AS cnt3, COUNT(*) AS cnt4 FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND temp_yn = false)
+		) AS s
+		`
+	} else {
+		query = `
+		SELECT SUM(cnt1) + SUM(cnt2) + SUM(cnt3) + SUM(cnt4) AS cnt
+		FROM
+		(
+			(SELECT COUNT(*) AS cnt1, 0 AS cnt2,0 AS cnt3, 0 AS cnt4 FROM novel_step1 WHERE seq_member = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false)
+			UNION ALL
+			(SELECT 0 AS cnt1, COUNT(*) AS cnt2, 0 AS cnt3, 0 AS cnt4 FROM novel_step2 WHERE seq_member = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false)
+			UNION ALL
+			(SELECT 0 AS cnt1, 0 AS cnt2, COUNT(*) AS cnt3, 0 AS cnt4 FROM novel_step3 WHERE seq_member = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false)
+			UNION ALL
+			(SELECT 0 AS cnt1, 0 AS cnt2, 0 AS cnt3, COUNT(*) AS cnt4 FROM novel_step4 WHERE seq_member = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false)
+		) AS s
+		`
+	}
+
 	result := sdb.Raw(query, seq, seq, seq, seq).Scan(&totalData)
 	if corm(result, &res) {
 		return res
@@ -53,84 +73,174 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 		TotalPage: tools.GetTotalPage(totalData, _sizePerPage),
 		TotalData: int(totalData),
 	}
-	query = `
-	(
-		SELECT
-			seq_novel_step1,
-			0 AS seq_novel_step2,
-			0 AS seq_novel_step3,
-			0 AS seq_novel_step4,
-			title,
-			UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
-			ns.updated_at,
-			1 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live,
-			false AS my_like,
-			ns.cnt_like
-		FROM novel_step1 ns
-		INNER JOIN keywords k ON k.seq_keyword = ns.seq_keyword
-		WHERE seq_member = ? AND ns.active_yn = true AND ns.temp_yn = false
-	)
-	UNION 
-	(
-		SELECT
-			0 AS seq_novel_step1,
-			ns2.seq_novel_step2,
-			0 AS seq_novel_step3,
-			0 AS seq_novel_step4,
-			ns1.title,
-			UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
-			ns2.updated_at,
-			2 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live,
-			false AS my_like,
-			ns2.cnt_like
-		FROM novel_step2 ns2
-		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
-		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
-		WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.temp_yn = false
-	)
-	UNION 
-	(
-		SELECT
-			0 AS seq_novel_step1,
-			0 AS seq_novel_step2,
-			ns3.seq_novel_step3,
-			0 AS seq_novel_step4,
-			ns1.title,
-			UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
-			ns3.updated_at,
-			3 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live,
-			false AS my_like,
-			ns3.cnt_like
-		FROM novel_step3 ns3
-		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
-		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
-		WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.temp_yn = false
-	)
-	UNION 
-	(
-		SELECT
-			0 AS seq_novel_step1,
-			0 AS seq_novel_step2,
-			0 AS seq_novel_step3,
-			ns4.seq_novel_step4,
-			ns1.title,
-			UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
-			ns4.updated_at,
-			4 AS step,
-			IF (k.end_date > NOW(), true, false) AS is_live,
-			false AS my_like,
-			ns4.cnt_like
-		FROM novel_step4 ns4
-		INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 
-		INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
-		WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.temp_yn = false
-	)
-	ORDER BY updated_at DESC
-	LIMIT ?, ?
-	`
+	if itsMe {
+		query = `
+		(
+			SELECT
+				seq_novel_step1,
+				0 AS seq_novel_step2,
+				0 AS seq_novel_step3,
+				0 AS seq_novel_step4,
+				title,
+				UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
+				ns.updated_at,
+				1 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns.cnt_like,
+				ns.deleted_yn
+			FROM novel_step1 ns
+			INNER JOIN keywords k ON k.seq_keyword = ns.seq_keyword
+			WHERE seq_member = ? AND ns.active_yn = true AND ns.temp_yn = false
+		)
+		UNION 
+		(
+			SELECT
+				0 AS seq_novel_step1,
+				ns2.seq_novel_step2,
+				0 AS seq_novel_step3,
+				0 AS seq_novel_step4,
+				ns1.title,
+				UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
+				ns2.updated_at,
+				2 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns2.cnt_like,
+				ns2.deleted_yn
+			FROM novel_step2 ns2
+			INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
+			INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
+			WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.temp_yn = false
+		)
+		UNION 
+		(
+			SELECT
+				0 AS seq_novel_step1,
+				0 AS seq_novel_step2,
+				ns3.seq_novel_step3,
+				0 AS seq_novel_step4,
+				ns1.title,
+				UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
+				ns3.updated_at,
+				3 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns3.cnt_like,
+				ns3.deleted_yn
+			FROM novel_step3 ns3
+			INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
+			INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
+			WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.temp_yn = false
+		)
+		UNION 
+		(
+			SELECT
+				0 AS seq_novel_step1,
+				0 AS seq_novel_step2,
+				0 AS seq_novel_step3,
+				ns4.seq_novel_step4,
+				ns1.title,
+				UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
+				ns4.updated_at,
+				4 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns4.cnt_like,
+				ns4.deleted_yn
+			FROM novel_step4 ns4
+			INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 
+			INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
+			WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.temp_yn = false
+		)
+		ORDER BY updated_at DESC
+		LIMIT ?, ?
+		`
+	} else {
+		query = `
+		(
+			SELECT
+				seq_novel_step1,
+				0 AS seq_novel_step2,
+				0 AS seq_novel_step3,
+				0 AS seq_novel_step4,
+				title,
+				UNIX_TIMESTAMP(ns.created_at) * 1000 AS created_at,
+				ns.updated_at,
+				1 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns.cnt_like,
+				false as deleted_yn
+			FROM novel_step1 ns
+			INNER JOIN keywords k ON k.seq_keyword = ns.seq_keyword
+			WHERE seq_member = ? AND ns.active_yn = true AND ns.temp_yn = false and ns.deleted_yn = false
+		)
+		UNION 
+		(
+			SELECT
+				0 AS seq_novel_step1,
+				ns2.seq_novel_step2,
+				0 AS seq_novel_step3,
+				0 AS seq_novel_step4,
+				ns1.title,
+				UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
+				ns2.updated_at,
+				2 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns2.cnt_like,
+				false as deleted_yn
+			FROM novel_step2 ns2
+			INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 
+			INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
+			WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.temp_yn = false and ns2.deleted_yn = false
+		)
+		UNION 
+		(
+			SELECT
+				0 AS seq_novel_step1,
+				0 AS seq_novel_step2,
+				ns3.seq_novel_step3,
+				0 AS seq_novel_step4,
+				ns1.title,
+				UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
+				ns3.updated_at,
+				3 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns3.cnt_like,
+				false as deleted_yn
+			FROM novel_step3 ns3
+			INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 
+			INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
+			WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.temp_yn = false and ns3.deleted_yn = false
+		)
+		UNION 
+		(
+			SELECT
+				0 AS seq_novel_step1,
+				0 AS seq_novel_step2,
+				0 AS seq_novel_step3,
+				ns4.seq_novel_step4,
+				ns1.title,
+				UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
+				ns4.updated_at,
+				4 AS step,
+				IF (k.end_date > NOW(), true, false) AS is_live,
+				false AS my_like,
+				ns4.cnt_like,
+				false as deleted_yn
+			FROM novel_step4 ns4
+			INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 
+			INNER JOIN keywords k ON k.seq_keyword = ns1.seq_keyword
+			WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.temp_yn = false and ns4.deleted_yn = false
+		)
+		ORDER BY updated_at DESC
+		LIMIT ?, ?
+		`
+	}
+
 	result = sdb.
 		Raw(query, seq, seq, seq, seq, limitStart, _sizePerPage).
 		Scan(&novelMyListCompleteRes.List)
@@ -230,5 +340,6 @@ type NovelMyListCompleteRes struct {
 		Step          int8    `json:"step"`
 		MyLike        bool    `json:"my_like"`
 		CntLike       int     `json:"cnt_like"`
+		DeletedYn     bool    `json:"deleted_yn"`
 	} `json:"list"`
 }
