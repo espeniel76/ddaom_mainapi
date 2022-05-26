@@ -272,6 +272,7 @@ type NovelDelete struct {
 	TypeDelete     int8      `gorm:"default:1" json:"type_delete"`
 	ReasonDelete   string    `gorm:"type:varchar(1024)" json:"reason_delete"`
 	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type KeywordChoiceFirst struct {
