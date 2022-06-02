@@ -36,14 +36,14 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	// 인기작
 	query = `
 	SELECT
-		nf.seq_novel_finish,
-		ns.seq_image,
-		ns.seq_color,
-		ns.title
-	FROM novel_finishes nf
-	INNER JOIN novel_step1 ns ON nf.seq_novel_step1 = ns.seq_novel_step1
-	WHERE nf.active_yn = true
-	ORDER BY nf.cnt_like DESC
+		seq_novel_finish,
+		seq_image,
+		seq_color,
+		title,
+		cnt_like + cnt_view AS cnt_sum
+	FROM novel_finishes
+	WHERE active_yn = true
+	ORDER BY cnt_sum DESC
 	LIMIT 10
 	`
 	result = sdb.Raw(query).Scan(&mainRes.ListPopular)
@@ -54,14 +54,13 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	// 완결작
 	query = `
 	SELECT
-		nf.seq_novel_finish,
-		ns.seq_image,
-		ns.seq_color,
-		ns.title
-	FROM novel_finishes nf
-	INNER JOIN novel_step1 ns ON nf.seq_novel_step1 = ns.seq_novel_step1
-	WHERE nf.active_yn = true
-	ORDER BY nf.created_at DESC
+		seq_novel_finish,
+		seq_image,
+		seq_color,
+		title
+	FROM novel_finishes
+	WHERE active_yn = true
+	ORDER BY created_at DESC
 	LIMIT 10
 	`
 	result = sdb.Raw(query).Scan(&mainRes.ListFinish)

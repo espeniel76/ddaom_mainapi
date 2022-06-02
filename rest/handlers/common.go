@@ -308,7 +308,8 @@ func sendPush(pushToken string, alarm *schemas.Alarm) {
 	// Send the message and receive the response without retries.
 	response, err := client.Send(msg)
 	if err != nil {
-		log.Fatalln(err)
+		// log.Fatalln(err)
+		fmt.Println(err)
 	}
 
 	log.Printf("%#v\n", response)

@@ -20,7 +20,7 @@ $lastInsertId = mysqli_insert_id($conn);
 
 // 1. 종료 된 키워드 조회
 $sql =
-	"SELECT * FROM keywords k WHERE active_yn = true AND end_date < NOW() AND finish_yn = false ORDER BY created_at DESC LIMIT 1";
+	"SELECT * FROM keywords k WHERE active_yn = true AND end_date < NOW() AND finish_yn = false ORDER BY created_at ASC LIMIT 1";
 $result = mysqli_query($conn, $sql);
 $keyword = mysqli_fetch_assoc($result);
 if (!$keyword) {
@@ -32,36 +32,68 @@ if (!$keyword) {
 // 추출이 되든 안되든, 1회만 실행 시켜야 하므로 플래그 업데이트
 $sql = "UPDATE keywords SET finish_yn = true, finished_at = NOW() WHERE seq_keyword = {$keyword["seq_keyword"]}";
 mysqli_query($conn, $sql);
-
 $list = [];
 
 // 2. 당 키워드 관련 글 조회
 // 2.1. STEP1
-$sql = "SELECT * FROM novel_step1 ns WHERE seq_keyword = {$keyword["seq_keyword"]} active_yn = true AND temp_yn = false AND deleted_yn = false";
-$result = mysqli_query($conn, $sql);
+$sql = "SELECT * FROM novel_step1 ns WHERE seq_keyword = {$keyword["seq_keyword"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false";
+$ret = mysqli_query($conn, $sql);
 $isRun = false;
-while ($novelStep1 = mysqli_fetch_assoc($result)) {
+while ($novelStep1 = mysqli_fetch_assoc($ret)) {
+	print_r($novelStep1);
 	if ($novelStep1 && intval($novelStep1["cnt_like"]) > 0) {
-		$isRun = true;
 		$novelStep2 = null;
 		$novelStep3 = null;
 		$novelStep4 = null;
 
 		// 2.2. STEP2
-		$sql = "SELECT * FROM novel_step2 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
+		$sql = "SELECT * FROM novel_step2 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
 		$result = mysqli_query($conn, $sql);
 		$novelStep2 = mysqli_fetch_assoc($result);
 		if ($novelStep2 && intval($novelStep2["cnt_like"]) > 0) {
+			// 2.2.1 해당 글 좋아요 1 업데이트 (좋아요가 같은게 2개 이상 있다면)
+			$sql = "SELECT COUNT(*) AS cnt_like_total FROM novel_step2 WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false AND cnt_like = {$novelStep2["cnt_like"]}";
+			$result = mysqli_query($conn, $sql);
+			$obj = mysqli_fetch_assoc($result);
+			if ($obj["cnt_like_total"] > 1) {
+				mysqli_query(
+					$conn,
+					"UPDATE novel_step2 SET cnt_like = cnt_like + 1, updated_at = NOW() WHERE seq_novel_step2 = {$novelStep2["seq_novel_step2"]}"
+				);
+			}
+
 			// 2.3. STEP3
-			$sql = "SELECT * FROM novel_step3 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
+			$sql = "SELECT * FROM novel_step3 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
 			$result = mysqli_query($conn, $sql);
 			$novelStep3 = mysqli_fetch_assoc($result);
 			if ($novelStep3 && intval($novelStep3["cnt_like"]) > 0) {
+				// 2.3.1 해당 글 좋아요 1 업데이트 (좋아요가 같은게 2개 이상 있다면)
+				$sql = "SELECT COUNT(*) AS cnt_like_total FROM novel_step3 WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false AND cnt_like = {$novelStep3["cnt_like"]}";
+				$result = mysqli_query($conn, $sql);
+				$obj = mysqli_fetch_assoc($result);
+				if ($obj["cnt_like_total"] > 1) {
+					mysqli_query(
+						$conn,
+						"UPDATE novel_step3 SET cnt_like = cnt_like + 1, updated_at = NOW() WHERE seq_novel_step3 = {$novelStep2["seq_novel_step3"]}"
+					);
+				}
+
 				// 2.4. STEP4
-				$sql = "SELECT * FROM novel_step4 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
+				$sql = "SELECT * FROM novel_step4 ns WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false ORDER BY cnt_like DESC, updated_at ASC LIMIT 1";
 				$result = mysqli_query($conn, $sql);
 				$novelStep4 = mysqli_fetch_assoc($result);
-				if (!$novelStep4 || intval($novelStep4["cnt_like"]) == 0) {
+				if ($novelStep4 && intval($novelStep4["cnt_like"]) > 0) {
+					// 2.4.1 해당 글 좋아요 1 업데이트 (좋아요가 같은게 2개 이상 있다면)
+					$sql = "SELECT COUNT(*) AS cnt_like_total FROM novel_step4 WHERE seq_novel_step1 = {$novelStep1["seq_novel_step1"]} AND active_yn = true AND temp_yn = false AND deleted_yn = false AND cnt_like = {$novelStep4["cnt_like"]}";
+					$result = mysqli_query($conn, $sql);
+					$obj = mysqli_fetch_assoc($result);
+					if ($obj["cnt_like_total"] > 1) {
+						mysqli_query(
+							$conn,
+							"UPDATE novel_step4 SET cnt_like = cnt_like + 1, updated_at = NOW() WHERE seq_novel_step4 = {$novelStep2["seq_novel_step4"]}"
+						);
+					}
+				} else {
 					$novelStep4 = null;
 				}
 			} else {
@@ -84,6 +116,7 @@ while ($novelStep1 = mysqli_fetch_assoc($result)) {
 		$cntLikeTotal = $cntLikeStep1 + $cntLikeStep2 + $cntLikeStep3 + $cntLikeStep4;
 		$successYn = 0;
 		if ($cntLikeStep1 > 0 && $cntLikeStep2 > 0 && $cntLikeStep3 > 0 && $cntLikeStep4 > 0) {
+			$isRun = true;
 			$successYn = 1;
 			$list[$seqNovelStep1]["1"] = $novelStep1;
 			$list[$seqNovelStep1]["2"] = $novelStep2;
@@ -125,6 +158,7 @@ while ($novelStep1 = mysqli_fetch_assoc($result)) {
 				NOW()
 			)
 		";
+		// print_r($sql);
 		mysqli_query($conn, $sql);
 	}
 }

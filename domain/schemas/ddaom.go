@@ -154,7 +154,7 @@ type NovelStep1 struct {
 	SeqColor       int64     `gorm:"index" json:"seq_color"`
 	SeqGenre       int64     `gorm:"index" json:"seq_genre"`
 	SeqMember      int64     `gorm:"index" json:"seq_member"`
-	Title          string    `gorm:"unique;type:varchar(1024)" json:"title"`
+	Title          string    `gorm:"index;type:varchar(1024)" json:"title"`
 	Content        string    `gorm:"type:varchar(5120)" json:"content"`
 	CntLike        int64     `gorm:"default:0" json:"cnt_like"`
 	CntView        int64     `gorm:"default:0" json:"cnt_view"`
@@ -238,7 +238,7 @@ type NovelFinish struct {
 	NickNameStep2  string    `gorm:"type:varchar(50)" json:"nick_name_step2"`
 	NickNameStep3  string    `gorm:"type:varchar(50)" json:"nick_name_step3"`
 	NickNameStep4  string    `gorm:"type:varchar(50)" json:"nick_name_step4"`
-	Title          string    `gorm:"unique;type:varchar(1024)" json:"title"`
+	Title          string    `gorm:"index;type:varchar(1024)" json:"title"`
 	Content1       string    `gorm:"type:varchar(5120)" json:"content1"`
 	Content2       string    `gorm:"type:varchar(5120)" json:"content2"`
 	Content3       string    `gorm:"type:varchar(5120)" json:"content3"`

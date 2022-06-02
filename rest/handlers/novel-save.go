@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+/**
+ * step1에 새로 등록할때 제목 중복 체크 기준 수정 요청
+ * => 완결로 등록된 소설 제목, 연재중 소설 제목만 중복 체크되도록 하고,
+ * 그 외 종료된 주제어의 소설 제목들은 중복 체크에서 제외"
+ */
 func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
@@ -21,8 +26,19 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+	// 현재 진행중인 소설
 	if cnt > 0 {
 		isExist = true
+	} else {
+		// 완결로 등록된 소설
+		result = slaveDb.Model(schemas.NovelFinish{}).Where("title = ?", _title).Count(&cnt)
+		if corm(result, &res) {
+			return res
+		}
+		if cnt > 0 {
+			isExist = true
+		}
+
 	}
 	data := make(map[string]bool)
 	data["is_exist"] = isExist
