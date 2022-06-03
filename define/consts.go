@@ -35,6 +35,7 @@ const (
 	NO_EXIST_NICK           = "NO_EXIST_NICK"
 	OTHER_USER              = "OTHER_USER"
 	INACTIVE_KEYWORD        = "INACTIVE_KEYWORD"
+	NO_EXIST_USER           = "NO_EXIST_USER"
 )
 
 // const LIST_PER_PAGE = 2
@@ -46,4 +47,9 @@ const (
 	FOLLOWING = "FOLLOWING"
 	FOLLOWER  = "FOLLOWER"
 	BOTH      = "BOTH"
+)
+
+const (
+	RECENT = "RECENT"
+	LIKE   = "LIKE"
 )

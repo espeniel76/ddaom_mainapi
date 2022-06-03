@@ -46,6 +46,50 @@ type MemberDetail struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
+type MemberBackup struct {
+	SeqMember       int64     `gorm:"index" json:"seq_member"`
+	Email           string    `gorm:"type:varchar(255)" json:"email"`
+	Token           string    `gorm:"type:varchar(5120)" json:"token"`
+	ProfileImageUrl string    `gorm:"type:varchar(512)" json:"profile_image_url"`
+	SnsType         string    `gorm:"type:ENUM('KAKAO','NAVER','FACEBOOK','GOOGLE','APPLE'); DEFAULT:'GOOGLE'" json:"sns_type"`
+	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
+	UserLevel       int8      `gorm:"default:5" json:"user_level"`
+	AllocatedDb     int8      `json:"allocted_db"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	DeletedAt       time.Time `json:"deleted_at"`
+	PushToken       string    `gorm:"type:varchar(5120)" json:"push_token"`
+}
+
+type MemberDetailBackup struct {
+	SeqMemberDetail  int64     `gorm:"index" json:"seq_member_detail"`
+	SeqMember        int64     `gorm:"index" json:"seq_member"`
+	Email            string    `gorm:"type:varchar(1024)" json:"email"`
+	Name             string    `gorm:"type:varchar(50)" json:"name"`
+	NickName         string    `gorm:"type:varchar(50);column:nick_name" json:"nick_name"`
+	ProfilePhoto     string    `gorm:"type:varchar(1024)" json:"profile_photo"`
+	Tel              string    `gorm:"type:varchar(50)" json:"tel"`
+	MobileCompany    int8      `gorm:"default:0" json:"mobile_company"`
+	Mobile           string    `gorm:"type:varchar(50)" json:"mobile"`
+	Address          string    `gorm:"type:varchar(1024)" json:"address"`
+	AddressDetail    string    `gorm:"type:varchar(1024)" json:"address_detail"`
+	Zipcode          string    `gorm:"type:varchar(50)" json:"zipcode"`
+	AuthenticationCi string    `gorm:"type:varchar(255)" json:"authentication_ci"`
+	AuthenticationAt time.Time `json:"authentication_at"`
+	IsNewKeyword     bool      `gorm:"default:false" json:"is_new_keyword"`
+	IsLiked          bool      `gorm:"default:false" json:"is_liked"`
+	IsFinished       bool      `gorm:"default:false" json:"is_finished"`
+	IsNewFollower    bool      `gorm:"default:false" json:"is_new_follower"`
+	IsNewFollowing   bool      `gorm:"default:false" json:"is_new_following"`
+	IsNightPush      bool      `gorm:"default:false" json:"is_night_push"`
+	IsDeleted        bool      `gorm:"default:false" json:"is_deleted"`
+	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
+	CntLike          int64     `gorm:"default:0" json:"cnt_like"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+	DeletedAt        time.Time `json:"deleted_at"`
+}
+
 type MemberAdmin struct {
 	SeqMemberAdmin int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_admin"`
 	UserId         string    `gorm:"type:varchar(50);unique" json:"user_id"`

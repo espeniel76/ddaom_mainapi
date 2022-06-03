@@ -18,8 +18,14 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if _seqMember == 0 && userToken != nil {
-		_seqMember = userToken.SeqMember
+	isLogin := false
+	itsMine := false
+	if userToken != nil {
+		isLogin = true
+		if _seqMember == 0 {
+			itsMine = true
+			_seqMember = userToken.SeqMember
+		}
 	}
 
 	if _page < 1 || _sizePerPage < 1 {
@@ -29,7 +35,6 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	sdb := db.List[define.DSN_SLAVE]
-	// ldb := GetMyLogDb(userToken.Allocated)
 	ldb := getUserLogDb(sdb, _seqMember)
 
 	// 구독현황
@@ -76,15 +81,29 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	for _, v := range info {
 		seqs = append(seqs, v.SeqMemberOpponent)
 	}
+
+	// 닉네임 딕셔너리
 	nicks := []TmpMembinfo{}
-	sdb.Raw("SELECT seq_member, nick_name FROM member_details WHERE seq_member IN (?)", seqs).Scan(&nicks)
+	result = sdb.Raw("SELECT seq_member, nick_name FROM member_details WHERE seq_member IN (?)", seqs).Scan(&nicks)
 	if corm(result, &res) {
 		return res
 	}
-	fmt.Println(nicks)
+
+	// status  딕셔너리 (로그인 했고, 남의 구독 상태 볼 때)
+	statuses := []TmpStatinfo{}
+	if isLogin && !itsMine {
+		// 내 구독 목록 가져옴
+		myLdb := getUserLogDb(sdb, userToken.SeqMember)
+		result = myLdb.Raw("SELECT seq_member_opponent, status FROM member_subscribes WHERE seq_member = ?", userToken.SeqMember).Scan(&statuses)
+		if corm(result, &res) {
+			return res
+		}
+		fmt.Println(statuses)
+	}
 
 	nickName := ""
 	isYou := false
+	mySubscribe := ""
 	for _, v := range info {
 		for _, k := range nicks {
 			if v.SeqMemberOpponent == k.SeqMember {
@@ -98,6 +117,22 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 				isYou = true
 			}
 		}
+		if isLogin && !itsMine {
+			isExist := false
+			for _, o := range statuses {
+				if o.SeqMemberOpponent == v.SeqMemberOpponent {
+					isExist = true
+					mySubscribe = o.Status
+					break
+				}
+			}
+			if !isExist {
+				mySubscribe = define.NONE
+			}
+		} else {
+			mySubscribe = v.Status
+		}
+
 		o.List = append(o.List, struct {
 			SeqMember   int64  "json:\"seq_member\""
 			NickName    string "json:\"nick_name\""
@@ -107,13 +142,18 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 			SeqMember:   int64(v.SeqMemberOpponent),
 			NickName:    nickName,
 			IsYou:       isYou,
-			MySubscribe: v.Status,
+			MySubscribe: mySubscribe,
 		})
 	}
 
 	res.Data = o
 
 	return res
+}
+
+type TmpStatinfo struct {
+	SeqMemberOpponent int64
+	Status            string
 }
 
 type TmpMembinfo struct {

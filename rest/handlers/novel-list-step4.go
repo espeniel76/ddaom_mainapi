@@ -22,6 +22,7 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
+	_sort := Cp(req.Parameters, "sort")
 
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
@@ -52,7 +53,14 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step4 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
 		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`)
-	query.WriteString(" ORDER BY ns.seq_novel_step4 DESC")
+	switch _sort {
+	case define.LIKE:
+		query.WriteString(" ORDER BY ns.cnt_like DESC, ns.updated_at DESC")
+	case define.RECENT:
+		fallthrough
+	default:
+		query.WriteString(" ORDER BY ns.updated_at DESC")
+	}
 	query.WriteString(" LIMIT ?, ?")
 	step4ResTmp := []Step4ResTmp{}
 	result = masterDB.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step4ResTmp)

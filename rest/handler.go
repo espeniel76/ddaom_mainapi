@@ -18,6 +18,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/auth/info", common(handlers.AuthInfo))
 	mux.HandleFunc("/auth/authentication", common(handlers.AuthAuthentication))
 	mux.HandleFunc("/auth/authentication/set", common(handlers.AuthAuthenticationSet))
+	mux.HandleFunc("/auth/withdrawal", common(handlers.AuthWithdrawal))
 
 	// 주제어
 	mux.HandleFunc("/keyword", common(handlers.Keyword))
