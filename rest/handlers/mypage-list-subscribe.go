@@ -88,6 +88,8 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+	fmt.Println(seqs)
+	fmt.Println(nicks)
 
 	// status  딕셔너리 (로그인 했고, 남의 구독 상태 볼 때)
 	statuses := []TmpStatinfo{}
@@ -104,31 +106,48 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	nickName := ""
 	isYou := false
 	mySubscribe := ""
+	// 구독 정보 순회
 	for _, v := range info {
+		// 닉네임 할당
 		for _, k := range nicks {
 			if v.SeqMemberOpponent == k.SeqMember {
+
 				nickName = k.NickName
 				break
 			}
 		}
 		isYou = false
+		// 로그인 유저이고
 		if userToken != nil {
+			// 목록에 있는게 너다
 			if v.SeqMemberOpponent == userToken.SeqMember {
 				isYou = true
 			}
 		}
+		// 로그인 했고, 너 구독 목록이 아니면
 		if isLogin && !itsMine {
 			isExist := false
+
+			// 내 구독 목록 순회
 			for _, o := range statuses {
+				// 내 구독 사용자와, 현재 구독 사용자가 동일하면
 				if o.SeqMemberOpponent == v.SeqMemberOpponent {
+					// 나한테도 존재하는 사용자 이며
 					isExist = true
+
+					// 나와 해당 사용자와의 구독 상황 매칭
 					mySubscribe = o.Status
 					break
 				}
 			}
+			// 내 구독 목록에 없는 사람이면
 			if !isExist {
+				// 이 사람과 나와의 관계는 none 이다
 				mySubscribe = define.NONE
 			}
+
+			// 로그인 했고, 내 구독 목록이다
+			// 로그인 안 했다
 		} else {
 			mySubscribe = v.Status
 		}

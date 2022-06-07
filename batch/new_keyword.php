@@ -50,7 +50,7 @@ if (sizeof($listToken) < 1) {
 }
 
 // 3. 발송
-$body = "❝{$newKeyword["keyword"]}❞ 신규 주제어가 등록되었습니다. 작가님의 이야기를 들려주세요.";
+$body = "\"{$newKeyword["keyword"]}\" 신규 주제어가 등록되었습니다. 작가님의 이야기를 들려주세요.";
 for ($i = 0; $i < sizeof($listToken); $i++) {
 	$o = $listToken[$i];
 
