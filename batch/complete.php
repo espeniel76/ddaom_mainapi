@@ -354,9 +354,10 @@ function sendPushBefore($conn, $seqMember, $title, $step, $seqNovelFinish)
 	$token = getToken($conn, $seqMember);
 	sendPush($token, $body, $seqAlarm, $seqNovelFinish);
 
-	$sql = "SELECT push_token FROM members WHERE seq_member = {$seqMember}";
-	$result = mysqli_query($conn, $sql);
-	$o = mysqli_fetch_assoc($result);
+	// 이거 왜 함?
+	// $sql = "SELECT push_token FROM members WHERE seq_member = {$seqMember}";
+	// $result = mysqli_query($conn, $sql);
+	// $o = mysqli_fetch_assoc($result);
 }
 
 function sendPush($token, $body, $seqAlarm, $valueAlarm)

@@ -11,6 +11,7 @@ type Member struct {
 	ProfileImageUrl string    `gorm:"type:varchar(512)" json:"profile_image_url"`
 	SnsType         string    `gorm:"type:ENUM('KAKAO','NAVER','FACEBOOK','GOOGLE','APPLE'); DEFAULT:'GOOGLE'" json:"sns_type"`
 	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
+	BlockYn         bool      `gorm:"default:false" json:"block_yn"`
 	UserLevel       int8      `gorm:"default:5" json:"user_level"`
 	AllocatedDb     int8      `json:"allocted_db"`
 	CreatedAt       time.Time `json:"created_at"`
