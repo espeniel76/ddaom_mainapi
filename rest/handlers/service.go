@@ -118,6 +118,12 @@ func ServiceInquiryList(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 
@@ -129,7 +135,9 @@ func ServiceInquiryList(req *domain.CommonRequest) domain.CommonResponse {
 
 	var totalData int64
 	sdb := db.List[define.DSN_SLAVE]
-	result := sdb.Model(schemas.ServiceInquiry{}).Count(&totalData)
+	result := sdb.Model(schemas.ServiceInquiry{}).
+		Where("seq_member = ?", userToken.SeqMember).
+		Count(&totalData)
 	if corm(result, &res) {
 		return res
 	}
@@ -150,6 +158,7 @@ func ServiceInquiryList(req *domain.CommonRequest) domain.CommonResponse {
 			UNIX_TIMESTAMP(created_at) * 1000 AS created_at,
 			UNIX_TIMESTAMP(updated_at) * 1000 AS updated_at
 		`).
+		Where("seq_member = ?", userToken.SeqMember).
 		Order("seq_service_inquiry DESC").
 		Offset(int(limitStart)).
 		Limit(int(_sizePerPage)).

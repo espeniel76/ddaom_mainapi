@@ -31,8 +31,10 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	masterDB := db.List[define.DSN_MASTER]
 	var query bytes.Buffer
 	query.WriteString(`
-		SELECT ns.seq_novel_step1
-		FROM novel_step1 ns
+		SELECT
+			COUNT(ns.seq_novel_step1)
+		FROM
+			novel_step1 ns
 		INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword
 		WHERE NOW() BETWEEN k.start_date AND k.end_date
 		AND ns.active_yn = true AND k.active_yn = true AND k.seq_keyword = ? AND ns.temp_yn = false AND ns.deleted_yn = false

@@ -139,3 +139,15 @@ type ListLive struct {
 	SeqColor      int64  `json:"seq_color"`
 	Title         string `json:"title"`
 }
+type ListPopular struct {
+	SeqNovelFinish int64  `json:"seq_novel_finish"`
+	SeqImage       int64  `json:"seq_image"`
+	SeqColor       int64  `json:"seq_color"`
+	Title          string `json:"title"`
+}
+
+type ListPopularWriter struct {
+	SeqMember    int64  `json:"seq_member"`
+	NickName     string `json:"nick_name"`
+	ProfilePhoto string `json:"profile_photo"`
+}

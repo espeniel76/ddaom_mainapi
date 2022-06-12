@@ -29,9 +29,10 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	var totalData int64
 	sdb := db.List[define.DSN_SLAVE]
-	result := sdb.Model(schemas.NovelFinish{}).Where("active_yn = true").Count(&totalData)
-	if corm(result, &res) {
-		return res
+	if _seqGenre > 0 {
+		sdb.Model(schemas.NovelFinish{}).Where("active_yn = true AND seq_genre = ?", _seqGenre).Count(&totalData)
+	} else {
+		sdb.Model(schemas.NovelFinish{}).Where("active_yn = true").Count(&totalData)
 	}
 
 	novelListFinishRes := NovelListFinishRes{
@@ -61,7 +62,7 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 		query.WriteString(" ORDER BY cnt_like DESC")
 	}
 	query.WriteString(" LIMIT ?, ?")
-	result = sdb.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListFinishRes.List)
+	result := sdb.Raw(query.String(), limitStart, _sizePerPage).Find(&novelListFinishRes.List)
 	if corm(result, &res) {
 		return res
 	}

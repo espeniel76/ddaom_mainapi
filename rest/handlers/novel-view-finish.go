@@ -135,6 +135,8 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	res.Data = novelViewFinishRes
 
+	cacheMainPopular()
+
 	return res
 }
 

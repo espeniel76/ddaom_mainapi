@@ -158,6 +158,8 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		pushSubscribe(userToken.SeqMember, int64(_seqMember))
 	}
 
+	cacheMainPopularWriter()
+
 	return res
 }
 

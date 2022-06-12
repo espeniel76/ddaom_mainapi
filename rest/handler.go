@@ -25,6 +25,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/skin", common(handlers.Skin))
 	mux.HandleFunc("/genre", common(handlers.Genre))
 	mux.HandleFunc("/assets", common(handlers.Assets))
+	// mux.HandleFunc("/assets2", common(handlers.Assets2))
 
 	// 소설 등록
 	mux.HandleFunc("/novel/check/title", common(handlers.NovelCheckTitle))

@@ -109,10 +109,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", _seqKeyword)
-		if corm(result, &res) {
-			return res
-		}
+		addKeywordCnt(_seqKeyword)
 		_seqNovelStep1 = novelWriteStep1.SeqNovelStep1
 	} else { // 업데이트
 
@@ -146,6 +143,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
+		cacheMainLive(_seqKeyword)
 		pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
@@ -195,10 +193,10 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
-		result = mdb.Exec("UPDATE novel_step1 SET cnt_step2 = cnt_step2 + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
-		if corm(result, &res) {
-			return res
+		if !_tempYn {
+			mdb.Exec("UPDATE novel_step1 SET cnt_step2 = cnt_step2 + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
 		}
+
 		novelStep2 := schemas.NovelStep2{
 			SeqNovelStep1: _seqNovelStep1,
 			SeqMember:     userToken.SeqMember,
@@ -210,11 +208,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
-		if corm(result, &res) {
-			return res
-		}
-
+		addKeywordCnt(seqKeyword)
 		// step 2 단계 글 기존
 	} else {
 		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
@@ -301,14 +295,12 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		result = mdb.Exec("UPDATE novel_step1 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step1 = ?", seqNovelStep1)
-		if corm(result, &res) {
-			return res
+
+		if !_tempYn {
+			result = mdb.Exec("UPDATE novel_step1 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step1 = ?", seqNovelStep1)
+			result = mdb.Exec("UPDATE novel_step2 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
 		}
-		result = mdb.Exec("UPDATE novel_step2 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
-		if corm(result, &res) {
-			return res
-		}
+
 		novelStep3 := schemas.NovelStep3{
 			SeqNovelStep1: seqNovelStep1,
 			SeqNovelStep2: _seqNovelStep2,
@@ -321,10 +313,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
-		if corm(result, &res) {
-			return res
-		}
+		addKeywordCnt(seqKeyword)
 		_seqNovelStep3 = novelStep3.SeqNovelStep3
 	} else {
 		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
@@ -412,18 +401,12 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		result = mdb.Exec("UPDATE novel_step1 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step1 = ?", novelStep3.SeqNovelStep1)
-		if corm(result, &res) {
-			return res
+		if !_tempYn {
+			mdb.Exec("UPDATE novel_step1 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step1 = ?", novelStep3.SeqNovelStep1)
+			mdb.Exec("UPDATE novel_step2 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step2 = ?", novelStep3.SeqNovelStep2)
+			mdb.Exec("UPDATE novel_step3 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step3 = ?", _seqNovelStep3)
 		}
-		result = mdb.Exec("UPDATE novel_step2 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step2 = ?", novelStep3.SeqNovelStep2)
-		if corm(result, &res) {
-			return res
-		}
-		result = mdb.Exec("UPDATE novel_step3 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step3 = ?", _seqNovelStep3)
-		if corm(result, &res) {
-			return res
-		}
+
 		novelStep4 := schemas.NovelStep4{
 			SeqNovelStep1: novelStep3.SeqNovelStep1,
 			SeqNovelStep2: novelStep3.SeqNovelStep2,
@@ -437,10 +420,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		result = mdb.Exec("UPDATE keywords SET cnt_total = cnt_total + 1 WHERE seq_keyword = ?", seqKeyword)
-		if corm(result, &res) {
-			return res
-		}
+		addKeywordCnt(seqKeyword)
 		_seqNovelStep4 = novelStep4.SeqNovelStep4
 	} else {
 		seqKeyword := getSeqKeyword(4, int64(_seqNovelStep4))
