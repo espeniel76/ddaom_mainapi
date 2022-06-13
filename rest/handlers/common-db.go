@@ -239,8 +239,9 @@ func addKeywordCnt(seqKeyword int64) {
 		Where("seq_keyword = ?", seqKeyword).
 		Update("cnt_total", totalCnt)
 
-	// redis update
+	// redis update (step1 novel count)
 	memdb.Zadd("CACHES:ASSET:COUNT", totalCnt, seqKeyword)
+
 }
 
 // novel-save (완)

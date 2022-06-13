@@ -36,6 +36,7 @@ const (
 	OTHER_USER              = "OTHER_USER"
 	INACTIVE_KEYWORD        = "INACTIVE_KEYWORD"
 	NO_EXIST_USER           = "NO_EXIST_USER"
+	CACHE_ERROR             = "CACHE_ERROR"
 )
 
 // const LIST_PER_PAGE = 2

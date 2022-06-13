@@ -1,12 +1,9 @@
 package handlers
 
 import (
-	"ddaom/db"
-	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/memdb"
 	"encoding/json"
-	"strconv"
 )
 
 func Main(req *domain.CommonRequest) domain.CommonResponse {
@@ -135,26 +132,30 @@ type MainRes struct {
 func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	_seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
+	// _seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
 
-	sdb := db.List[define.DSN_SLAVE]
+	// sdb := db.List[define.DSN_SLAVE]
 	mainRes := ListLiveRes{}
 
-	query := `
-	SELECT
-		seq_novel_step1,
-		seq_image,
-		seq_color,
-		title
-	FROM novel_step1
-	WHERE active_yn = true AND seq_keyword = ? AND temp_yn = false AND deleted_yn = false
-	ORDER BY created_at DESC
-	LIMIT 10
-	`
-	result := sdb.Raw(query, _seqKeyword).Scan(&mainRes.ListLive)
-	if corm(result, &res) {
-		return res
-	}
+	// 연재중인 소설 (오늘 주제어 키워드)
+	list, _ := memdb.Get("CACHES:MAIN:LIST_LIVE:" + req.Vars["seq_keyword"])
+	json.Unmarshal([]byte(list), &mainRes.ListLive)
+
+	// query := `
+	// SELECT
+	// 	seq_novel_step1,
+	// 	seq_image,
+	// 	seq_color,
+	// 	title
+	// FROM novel_step1
+	// WHERE active_yn = true AND seq_keyword = ? AND temp_yn = false AND deleted_yn = false
+	// ORDER BY created_at DESC
+	// LIMIT 10
+	// `
+	// result := sdb.Raw(query, _seqKeyword).Scan(&mainRes.ListLive)
+	// if corm(result, &res) {
+	// 	return res
+	// }
 	res.Data = mainRes
 
 	return res

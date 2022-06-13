@@ -6,9 +6,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/memdb"
-	"ddaom/tools"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -19,7 +17,9 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 
 	assets, err := memdb.Get("CACHES:ASSET:LIST")
 	if err != nil {
-		fmt.Println("redis 없을 시 처리")
+		res.ResultCode = define.CACHE_ERROR
+		res.ErrorDesc = err.Error()
+		return res
 	}
 
 	data := AssetRes{}
@@ -55,11 +55,104 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 		data.ListKeyword[i].CntTotal = num
 	}
 
-	//
-
 	res.Data = data
 
 	return res
+}
+
+type AssetRes struct {
+	ListKeyword []struct {
+		SeqKeyword int64  `json:"seq_keyword"`
+		Keyword    string `json:"keyword"`
+		StartDate  int64  `json:"start_date"`
+		EndDate    int64  `json:"end_date"`
+		CntTotal   int64  `json:"cnt_total"`
+	} `json:"list_keyword"`
+	ListImage []struct {
+		SeqImage int64  `json:"seq_image"`
+		Image    string `json:"image"`
+	} `json:"list_image"`
+	ListColor []struct {
+		SeqColor int64  `json:"seq_color"`
+		Color    string `json:"color"`
+	} `json:"list_color"`
+	ListGenre []struct {
+		SeqGenre int64  `json:"seq_genre"`
+		Genre    string `json:"genre"`
+	} `json:"list_genre"`
+	ListSlang       []string `json:"list_slang"`
+	ListCategoryFaq []struct {
+		SeqCategoryFaq int64  `json:"seq_category_faq"`
+		CategoryFaq    string `json:"category_faq"`
+	} `json:"list_category_faq"`
+	UrlPrivacyPolicy  string `json:"url_privacy_policy"`
+	UrlTermsOfService string `json:"url_terms_of_service"`
+}
+
+func Keyword(req *domain.CommonRequest) domain.CommonResponse {
+	var res = domain.CommonResponse{}
+	keywords, err := memdb.Get("CACHES:ASSET:LIST:KEYWORD")
+	if err != nil {
+		res.ResultCode = define.CACHE_ERROR
+		res.ErrorDesc = err.Error()
+		return res
+	}
+
+	data := KeywordRes{}
+	json.Unmarshal([]byte(keywords), &data.List)
+
+	var list []interface{}
+	nowDate := time.Now().UnixMilli()
+	keywordRes := KeywordRes{}
+	list = append(list, "CACHES:ASSET:COUNT")
+	for i := 0; i < len(data.List); i++ {
+		o := data.List[i]
+
+		// 실시간 카운트 위한 인덱스 추출
+		list = append(list, o.SeqKeyword)
+
+		// 실시간 주제어 정보
+		if o.StartDate <= nowDate && o.EndDate > nowDate {
+			keywordRes.List = append(keywordRes.List, struct {
+				SeqKeyword int64  "json:\"seq_keyword\""
+				Keyword    string "json:\"keyword\""
+				StartDate  int64  "json:\"start_date\""
+				EndDate    int64  "json:\"end_date\""
+				CntTotal   int64  "json:\"cnt_total\""
+			}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, StartDate: o.StartDate, EndDate: o.EndDate, CntTotal: o.CntTotal})
+		}
+	}
+
+	// 실시간 카운트 정보
+	data.List = keywordRes.List
+	result, err := memdb.ZMSCORE(list...)
+	for i := 0; i < len(data.List); i++ {
+		num, _ := strconv.ParseInt(result[i], 10, 64)
+		data.List[i].CntTotal = num
+	}
+	res.Data = data
+
+	return res
+}
+
+type KeywordDate struct {
+	SeqKeyword    int64  `json:"seq_keyword"`
+	Keyword       string `json:"keyword"`
+	ViewStartDate string `json:"view_start_date"`
+	ViewEndDate   string `json:"view_end_date"`
+	StartDate     time.Time
+	EndDate       time.Time
+	CntTotal      int64 `json:"cnt_total"`
+}
+
+type KeywordRes struct {
+	List []struct {
+		SeqKeyword int64  `json:"seq_keyword"`
+		Keyword    string `json:"keyword"`
+		StartDate  int64  `json:"start_date"`
+		EndDate    int64  `json:"end_date"`
+		CntTotal   int64  `json:"cnt_total"`
+	} `json:"list"`
 }
 
 // func Assets(req *domain.CommonRequest) domain.CommonResponse {
@@ -148,99 +241,50 @@ func Assets(req *domain.CommonRequest) domain.CommonResponse {
 // 	return res
 // }
 
-type AssetRes struct {
-	ListKeyword []struct {
-		SeqKeyword int64  `json:"seq_keyword"`
-		Keyword    string `json:"keyword"`
-		StartDate  int64  `json:"start_date"`
-		EndDate    int64  `json:"end_date"`
-		CntTotal   int64  `json:"cnt_total"`
-	} `json:"list_keyword"`
-	ListImage []struct {
-		SeqImage int64  `json:"seq_image"`
-		Image    string `json:"image"`
-	} `json:"list_image"`
-	ListColor []struct {
-		SeqColor int64  `json:"seq_color"`
-		Color    string `json:"color"`
-	} `json:"list_color"`
-	ListGenre []struct {
-		SeqGenre int64  `json:"seq_genre"`
-		Genre    string `json:"genre"`
-	} `json:"list_genre"`
-	ListSlang       []string `json:"list_slang"`
-	ListCategoryFaq []struct {
-		SeqCategoryFaq int64  `json:"seq_category_faq"`
-		CategoryFaq    string `json:"category_faq"`
-	} `json:"list_category_faq"`
-	UrlPrivicyPolicy  string `json:"url_privicy_policy"`
-	UrlTermsOfService string `json:"url_terms_of_service"`
-}
+// func Keyword(req *domain.CommonRequest) domain.CommonResponse {
 
-func Keyword(req *domain.CommonRequest) domain.CommonResponse {
+// 	var res = domain.CommonResponse{}
 
-	var res = domain.CommonResponse{}
+// 	// 오늘 날짜
+// 	today, _ := strconv.Atoi(tools.TodayFormattedDate())
+// 	fmt.Println(today)
 
-	// 오늘 날짜
-	today, _ := strconv.Atoi(tools.TodayFormattedDate())
-	fmt.Println(today)
+// 	// 데이터 가져온다.
+// 	sdb := db.List[define.DSN_SLAVE]
+// 	query := `
+// 		SELECT
+// 			seq_keyword,
+// 			keyword,
+// 			start_date AS view_start_date,
+// 			end_date AS view_end_date,
+// 			start_date,
+// 			end_date,
+// 			cnt_total
+// 		FROM ddaom.keywords
+// 		WHERE active_yn = true AND NOW() BETWEEN start_date AND end_date
+// 		ORDER BY seq_keyword DESC
+// 	`
+// 	keywordDate := []KeywordDate{}
+// 	result := sdb.Raw(query).Scan(&keywordDate)
+// 	if corm(result, &res) {
+// 		return res
+// 	}
+// 	keywordRes := KeywordRes{}
+// 	for i := 0; i < len(keywordDate); i++ {
+// 		o := keywordDate[i]
+// 		keywordRes.List = append(keywordRes.List, struct {
+// 			SeqKeyword int64  "json:\"seq_keyword\""
+// 			Keyword    string "json:\"keyword\""
+// 			StartDate  int64  "json:\"start_date\""
+// 			EndDate    int64  "json:\"end_date\""
+// 			CntTotal   int64  "json:\"cnt_total\""
+// 		}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, StartDate: o.StartDate.UnixMilli(), EndDate: o.EndDate.UnixMilli(), CntTotal: o.CntTotal})
+// 	}
 
-	// 데이터 가져온다.
-	sdb := db.List[define.DSN_SLAVE]
-	query := `
-		SELECT
-			seq_keyword,
-			keyword,
-			start_date AS view_start_date,
-			end_date AS view_end_date,
-			start_date,
-			end_date,
-			cnt_total
-		FROM ddaom.keywords
-		WHERE active_yn = true AND NOW() BETWEEN start_date AND end_date
-		ORDER BY seq_keyword DESC
-	`
-	keywordDate := []KeywordDate{}
-	result := sdb.Raw(query).Scan(&keywordDate)
-	if corm(result, &res) {
-		return res
-	}
-	keywordRes := KeywordRes{}
-	for i := 0; i < len(keywordDate); i++ {
-		o := keywordDate[i]
-		keywordRes.List = append(keywordRes.List, struct {
-			SeqKeyword int64  "json:\"seq_keyword\""
-			Keyword    string "json:\"keyword\""
-			StartDate  int64  "json:\"start_date\""
-			EndDate    int64  "json:\"end_date\""
-			CntTotal   int64  "json:\"cnt_total\""
-		}{SeqKeyword: o.SeqKeyword, Keyword: o.Keyword, StartDate: o.StartDate.UnixMilli(), EndDate: o.EndDate.UnixMilli(), CntTotal: o.CntTotal})
-	}
+// 	res.Data = keywordRes
 
-	res.Data = keywordRes
-
-	return res
-}
-
-type KeywordDate struct {
-	SeqKeyword    int64  `json:"seq_keyword"`
-	Keyword       string `json:"keyword"`
-	ViewStartDate string `json:"view_start_date"`
-	ViewEndDate   string `json:"view_end_date"`
-	StartDate     time.Time
-	EndDate       time.Time
-	CntTotal      int64 `json:"cnt_total"`
-}
-
-type KeywordRes struct {
-	List []struct {
-		SeqKeyword int64  `json:"seq_keyword"`
-		Keyword    string `json:"keyword"`
-		StartDate  int64  `json:"start_date"`
-		EndDate    int64  `json:"end_date"`
-		CntTotal   int64  `json:"cnt_total"`
-	} `json:"list"`
-}
+// 	return res
+// }
 
 func Skin(req *domain.CommonRequest) domain.CommonResponse {
 

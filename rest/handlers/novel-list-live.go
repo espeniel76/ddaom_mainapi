@@ -73,7 +73,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	if _seqGenre > 0 {
 		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}
-	query.WriteString(" ORDER BY ns.seq_novel_step1 DESC")
+	query.WriteString(" ORDER BY ns.updated_at DESC")
 	query.WriteString(" LIMIT ?, ?")
 	result = masterDB.Raw(query.String(), _seqKeyword, limitStart, _sizePerPage).Find(&novelListLiveRes.List)
 	if result.Error != nil {
