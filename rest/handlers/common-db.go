@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/appleboy/go-fcm"
 	"gorm.io/gorm"
@@ -242,6 +243,7 @@ func addKeywordCnt(seqKeyword int64) {
 	memdb.Zadd("CACHES:ASSET:COUNT", totalCnt, seqKeyword)
 }
 
+// novel-save (완)
 func cacheMainLive(seqKeyword int64) {
 	sdb := db.List[define.DSN_SLAVE]
 	listLive := []ListLive{}
@@ -258,9 +260,11 @@ func cacheMainLive(seqKeyword int64) {
 	`
 	sdb.Raw(query, seqKeyword).Scan(&listLive)
 	j, _ := json.Marshal(listLive)
-	memdb.Set("CACHES:MAIN:LIST_LIVE", string(j))
+	memdb.Set("CACHES:MAIN:LIST_LIVE:"+strconv.FormatInt(seqKeyword, 10), string(j))
 }
 
+// novel-view-finish (view cnt, 완)
+// complete batch (like cnt, 완)
 func cacheMainPopular() {
 	sdb := db.List[define.DSN_SLAVE]
 	listPopular := []ListPopular{}
@@ -280,10 +284,12 @@ func cacheMainPopular() {
 	memdb.Set("CACHES:MAIN:LIST_POPULAR", string(j))
 }
 
+// novel-subscribe (subscribe cnt)
+// like step1~4 (like cnt)
 func cacheMainPopularWriter() {
 	sdb := db.List[define.DSN_SLAVE]
 	listPopularWriter := []ListPopularWriter{}
-	query := "SELECT seq_member, nick_name, profile_photo FROM member_details ORDER BY cnt_subscribe DESC LIMIT 10"
+	query := "SELECT seq_member, nick_name, profile_photo FROM member_details ORDER BY cnt_like DESC, cnt_subscribe DESC LIMIT 10"
 	sdb.Raw(query).Scan(&listPopularWriter)
 	j, _ := json.Marshal(listPopularWriter)
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))

@@ -44,6 +44,11 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+
+	// 작가 seq
+	var seqMemberWriter int64
+	mdb.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", _seqNovelStep2).Select("seq_member").Scan(&seqMemberWriter)
+
 	if MemberLikeStep2.SeqMemberLike == 0 { // 존재하지 않음
 		result = ldb.Create(&schemas.MemberLikeStep2{
 			SeqMember:     userToken.SeqMember,
@@ -60,7 +65,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 		}
 		myLike = true
 		cnt++
-		mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
+		updateKeywordMemberLike(seqMemberWriter, seqKeyword, "PLUS")
 	} else { // 존재함
 		if MemberLikeStep2.LikeYn {
 			result = ldb.Model(&schemas.MemberLikeStep2{}).
@@ -75,7 +80,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 			}
 			myLike = false
 			cnt--
-			mdb.Exec("UPDATE keywords SET cnt_like = cnt_like - 1 WHERE seq_keyword = ?", seqKeyword)
+			updateKeywordMemberLike(seqMemberWriter, seqKeyword, "MINUS")
 		} else {
 			result = ldb.Model(&schemas.MemberLikeStep2{}).
 				Where("seq_member = ? AND seq_novel_step2 = ?", userToken.SeqMember, _seqNovelStep2).
@@ -89,7 +94,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 			}
 			myLike = true
 			cnt++
-			mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
+			updateKeywordMemberLike(seqMemberWriter, seqKeyword, "PLUS")
 		}
 	}
 
@@ -102,6 +107,8 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	if myLike {
 		pushLike(2, int64(_seqNovelStep2), userToken.SeqMember)
 	}
+
+	cacheMainPopularWriter()
 
 	return res
 }

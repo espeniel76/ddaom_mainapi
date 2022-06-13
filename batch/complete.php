@@ -303,7 +303,27 @@ if ($isRun) {
 		$sql = "UPDATE keyword_choice_firsts SET finish_yn = true, updated_at = NOW() WHERE seq_keyword_choice_first = {$oChoice["seq_keyword_choice_first"]}";
 		mysqli_query($conn, $sql);
 
-		// 6.3.1. push
+		// 6.3.1. 인기작 redis cache (for main)
+		$sql =
+			"SELECT seq_novel_finish, seq_image, seq_color, title FROM novel_finishes WHERE active_yn = true ORDER BY cnt_like DESC, cnt_view DESC LIMIT 10";
+		$rets = mysqli_query($conn, $sql);
+		$list = [];
+		while ($main = mysqli_fetch_assoc($rets)) {
+			$list[] = $main;
+		}
+		$redis->set("CACHES:MAIN:LIST_POPULAR", json_encode($list, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
+
+		// 6.3.2. 인기작 redis cache (for main)
+		$sql =
+			"SELECT seq_novel_finish, seq_image, seq_color, title FROM novel_finishes WHERE active_yn = true ORDER BY cnt_like DESC, cnt_view DESC LIMIT 10";
+		$rets = mysqli_query($conn, $sql);
+		$list = [];
+		while ($main = mysqli_fetch_assoc($rets)) {
+			$list[] = $main;
+		}
+		$redis->set("CACHES:MAIN:LIST_FINISH", json_encode($list, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK));
+
+		// 6.3.3. push
 		sendPushBefore($conn, $seq_member_step1, $title, 1, $seqNovelFinish);
 		sendPushBefore($conn, $seq_member_step2, $title, 2, $seqNovelFinish);
 		sendPushBefore($conn, $seq_member_step3, $title, 3, $seqNovelFinish);

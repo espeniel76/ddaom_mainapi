@@ -48,6 +48,11 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+
+	// 작가 seq
+	var seqMemberWriter int64
+	mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Select("seq_member").Scan(&seqMemberWriter)
+
 	if memberLikeStep1.SeqMemberLike == 0 { // 존재하지 않음
 		// 1. 로그넣기
 		result = ldb.Create(&schemas.MemberLikeStep1{
@@ -66,7 +71,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 		}
 		myLike = true
 		cnt++
-		mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
+		updateKeywordMemberLike(seqMemberWriter, seqKeyword, "PLUS")
 	} else { // 존재함
 		// 1. 좋아요 상태
 		if memberLikeStep1.LikeYn {
@@ -82,7 +87,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 			}
 			myLike = false
 			cnt--
-			mdb.Exec("UPDATE keywords SET cnt_like = cnt_like - 1 WHERE seq_keyword = ?", seqKeyword)
+			updateKeywordMemberLike(seqMemberWriter, seqKeyword, "MINUS")
 		} else {
 			result = ldb.Model(&schemas.MemberLikeStep1{}).
 				Where("seq_member = ? AND seq_novel_step1 = ?", userToken.SeqMember, _seqNovelStep1).
@@ -97,6 +102,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 			myLike = true
 			cnt++
 			mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
+			updateKeywordMemberLike(seqMemberWriter, seqKeyword, "PLUS")
 		}
 
 	}
@@ -111,7 +117,21 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 		pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
 	}
 
+	cacheMainPopularWriter()
+
 	return res
+}
+
+func updateKeywordMemberLike(seqMember int64, seqKeyword int64, direction string) {
+	mdb := db.List[define.DSN_MASTER]
+	if direction == "PLUS" {
+		mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
+		mdb.Exec("UPDATE member_details SET cnt_like = cnt_like + 1 WHERE seq_member = ?", seqMember)
+	} else {
+		mdb.Exec("UPDATE keywords SET cnt_like = cnt_like - 1 WHERE seq_keyword = ?", seqKeyword)
+		mdb.Exec("UPDATE member_details SET cnt_like = cnt_like - 1 WHERE seq_member = ?", seqMember)
+	}
+
 }
 
 func pushLike(step int8, seqNovel int64, seqMember int64) {
