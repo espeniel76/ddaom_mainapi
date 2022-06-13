@@ -78,9 +78,17 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// 가용 키워드 검사
+	// 가용 키워드/이미지/컬러 검사
 	if isAbleKeyword(_seqKeyword) != true {
 		res.ResultCode = define.INACTIVE_KEYWORD
+		return res
+	}
+	if isAbleImage(_seqImage) != true {
+		res.ResultCode = define.INACTIVE_IMAGE
+		return res
+	}
+	if isAbleColor(_seqColor) != true {
+		res.ResultCode = define.INACTIVE_COLOR
 		return res
 	}
 

@@ -140,6 +140,26 @@ func isAbleKeyword(seqKeyword int64) bool {
 		return false
 	}
 }
+func isAbleImage(seqImage int64) bool {
+	sdb := db.List[define.DSN_SLAVE]
+	image := schemas.Image{}
+	sdb.Model(&image).Where("seq_image = ? AND active_yn = true", seqImage).Scan(&image)
+	if image.SeqImage > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+func isAbleColor(seqColor int64) bool {
+	sdb := db.List[define.DSN_SLAVE]
+	color := schemas.Color{}
+	sdb.Model(&color).Where("seq_color = ? AND active_yn = true", seqColor).Scan(&color)
+	if color.SeqColor > 0 {
+		return true
+	} else {
+		return false
+	}
+}
 
 func getUserInfo(seqMember int64) schemas.MemberDetail {
 	sdb := db.List[define.DSN_SLAVE]
