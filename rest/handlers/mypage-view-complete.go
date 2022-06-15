@@ -20,7 +20,7 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 	switch _step {
 	case 1:
 		result := sdb.Model(schemas.NovelStep1{}).
-			Select("title, content, true AS my_like, cnt_like, 1 AS step, UNIX_TIMESTAMP(created_at) * 1000 AS created_at, deleted_yn").
+			Select("title, content, true AS my_like, cnt_like, 1 AS step, UNIX_TIMESTAMP(created_at) * 1000 AS created_at, deleted_yn, seq_keyword, seq_genre").
 			Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", _seqNovel).
 			Scan(&o)
 		if corm(result, &res) {
@@ -37,7 +37,9 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 				ns2.cnt_like,
 				2 AS step,
 				UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
-				ns2.deleted_yn
+				ns2.deleted_yn,
+				ns1.seq_keyword,
+				ns1.seq_genre
 			FROM novel_step2 ns2 INNER JOIN novel_step1 ns1
 			ON ns2.seq_novel_step1 = ns1.seq_novel_step1
 			WHERE ns2.seq_novel_step2 = ? AND ns2.active_yn = true AND ns2.temp_yn = false
@@ -57,7 +59,9 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 				ns3.cnt_like,
 				3 AS step,
 				UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
-				ns3.deleted_yn
+				ns3.deleted_yn,
+				ns1.seq_keyword,
+				ns1.seq_genre
 			FROM novel_step3 ns3 INNER JOIN novel_step1 ns1
 			ON ns3.seq_novel_step1 = ns1.seq_novel_step1
 			WHERE ns3.seq_novel_step3 = ? AND ns3.active_yn = true AND ns3.temp_yn = false
@@ -77,7 +81,9 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 				ns4.cnt_like,
 				4 AS step,
 				UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
-				ns4.deleted_yn
+				ns4.deleted_yn,
+				ns1.seq_keyword,
+				ns1.seq_genre
 			FROM novel_step4 ns4 INNER JOIN novel_step1 ns1
 			ON ns4.seq_novel_step1 = ns1.seq_novel_step1
 			WHERE ns4.seq_novel_step4 = ? AND ns4.active_yn = true AND ns4.temp_yn = false
@@ -94,11 +100,13 @@ func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 type MypageViewCompleteRes struct {
-	Title     string  `json:"title"`
-	Content   string  `json:"content"`
-	CreatedAt float64 `json:"created_at"`
-	MyLike    bool    `json:"my_like"`
-	CntLike   int     `json:"cnt_like"`
-	Step      int     `json:"step"`
-	DeletedYn bool    `json:"deleted_yn"`
+	Title      string  `json:"title"`
+	Content    string  `json:"content"`
+	CreatedAt  float64 `json:"created_at"`
+	MyLike     bool    `json:"my_like"`
+	CntLike    int     `json:"cnt_like"`
+	Step       int     `json:"step"`
+	DeletedYn  bool    `json:"deleted_yn"`
+	SeqKeyword int     `json:"seq_keyword"`
+	SeqGenre   int     `json:"seq_genre"`
 }

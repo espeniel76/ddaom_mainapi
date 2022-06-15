@@ -177,11 +177,22 @@
 		]
 	},
 	"/auth/withdrawal": {
-		"allow_method": "GET",
-		"data_type": "text/plain",
+		"allow_method": "POST",
+		"data_type": "application/json",
 		"require_token": false,
 		"user_level": 5,
-		"require_parameters": []
+		"require_parameters": [
+			{
+				"name": "reason_type",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason",
+				"type": "string",
+				"required": true
+			}
+		]
 	},
 
 	"/assets": {

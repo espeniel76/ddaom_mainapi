@@ -139,12 +139,13 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			seq_genre = ?,
 			seq_image = ?,
 			seq_color = ?,
+			seq_keyword = ?,
 			title = ?,
 			content = ?,
 			temp_yn = ?
 		WHERE seq_novel_step1 = ?
 		`
-		result = mdb.Exec(query, _seqGenre, _seqImage, _seqColor, _title, _content, _tempYn, _seqNovelStep1)
+		result = mdb.Exec(query, _seqGenre, _seqImage, _seqColor, _seqKeyword, _title, _content, _tempYn, _seqNovelStep1)
 		if corm(result, &res) {
 			return res
 		}
