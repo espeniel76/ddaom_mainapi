@@ -20,12 +20,12 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/auth/authentication/set", common(handlers.AuthAuthenticationSet))
 	mux.HandleFunc("/auth/withdrawal", common(handlers.AuthWithdrawal))
 
-	// 주제어
-	mux.HandleFunc("/keyword", common(handlers.Keyword))
-	mux.HandleFunc("/skin", common(handlers.Skin))
-	mux.HandleFunc("/genre", common(handlers.Genre))
+	// 리소스
 	mux.HandleFunc("/assets", common(handlers.Assets))
-	// mux.HandleFunc("/assets2", common(handlers.Assets2))
+	mux.HandleFunc("/keyword", common(handlers.Keyword))
+	mux.HandleFunc("/asset/images", common(handlers.ImageColors))
+	mux.HandleFunc("/asset/genres", common(handlers.Genres))
+	mux.HandleFunc("/asset/slangs", common(handlers.Slangs))
 
 	// 소설 등록
 	mux.HandleFunc("/novel/check/title", common(handlers.NovelCheckTitle))

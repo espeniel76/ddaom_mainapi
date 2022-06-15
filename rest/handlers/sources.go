@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
-	"ddaom/domain/schemas"
 	"ddaom/memdb"
 	"encoding/json"
 	"strconv"
@@ -70,10 +68,12 @@ type AssetRes struct {
 	} `json:"list_keyword"`
 	ListImage []struct {
 		SeqImage int64  `json:"seq_image"`
+		ActiveYn bool   `json:"active_yn"`
 		Image    string `json:"image"`
 	} `json:"list_image"`
 	ListColor []struct {
 		SeqColor int64  `json:"seq_color"`
+		ActiveYn bool   `json:"active_yn"`
 		Color    string `json:"color"`
 	} `json:"list_color"`
 	ListGenre []struct {
@@ -153,6 +153,92 @@ type KeywordRes struct {
 		EndDate    int64  `json:"end_date"`
 		CntTotal   int64  `json:"cnt_total"`
 	} `json:"list"`
+}
+
+func ImageColors(req *domain.CommonRequest) domain.CommonResponse {
+	var res = domain.CommonResponse{}
+	images, err := memdb.Get("CACHES:ASSET:LIST:IMAGE")
+	if err != nil {
+		res.ResultCode = define.CACHE_ERROR
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	colors, err := memdb.Get("CACHES:ASSET:LIST:COLOR")
+	if err != nil {
+		res.ResultCode = define.CACHE_ERROR
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	list := ImageColorRes{}
+	json.Unmarshal([]byte(images), &list.ListImage)
+	json.Unmarshal([]byte(colors), &list.ListColor)
+
+	res.Data = list
+
+	return res
+}
+
+type ImageColorRes struct {
+	ListImage []struct {
+		SeqImage int64  `json:"seq_image"`
+		ActiveYn bool   `json:"active_yn"`
+		Image    string `json:"image"`
+	} `json:"list_image"`
+	ListColor []struct {
+		SeqColor int64  `json:"seq_color"`
+		ActiveYn bool   `json:"active_yn"`
+		Color    string `json:"color"`
+	} `json:"list_color"`
+}
+
+func Genres(req *domain.CommonRequest) domain.CommonResponse {
+	var res = domain.CommonResponse{}
+	genres, err := memdb.Get("CACHES:ASSET:LIST:GENRE")
+	if err != nil {
+		res.ResultCode = define.CACHE_ERROR
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	list := GenreRes{}
+	json.Unmarshal([]byte(genres), &list.ListGenre)
+
+	res.Data = list
+
+	return res
+}
+
+type GenreRes struct {
+	ListGenre []struct {
+		SeqGenre int64  `json:"seq_genre"`
+		Genre    string `json:"genre"`
+	} `json:"list_genre"`
+}
+
+func Slangs(req *domain.CommonRequest) domain.CommonResponse {
+	var res = domain.CommonResponse{}
+	slangs, err := memdb.Get("CACHES:ASSET:LIST:SLANG")
+	if err != nil {
+		res.ResultCode = define.CACHE_ERROR
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	list := SlangRes{}
+	json.Unmarshal([]byte(slangs), &list.ListSlang)
+
+	res.Data = list
+
+	return res
+}
+
+type SlangRes struct {
+	ListSlang []string `json:"list_slang"`
+}
+
+type CategoryFaqRes struct {
+	ListCategoryFaq []struct {
+		SeqCategoryFaq int64  `json:"seq_category_faq"`
+		CategoryFaq    string `json:"category_faq"`
+	} `json:"list_category_faq"`
 }
 
 // func Assets(req *domain.CommonRequest) domain.CommonResponse {
@@ -286,50 +372,50 @@ type KeywordRes struct {
 // 	return res
 // }
 
-func Skin(req *domain.CommonRequest) domain.CommonResponse {
+// func Skin(req *domain.CommonRequest) domain.CommonResponse {
 
-	var res = domain.CommonResponse{}
+// 	var res = domain.CommonResponse{}
 
-	// 데이터 가져온다.
-	sdb := db.List[define.DSN_SLAVE]
-	skinRes := SkinRes{}
-	result := sdb.Model(&schemas.Image{}).Where("active_yn = true").Find(&skinRes.List)
-	if corm(result, &res) {
-		return res
-	}
+// 	// 데이터 가져온다.
+// 	sdb := db.List[define.DSN_SLAVE]
+// 	skinRes := SkinRes{}
+// 	result := sdb.Model(&schemas.Image{}).Where("active_yn = true").Find(&skinRes.List)
+// 	if corm(result, &res) {
+// 		return res
+// 	}
 
-	res.Data = skinRes
+// 	res.Data = skinRes
 
-	return res
-}
+// 	return res
+// }
 
-type SkinRes struct {
-	List []struct {
-		SeqImage int64  `json:"seq_image"`
-		Image    string `json:"image"`
-	} `json:"list"`
-}
+// type SkinRes struct {
+// 	List []struct {
+// 		SeqImage int64  `json:"seq_image"`
+// 		Image    string `json:"image"`
+// 	} `json:"list"`
+// }
 
-func Genre(req *domain.CommonRequest) domain.CommonResponse {
+// func Genre(req *domain.CommonRequest) domain.CommonResponse {
 
-	var res = domain.CommonResponse{}
+// 	var res = domain.CommonResponse{}
 
-	// 데이터 가져온다.
-	sdb := db.List[define.DSN_SLAVE]
-	genreRes := GenreRes{}
-	result := sdb.Model(&schemas.Genre{}).Where("active_yn = true").Find(&genreRes.List)
-	if corm(result, &res) {
-		return res
-	}
+// 	// 데이터 가져온다.
+// 	sdb := db.List[define.DSN_SLAVE]
+// 	genreRes := GenreRes{}
+// 	result := sdb.Model(&schemas.Genre{}).Where("active_yn = true").Find(&genreRes.List)
+// 	if corm(result, &res) {
+// 		return res
+// 	}
 
-	res.Data = genreRes
+// 	res.Data = genreRes
 
-	return res
-}
+// 	return res
+// }
 
-type GenreRes struct {
-	List []struct {
-		SeqGenre int64  `json:"seq_genre"`
-		Genre    string `json:"genre"`
-	} `json:"list"`
-}
+// type GenreRes struct {
+// 	List []struct {
+// 		SeqGenre int64  `json:"seq_genre"`
+// 		Genre    string `json:"genre"`
+// 	} `json:"list"`
+// }

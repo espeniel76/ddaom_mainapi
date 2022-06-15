@@ -16,12 +16,12 @@ const (
 	USER_TOKEN = "USER:TOKEN:"
 )
 
-func initRedis() {
-	// init redis connection pool
-	initPool()
+func RunRedis() {
+	initRedis()
+}
 
-	// bootstramp some data to redis
-	// initStore()
+func initRedis() {
+	initPool()
 }
 
 func initPool() {
@@ -208,8 +208,4 @@ func Execute(exec string, values ...interface{}) ([]string, error) {
 		return nil, err
 	}
 	return s, nil
-}
-
-func RunRedis() {
-	initRedis()
 }
