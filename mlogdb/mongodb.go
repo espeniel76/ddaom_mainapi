@@ -30,7 +30,7 @@ func initMongoDb() {
 	// defer close()
 }
 
-func close() {
+func Close() {
 	defer cancel()
 	defer func() {
 		if err := client.Disconnect(ctx); err != nil {
@@ -41,7 +41,7 @@ func close() {
 
 func connect(uri string) {
 	clientOptions := options.Client().ApplyURI(uri)
-	// clientOptions.SetMaxPoolSize(100)
+	clientOptions.SetMaxPoolSize(100)
 	clientOptions.SetMinPoolSize(10)
 	clientOptions.SetMaxConnIdleTime(10 * time.Second)
 	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)

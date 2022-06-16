@@ -376,7 +376,7 @@ type ServiceInquiry struct {
 type Notice struct {
 	SeqNotice      int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_notice"`
 	SeqMemberAdmin int64     `gorm:"index" json:"seq_member_admin"`
-	Title          string    `json:"title"`
+	Title          string    `gorm:"type:varchar(256)" json:"title"`
 	Content        string    `json:"content"`
 	ActiveYn       bool      `gorm:"default:false" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`

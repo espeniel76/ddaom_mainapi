@@ -32,17 +32,12 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	// 		{"req", string(out)},
 	// 		{"res", 0},
 	// 	}
-	// 	insertOneResult, _ := mlogdb.InsertOne(document)
-	// 	fmt.Println(insertOneResult)
+	// 	_, err := mlogdb.InsertOne(document)
+	// 	if err != nil {
+	// 		fmt.Println(err.Error())
+	// 	}
+
 	// }
-	// document := bson.D{
-	// 	{"seq_user", 0},
-	// 	{"api_num", 2},
-	// 	{"req", req},
-	// 	{"res", 95},
-	// }
-	// _, err := mlogdb.InsertOne(document)
-	// fmt.Println(err)
 
 	var res = domain.CommonResponse{}
 
