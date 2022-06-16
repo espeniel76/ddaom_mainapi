@@ -14,6 +14,7 @@ import (
 func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		// fmt.Println(r.Header)
 		// s, err := ioutil.ReadAll(r.Body)
 		// fmt.Println(err)
 		// fmt.Println(string(s))
@@ -125,8 +126,6 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 				case http.MethodPost:
 					req.Parameters = *requestParameters
 					req.Vars = mux.Vars(r)
-
-					fmt.Println(req)
 					res = f(&req)
 				}
 			}

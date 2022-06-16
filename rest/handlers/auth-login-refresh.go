@@ -31,6 +31,7 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	mdb := db.List[define.DSN_MASTER]
 	if pushToken != "<nil>" && pushToken != "" {
 		mdb.Model(schemas.Member{}).Where("seq_member = ?", userToken.SeqMember).Update("push_token", pushToken)
+		setPushToken(userToken.SeqMember, pushToken)
 	}
 
 	// 2. 신규 access_token 과 refresh_token 을 발급한다.

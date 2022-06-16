@@ -25,13 +25,15 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	masterDB := db.List[define.DSN_MASTER]
+	mdb := db.List[define.DSN_MASTER]
 	memberDetail := &schemas.MemberDetail{}
-	result := masterDB.Where("nick_name = ?", _nickName).Find(&memberDetail)
+	memberDetailBackup := &schemas.MemberDetailBackup{}
+
+	// 기존 사용중인 닉네임 검색
+	result := mdb.Where("nick_name = ?", _nickName).Find(&memberDetail)
 	if corm(result, &res) {
 		return res
 	}
-
 	if memberDetail.SeqMember > 0 {
 		if memberDetail.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.ALREADY_EXISTS_NICKNAME
@@ -40,19 +42,30 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
+	// 탈퇴 사용자 닉네임 검색
+	result = mdb.Where("nick_name = ?", _nickName).Find(&memberDetailBackup)
+	if corm(result, &res) {
+		return res
+	}
+	if memberDetailBackup.SeqMember > 0 {
+		res.ResultCode = define.ALREADY_EXISTS_NICKNAME
+		res.ErrorDesc = "Nickname that already exists"
+		return res
+	}
+
 	member := &schemas.Member{}
-	result = masterDB.Find(&member, "email", userToken.Email)
+	result = mdb.Find(&member, "email", userToken.Email)
 	if corm(result, &res) {
 		return res
 	}
 
-	result = masterDB.Find(&memberDetail, "seq_member", userToken.SeqMember)
+	result = mdb.Find(&memberDetail, "seq_member", userToken.SeqMember)
 	if corm(result, &res) {
 		return res
 	}
 
 	if memberDetail.SeqMember > 0 {
-		result = masterDB.Model(memberDetail).
+		result = mdb.Model(memberDetail).
 			Where("seq_member = ?", userToken.SeqMember).
 			Update("nick_name", _nickName)
 		if corm(result, &res) {
@@ -65,7 +78,8 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
 		memberDetail.AuthenticationAt = time.Now()
 		memberDetail.NickName = _nickName
-		result = masterDB.Create(&memberDetail)
+		memberDetail.DeletedAt = time.Now()
+		result = mdb.Create(&memberDetail)
 		if corm(result, &res) {
 			return res
 		}

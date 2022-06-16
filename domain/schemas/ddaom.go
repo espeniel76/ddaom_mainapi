@@ -17,6 +17,8 @@ type Member struct {
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	PushToken       string    `gorm:"type:varchar(5120)" json:"push_token"`
+	DeletedYn       bool      `gorm:"default:false" json:"deleted_yn"`
+	DeletedAt       time.Time `json:"deleted_at"`
 }
 
 type MemberDetail struct {
@@ -45,6 +47,16 @@ type MemberDetail struct {
 	CntLike          int64     `gorm:"default:0" json:"cnt_like"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
+	DeletedYn        bool      `gorm:"default:false" json:"deleted_yn"`
+	DeletedAt        time.Time `json:"deleted_at"`
+}
+
+type MemberPushToken struct {
+	SeqMemberPushToken int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_push_token"`
+	SeqMember          int64     `gorm:"index:uk_push_token,unique" json:"seq_member"`
+	PushToken          string    `gorm:"index:uk_push_token,unique,type:varchar(5120)" json:"push_token"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"` // Last USE
 }
 
 type MemberBackup struct {
@@ -60,6 +72,8 @@ type MemberBackup struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 	DeletedAt       time.Time `json:"deleted_at"`
 	PushToken       string    `gorm:"type:varchar(5120)" json:"push_token"`
+	ReasonType      int8      `gorm:"default:0" json:"reason_type"`
+	Reason          string    `json:"reason"`
 }
 
 type MemberDetailBackup struct {

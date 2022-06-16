@@ -75,13 +75,11 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 		for _, v := range novelListFinishRes.List {
 			seqNovelFinishes = append(seqNovelFinishes, v.SeqNovelFinish)
 		}
-		fmt.Println(seqNovelFinishes)
 		ldb := GetMyLogDb(userToken.Allocated)
 		ldb.Model(schemas.MemberBookmark{}).
-			Where("seq_novel_finish IN (?) AND bookmark_yn = true", seqNovelFinishes).
+			Where("seq_member = ? AND seq_novel_finish IN (?) AND bookmark_yn = true", userToken.SeqMember, seqNovelFinishes).
 			Select("seq_novel_finish").
 			Scan(&listMy)
-		// fmt.Println(listMy)
 		for i := 0; i < len(novelListFinishRes.List); i++ {
 			o := novelListFinishRes.List[i]
 			for _, v := range listMy {

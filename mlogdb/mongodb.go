@@ -1,4 +1,4 @@
-package mdb
+package mlogdb
 
 import (
 	"context"
@@ -16,6 +16,7 @@ var cancel context.CancelFunc
 var err error
 
 const dataBase = "ddaom_log"
+const col = "actions"
 
 func RunMongodb() {
 	initMongoDb()
@@ -40,44 +41,44 @@ func close() {
 
 func connect(uri string) {
 	clientOptions := options.Client().ApplyURI(uri)
-	clientOptions.SetMaxPoolSize(100)
+	// clientOptions.SetMaxPoolSize(100)
 	clientOptions.SetMinPoolSize(10)
 	clientOptions.SetMaxConnIdleTime(10 * time.Second)
 	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
 	client, err = mongo.Connect(ctx, clientOptions)
 }
 
-func InsertOne(col string, doc interface{}) (*mongo.InsertOneResult, error) {
+func InsertOne(doc interface{}) (*mongo.InsertOneResult, error) {
 	collection := client.Database(dataBase).Collection(col)
 	result, err := collection.InsertOne(ctx, doc)
 	return result, err
 }
 
-func InsertMany(col string, docs []interface{}) (*mongo.InsertManyResult, error) {
+func InsertMany(docs []interface{}) (*mongo.InsertManyResult, error) {
 	collection := client.Database(dataBase).Collection(col)
 	result, err := collection.InsertMany(ctx, docs)
 	return result, err
 }
 
-func UpdateOne(col string, filter, update interface{}) (result *mongo.UpdateResult, err error) {
+func UpdateOne(filter, update interface{}) (result *mongo.UpdateResult, err error) {
 	collection := client.Database(dataBase).Collection(col)
 	result, err = collection.UpdateOne(ctx, filter, update)
 	return
 }
 
-func UpdateMany(col string, filter, update interface{}) (result *mongo.UpdateResult, err error) {
+func UpdateMany(filter, update interface{}) (result *mongo.UpdateResult, err error) {
 	collection := client.Database(dataBase).Collection(col)
 	result, err = collection.UpdateMany(ctx, filter, update)
 	return
 }
 
-func DeleteOne(col string, query interface{}) (result *mongo.DeleteResult, err error) {
+func DeleteOne(query interface{}) (result *mongo.DeleteResult, err error) {
 	collection := client.Database(dataBase).Collection(col)
 	result, err = collection.DeleteOne(ctx, query)
 	return
 }
 
-func DeleteMany(col string, query interface{}) (result *mongo.DeleteResult, err error) {
+func DeleteMany(query interface{}) (result *mongo.DeleteResult, err error) {
 	collection := client.Database(dataBase).Collection(col)
 	result, err = collection.DeleteMany(ctx, query)
 	return

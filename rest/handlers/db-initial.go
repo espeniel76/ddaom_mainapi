@@ -25,6 +25,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 
 	mdb.AutoMigrate(schemas.Member{})
 	mdb.AutoMigrate(schemas.MemberDetail{})
+	mdb.AutoMigrate(schemas.MemberPushToken{})
 
 	mdb.AutoMigrate(schemas.MemberBackup{})
 	mdb.AutoMigrate(schemas.MemberDetailBackup{})

@@ -4,7 +4,6 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
-	"ddaom/domain/schemas"
 )
 
 func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
@@ -17,6 +16,9 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 	mdb := db.List[define.DSN_MASTER]
+
+	_reasonType := CpInt64(req.Parameters, "reason_type")
+	_reason := Cp(req.Parameters, "reason")
 
 	// 데이터 존재 여부 체크
 	isExist := db.ExistRow(mdb, "members", "email", userToken.Email)
@@ -39,7 +41,9 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 			created_at,
 			updated_at,
 			push_token,
-			deleted_at
+			deleted_at,
+			reason_type,
+			reason
 		)
 		SELECT
 			seq_member,
@@ -53,13 +57,15 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 			created_at,
 			updated_at,
 			push_token,
-			NOW()
+			NOW(),
+			?,
+			?
 		FROM
 			members
 		WHERE
 			seq_member = ?
 	`
-	result := mdb.Exec(query, userToken.SeqMember)
+	result := mdb.Exec(query, _reasonType, _reason, userToken.SeqMember)
 	if corm(result, &res) {
 		return res
 	}
@@ -129,23 +135,26 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// 원본 데이터 삭제
-	result = mdb.Where("seq_member = ?", userToken.SeqMember).Delete(&schemas.Member{})
-	if corm(result, &res) {
-		return res
-	}
-	result = mdb.Where("seq_member = ?", userToken.SeqMember).Delete(&schemas.MemberDetail{})
-	if corm(result, &res) {
-		return res
-	}
+	// 원본 데이터 삭제 (삭제 -> 업데이트로 변경)
+	// result = mdb.Where("seq_member = ?", userToken.SeqMember).Delete(&schemas.Member{})
+	// if corm(result, &res) {
+	// 	return res
+	// }
+	// result = mdb.Where("seq_member = ?", userToken.SeqMember).Delete(&schemas.MemberDetail{})
+	// if corm(result, &res) {
+	// 	return res
+	// }
+	// 윈본 데이터 업데이트
+	mdb.Exec("UPDATE members SET deleted_yn = true, deleted_at = NOW() WHERE seq_member = ?", userToken.SeqMember)
+	mdb.Exec("UPDATE member_details SET deleted_yn = true, deleted_at = NOW() WHERE seq_member = ?", userToken.SeqMember)
 
 	// 각종 탈퇴 프로세스 처리
 	/*
-			- 개인정보 파기 : 수집한 이메일, 회원정보수정으로 최종 저장된 이메일 (즉시)
-		    - 재가입 즉시/반복 가능
-		    - 닉네임 재사용 불가
-		    - 진행중인 주제어에 작성한 글이 있는 경우, 삭제 처리 (admin에서 확인 가능 / 삭제된 소설로 처리)
-		    - 완결 소설은 삭제하지 않으며, admin에서 삭제된 소설로 처리하지 않음
+			- 개인정보 파기 : 수집한 이메일, 회원정보수정으로 최종 저장된 이메일 (즉시) *
+		    - 재가입 즉시/반복 가능 *
+		    - 닉네임 재사용 불가 (회원가입 시 /auth/login/detail)
+		    - 진행중인 주제어에 작성한 글이 있는 경우, 삭제 처리 (admin에서 확인 가능 / 삭제된 소설로 처리) <= 보류
+		    - 완결 소설은 삭제하지 않으며, admin에서 삭제된 소설로 처리하지 않음 *
 		    - 완결 소설 하단에 작가 정보에서 클릭 불가하도록 비활성화 처리
 		    - Front에서는 완결 소설, 작가명만 노출됨 / admin에서 탈퇴 회원의 정보 개인정보 제외한 전체 확인 가능
 		    - 메인 화면의 ‘인기 작가 리스트’에 있는 경우, 삭제 처리
