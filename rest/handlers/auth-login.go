@@ -21,24 +21,6 @@ type Contact struct {
 
 func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
-	// mongo DB 를 이용하여, 누가/무엇을/어떻게/결과는
-	// 을 저장하고자 했으나, 실력이 미천하여, 좀더 학습 후 적용 (우선 순위에서 밀림)
-	// out, err := json.Marshal(req.Parameters)
-	// if err == nil {
-	// 	fmt.Println(string(out))
-	// 	document := bson.D{
-	// 		{"seq_user", 0},
-	// 		{"api_num", 2},
-	// 		{"req", string(out)},
-	// 		{"res", 0},
-	// 	}
-	// 	_, err := mlogdb.InsertOne(document)
-	// 	if err != nil {
-	// 		fmt.Println(err.Error())
-	// 	}
-
-	// }
-
 	var res = domain.CommonResponse{}
 
 	mdb := db.List[define.DSN_MASTER]

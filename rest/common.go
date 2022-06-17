@@ -22,6 +22,8 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		// fmt.Println(err)
 		// fmt.Println(string(s))
 
+		intervalStart := time.Now().UnixMilli()
+
 		var req = domain.CommonRequest{}
 		var res = domain.CommonResponse{}
 		isCheck := true
@@ -136,6 +138,8 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 				res.ResultCode = define.OK
 			}
 		}
+		intervalEnd := time.Now().UnixMilli()
+		interval := intervalEnd - intervalStart
 
 		// action log (무겁지 않을까...?)
 		go func() {
@@ -145,48 +149,46 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 				seqMember = int(userToken.SeqMember)
 			}
 
-			var _req string
+			// var _req string
 			var _res string
 
-			fmt.Println(req.HttpRquest.Method)
-			if contentType == "multipart/form-data" {
-				outReq, _ := json.Marshal(req.Parameters)
-				_req = string(outReq)
-			} else {
-				switch r.Method {
-				case http.MethodGet:
-					outReq, _ := json.Marshal(req.Vars)
-					_req = string(outReq)
-				case http.MethodPut:
-					fallthrough
-				case http.MethodPatch:
-					fallthrough
-				case http.MethodDelete:
-					fallthrough
-				case http.MethodPost:
-					outReq, _ := json.Marshal(req.Parameters)
-					_req = string(outReq)
-				}
-			}
+			// fmt.Println(req.HttpRquest.Method)
+			// if contentType == "multipart/form-data" {
+			// 	// outReq, _ := json.Marshal(req.Parameters)
+			// 	// _req = string(outReq)
+			// } else {
+			// 	switch r.Method {
+			// 	case http.MethodGet:
+			// 		// outReq, _ := json.Marshal(req.Vars)
+			// 		// _req = string(outReq)
+			// 	case http.MethodPut:
+			// 		fallthrough
+			// 	case http.MethodPatch:
+			// 		fallthrough
+			// 	case http.MethodDelete:
+			// 		fallthrough
+			// 	case http.MethodPost:
+			// 		// outReq, _ := json.Marshal(req.Parameters)
+			// 		// _req = string(outReq)
+			// 	}
+			// }
 
 			outRes, err := json.Marshal(res.ResultCode)
 			if err == nil {
 				_res = string(outRes)
-				mlogdb.RunMongodb()
 				document := bson.D{
 					{"seq_user", seqMember},
-					{"token", req.JWToken},
+					{"method", r.Method},
 					{"url", req.HttpRquest.URL},
-					{"req", _req},
+					{"delay", interval},
+					// {"req", _req},
 					{"res", _res},
 					{"at", time.Now()},
 				}
-				// fmt.Println(document)
 				_, err := mlogdb.InsertOne(document)
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				mlogdb.Close()
 			}
 		}()
 
