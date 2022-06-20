@@ -34,15 +34,19 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		ns1.cnt_view,
 		ns1.seq_member AS seq_member_step1,
 		(SELECT nick_name FROM member_details WHERE seq_member = ns1.seq_member) AS nick_name_step1,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step1) AS deleted_yn_step1,
 		ns1.content AS content_step1,
 		ns2.seq_member AS seq_member_step2,
 		(SELECT nick_name FROM member_details WHERE seq_member = ns1.seq_member) AS nick_name_step2,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step2) AS deleted_yn_step2,
 		ns2.content AS content_step2,
 		ns3.seq_member AS seq_member_step3,
 		(SELECT nick_name FROM member_details WHERE seq_member = ns1.seq_member) AS nick_name_step3,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step3) AS deleted_yn_step3,
 		ns3.content AS content_step3,
 		ns4.seq_member AS seq_member_step4,
 		(SELECT nick_name FROM member_details WHERE seq_member = ns1.seq_member) AS nick_name_step4,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step4) AS deleted_yn_step4,
 		ns4.content AS content_step4,
 		nf.created_at
 	FROM novel_finishes nf
@@ -107,37 +111,45 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		Step1: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep1,
 			NickName:  n.NickNameStep1,
+			DeletedYn: n.DeletedYnStep1,
 			Content:   n.ContentStep1,
 		},
 		Step2: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep2,
 			NickName:  n.NickNameStep2,
+			DeletedYn: n.DeletedYnStep2,
 			Content:   n.ContentStep2,
 		},
 		Step3: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep3,
 			NickName:  n.NickNameStep3,
+			DeletedYn: n.DeletedYnStep3,
 			Content:   n.ContentStep3,
 		},
 		Step4: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep4,
 			NickName:  n.NickNameStep4,
+			DeletedYn: n.DeletedYnStep4,
 			Content:   n.ContentStep4,
 		},
 	}

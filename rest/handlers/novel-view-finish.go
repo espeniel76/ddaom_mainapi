@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"time"
 )
 
@@ -35,15 +36,19 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		cnt_view,
 		seq_member_step1,
 		nick_name_step1,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step1) AS deleted_yn_step1,
 		content1 AS content_step1,
 		seq_member_step2,
 		nick_name_step2,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step2) AS deleted_yn_step2,
 		content2 AS content_step2,
 		seq_member_step3,
 		nick_name_step3,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step3) AS deleted_yn_step3,
 		content3 AS content_step3,
 		seq_member_step4,
 		nick_name_step4,
+		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step4) AS deleted_yn_step4,
 		content4 AS content_step4,
 		created_at
 	FROM novel_finishes nf
@@ -98,40 +103,50 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		Step1: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep1,
 			NickName:  n.NickNameStep1,
+			DeletedYn: n.DeletedYnStep1,
 			Content:   n.ContentStep1,
 		},
 		Step2: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep2,
 			NickName:  n.NickNameStep2,
+			DeletedYn: n.DeletedYnStep2,
 			Content:   n.ContentStep2,
 		},
 		Step3: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep3,
 			NickName:  n.NickNameStep3,
+			DeletedYn: n.DeletedYnStep3,
 			Content:   n.ContentStep3,
 		},
 		Step4: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
+			DeletedYn bool   "json:\"deleted_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep4,
 			NickName:  n.NickNameStep4,
+			DeletedYn: n.DeletedYnStep4,
 			Content:   n.ContentStep4,
 		},
 	}
+
+	fmt.Println(novelViewFinishRes)
 
 	res.Data = novelViewFinishRes
 
@@ -158,15 +173,19 @@ type NovelViewFinishData struct {
 	CreatedAt      time.Time `json:"created_at"`
 	SeqMemberStep1 int64     `json:"seq_member_step1"`
 	NickNameStep1  string    `json:"nick_name_step1"`
+	DeletedYnStep1 bool      `json:"deleted_yn_step1"`
 	ContentStep1   string    `json:"content_step1"`
 	SeqMemberStep2 int64     `json:"seq_member_step2"`
 	NickNameStep2  string    `json:"nick_name_step2"`
+	DeletedYnStep2 bool      `json:"deleted_yn_step2"`
 	ContentStep2   string    `json:"content_step2"`
 	SeqMemberStep3 int64     `json:"seq_member_step3"`
 	NickNameStep3  string    `json:"nick_name_step3"`
+	DeletedYnStep3 bool      `json:"deleted_yn_step3"`
 	ContentStep3   string    `json:"content_step3"`
 	SeqMemberStep4 int64     `json:"seq_member_step4"`
 	NickNameStep4  string    `json:"nick_name_step4"`
+	DeletedYnStep4 bool      `json:"deleted_yn_step4"`
 	ContentStep4   string    `json:"content_step4"`
 }
 
@@ -185,21 +204,25 @@ type NovelViewFinishRes struct {
 	Step1          struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
+		DeletedYn bool   `json:"deleted_yn"`
 		Content   string `json:"content"`
 	} `json:"step1"`
 	Step2 struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
+		DeletedYn bool   `json:"deleted_yn"`
 		Content   string `json:"content"`
 	} `json:"step2"`
 	Step3 struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
+		DeletedYn bool   `json:"deleted_yn"`
 		Content   string `json:"content"`
 	} `json:"step3"`
 	Step4 struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
+		DeletedYn bool   `json:"deleted_yn"`
 		Content   string `json:"content"`
 	} `json:"step4"`
 }
