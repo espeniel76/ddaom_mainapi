@@ -58,7 +58,7 @@ func ExistRow(orm *gorm.DB, table string, field string, value string) bool {
 	var o struct {
 		Found bool
 	}
-	doc := "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE " + field + " = ?) AS found"
+	doc := "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE " + field + " = ? AND deleted_yn = false) AS found"
 	orm.Raw(doc, value).Scan(&o)
 	return o.Found
 }

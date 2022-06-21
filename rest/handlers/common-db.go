@@ -310,7 +310,16 @@ func cacheMainPopular() {
 func cacheMainPopularWriter() {
 	sdb := db.List[define.DSN_SLAVE]
 	listPopularWriter := []ListPopularWriter{}
-	query := "SELECT seq_member, nick_name, profile_photo FROM member_details ORDER BY cnt_like DESC, cnt_subscribe DESC LIMIT 10"
+	query := `
+		SELECT
+			md.seq_member, md.nick_name, md.profile_photo
+		FROM
+			member_details md INNER JOIN members m ON md.seq_member = m.seq_member
+		WHERE
+			m.deleted_yn = false
+		ORDER BY
+			md.cnt_like DESC, md.cnt_subscribe DESC
+		LIMIT 10`
 	sdb.Raw(query).Scan(&listPopularWriter)
 	j, _ := json.Marshal(listPopularWriter)
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))

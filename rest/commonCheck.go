@@ -99,7 +99,7 @@ func checkRequireParameters(requestParamameter map[string]interface{}, selectFor
 
 	isExistKey := true
 	noExistParam := define.NONE
-	fmt.Println("##### Check parameters #####")
+	// fmt.Println("##### Check parameters #####")
 	for _, v := range selectFormat["require_parameters"].([]interface{}) {
 		isExistKey = false
 		require := v.(map[string]interface{})

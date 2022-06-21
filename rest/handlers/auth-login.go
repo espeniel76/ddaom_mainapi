@@ -70,8 +70,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		// 2. 탈퇴회원인가
 	} else if tmpMember.SeqMember > 0 && tmpMember.DeletedYn {
 		fmt.Println("탈퇴회원")
-		mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
-		mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
+		// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
+		// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
 		mdb.Create(member)
 
 		// 3. 기존회원인가

@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"time"
 )
 
@@ -146,7 +145,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		},
 	}
 
-	fmt.Println(novelViewFinishRes)
+	// fmt.Println(novelViewFinishRes)
 
 	res.Data = novelViewFinishRes
 
