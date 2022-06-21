@@ -42,12 +42,12 @@ func setInitialize() {
 	// }
 
 	// for REST SSL
-	go func() {
-		err := http.ListenAndServeTLS(":"+define.HTTP_PORT_SSL, "/usr/local/ssl/cert.pem", "/usr/local/ssl/key.pem", handler)
-		if err != nil {
-			log.Fatal("ListenAndServeTLS:", err)
-		}
-	}()
+	// go func() {
+	err := http.ListenAndServeTLS(":"+define.HTTP_PORT_SSL, "/usr/local/ssl/cert.pem", "/usr/local/ssl/key.pem", handler)
+	if err != nil {
+		log.Fatal("ListenAndServeTLS:", err)
+	}
+	// }()
 
 	fmt.Println("Test Edit")
 }
