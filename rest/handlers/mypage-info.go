@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"strconv"
 )
 
@@ -93,7 +92,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 구독현황
 	ldb := getUserLogDb(sdb, _seqMember)
-	fmt.Println(ldb)
+	// fmt.Println(ldb)
 	listStatus := []string{}
 	result = ldb.Model(&schemas.MemberSubscribe{}).Select("status").
 		Where("seq_member = ?", _seqMember).Scan(&listStatus)

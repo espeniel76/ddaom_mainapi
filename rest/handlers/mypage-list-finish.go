@@ -6,7 +6,6 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
-	"fmt"
 )
 
 func MypageListFinish(req *domain.CommonRequest) domain.CommonResponse {
@@ -90,7 +89,7 @@ func MypageListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	res.Data = novelListFinishRes
-	fmt.Println(novelListFinishRes)
+	// fmt.Println(novelListFinishRes)
 
 	return res
 }

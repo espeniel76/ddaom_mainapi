@@ -15,7 +15,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
-	fmt.Println(_step, _seqNovel)
+	// fmt.Println(_step, _seqNovel)
 
 	var cntTotal int64
 	var seqNovelStep1 int64

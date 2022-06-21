@@ -46,11 +46,6 @@ func MypageListTemp(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 	}
-
-	fmt.Println("#############################")
-	fmt.Println(seqKeywords)
-	fmt.Println("#############################")
-
 	var totalData int64
 	seq := userToken.SeqMember
 	query := `
