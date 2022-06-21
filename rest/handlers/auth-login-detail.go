@@ -85,5 +85,7 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
+	cacheMainPopularWriter()
+
 	return res
 }

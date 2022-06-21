@@ -194,6 +194,7 @@ type Step1Res struct {
 	NickName      string    `json:"nick_name"`
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
+	DeletedYn     bool      `json:"deleted_yn"`
 }
 type Step2Res struct {
 	SeqNovelStep2 int64     `json:"seq_novel_step2"`
@@ -202,6 +203,7 @@ type Step2Res struct {
 	CreatedAt     time.Time `json:"created_at"`
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
+	DeletedYn     bool      `json:"deleted_yn"`
 }
 type Step3Res struct {
 	SeqNovelStep3 int64     `json:"seq_novel_step3"`
@@ -210,6 +212,7 @@ type Step3Res struct {
 	CreatedAt     time.Time `json:"created_at"`
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
+	DeletedYn     bool      `json:"deleted_yn"`
 }
 type Step4Res struct {
 	SeqNovelStep4 int64     `json:"seq_novel_step4"`
@@ -218,4 +221,5 @@ type Step4Res struct {
 	CreatedAt     time.Time `json:"created_at"`
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
+	DeletedYn     bool      `json:"deleted_yn"`
 }

@@ -135,31 +135,30 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// 원본 데이터 삭제 (삭제 -> 업데이트로 변경)
-	// result = mdb.Where("seq_member = ?", userToken.SeqMember).Delete(&schemas.Member{})
-	// if corm(result, &res) {
-	// 	return res
-	// }
-	// result = mdb.Where("seq_member = ?", userToken.SeqMember).Delete(&schemas.MemberDetail{})
-	// if corm(result, &res) {
-	// 	return res
-	// }
 	// 윈본 데이터 업데이트
+	// 탈퇴 플래그 업데이트
 	mdb.Exec("UPDATE members SET deleted_yn = true, deleted_at = NOW(), email = seq_member WHERE seq_member = ?", userToken.SeqMember)
 	mdb.Exec("UPDATE member_details SET deleted_yn = true, deleted_at = NOW() WHERE seq_member = ?", userToken.SeqMember)
 
-	// 탈퇴 회원 구독 삭제 (당사자, 상대방)
 	ldb1 := db.List[define.DSN_LOG1]
-	ldb1.Exec("DELETE FROM member_subscribes WHERE seq_member = ? OR seq_member_opponent = ?", userToken.SeqMember, userToken.SeqMember)
 	ldb2 := db.List[define.DSN_LOG1]
+
+	// 탈퇴 회원 구독 삭제 (당사자, 상대방)
+	ldb1.Exec("DELETE FROM member_subscribes WHERE seq_member = ? OR seq_member_opponent = ?", userToken.SeqMember, userToken.SeqMember)
 	ldb2.Exec("DELETE FROM member_subscribes WHERE seq_member = ? OR seq_member_opponent = ?", userToken.SeqMember, userToken.SeqMember)
+
+	// 탈퇴 회원 북마크 정보 삭제
+	ldb1.Exec("DELETE FROM member_bookmarks WHERE seq_member = ?", userToken.SeqMember)
+	ldb2.Exec("DELETE FROM member_bookmarks WHERE seq_member = ?", userToken.SeqMember)
+
+	// 유명작가 캐쉬
+	cacheMainPopularWriter()
 
 	// 각종 탈퇴 프로세스 처리
 	/*
 			- 개인정보 파기 : 수집한 이메일, 회원정보수정으로 최종 저장된 이메일 (즉시) *
 		    - 재가입 즉시/반복 가능 *
 		    - 닉네임 재사용 불가 (회원가입 시 /auth/login/detail)
-		    - 진행중인 주제어에 작성한 글이 있는 경우, 삭제 처리 (admin에서 확인 가능 / 삭제된 소설로 처리) <= 보류
 		    - 완결 소설은 삭제하지 않으며, admin에서 삭제된 소설로 처리하지 않음 *
 		    - 완결 소설 하단에 작가 정보에서 클릭 불가하도록 비활성화 처리 *
 		    - Front에서는 완결 소설, 작가명만 노출됨 / admin에서 탈퇴 회원의 정보 개인정보 제외한 전체 확인 가능 *

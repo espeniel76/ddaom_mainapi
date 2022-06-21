@@ -64,9 +64,11 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		ns.content,
 		ns.cnt_like,
 		ns.seq_image,
-		ns.seq_color
+		ns.seq_color,
+		m.deleted_yn
 	FROM novel_step1 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
+	INNER JOIN members m ON md.seq_member = m.seq_member
 	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`
 	step1Res := Step1Res{}
 	result := ldb.Raw(query, seqNovelStep1).Scan(&step1Res)
@@ -90,6 +92,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		step1["content"] = step1Res.Content
 		step1["cnt_like"] = step1Res.CntLike
 		step1["my_like"] = getMyLike(userToken, 1, step1Res.SeqNovelStep1)
+		step1["deleted_yn"] = bool(step1Res.DeletedYn)
 		data["step1"] = step1
 
 		query = `
@@ -99,9 +102,11 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 			md.nick_name,
 			ns.created_at,
 			ns.content,
-			ns.cnt_like
+			ns.cnt_like,
+			m.deleted_yn
 		FROM novel_step2 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
+		INNER JOIN members m ON md.seq_member = m.seq_member
 		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 		ORDER BY ns.updated_at DESC`
 		step2Res := Step2Res{}
@@ -118,6 +123,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 			step["content"] = step2Res.Content
 			step["cnt_like"] = step2Res.CntLike
 			step["my_like"] = getMyLike(userToken, 2, step2Res.SeqNovelStep2)
+			step["deleted_yn"] = bool(step2Res.DeletedYn)
 			result = ldb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", seqNovelStep1).Count(&cntTotal)
 			if corm(result, &res) {
 				return res
@@ -132,9 +138,11 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 				md.nick_name,
 				ns.created_at,
 				ns.content,
-				ns.cnt_like
+				ns.cnt_like,
+				m.deleted_yn
 			FROM novel_step3 ns
 			INNER JOIN member_details md ON ns.seq_member = md.seq_member
+			INNER JOIN members m ON md.seq_member = m.seq_member
 			WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 			ORDER BY ns.updated_at DESC`
 			step3Res := Step3Res{}
@@ -151,6 +159,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 				step["content"] = step3Res.Content
 				step["cnt_like"] = step3Res.CntLike
 				step["my_like"] = getMyLike(userToken, 3, step3Res.SeqNovelStep3)
+				step["deleted_yn"] = bool(step3Res.DeletedYn)
 				result = ldb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", seqNovelStep1).Count(&cntTotal)
 				if corm(result, &res) {
 					return res
@@ -165,9 +174,11 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 					md.nick_name,
 					ns.created_at,
 					ns.content,
-					ns.cnt_like
+					ns.cnt_like,
+					m.deleted_yn
 				FROM novel_step4 ns
 				INNER JOIN member_details md ON ns.seq_member = md.seq_member
+				INNER JOIN members m ON md.seq_member = m.seq_member
 				WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 				ORDER BY ns.updated_at DESC`
 				step4Res := Step4Res{}
@@ -184,6 +195,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 					step["content"] = step4Res.Content
 					step["cnt_like"] = step4Res.CntLike
 					step["my_like"] = getMyLike(userToken, 4, step4Res.SeqNovelStep4)
+					step["deleted_yn"] = bool(step4Res.DeletedYn)
 					result = ldb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", seqNovelStep1).Count(&cntTotal)
 					if corm(result, &res) {
 						return res

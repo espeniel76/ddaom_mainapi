@@ -42,6 +42,9 @@ func getUserLogDb(_db *gorm.DB, seqMember int64) *gorm.DB {
 	_db.Model(schemas.Member{}).
 		Select("allocated_db").
 		Where("seq_member = ?", seqMember).Scan(&allocatedDb)
+
+	fmt.Println("-------------------------")
+	fmt.Println(allocatedDb)
 	ldb := GetMyLogDb(int8(allocatedDb))
 	return ldb
 }
