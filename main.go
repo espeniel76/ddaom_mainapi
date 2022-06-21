@@ -36,10 +36,10 @@ func setInitialize() {
 	handler := c.Handler(mux)
 
 	// // for REST HTTP
-	err := http.ListenAndServe(":"+define.HTTP_PORT, handler)
-	if err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
+	// err := http.ListenAndServe(":"+define.HTTP_PORT, handler)
+	// if err != nil {
+	// 	log.Fatal("ListenAndServe:", err)
+	// }
 
 	// for REST SSL
 	go func() {
