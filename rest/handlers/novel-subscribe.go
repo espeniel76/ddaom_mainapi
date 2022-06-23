@@ -32,8 +32,8 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	var cnt int64
 
 	mdb := db.List[define.DSN_MASTER]
-	ldbMe := GetMyLogDb(userToken.Allocated)
-	ldbYour := getUserLogDb(mdb, int64(_seqMember))
+	ldbMe := GetMyLogDbMaster(userToken.Allocated)
+	ldbYour := getUserLogDbMaster(mdb, int64(_seqMember))
 
 	// 사용자 존재 여부
 	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", _seqMember).Count(&cnt)

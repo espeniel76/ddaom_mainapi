@@ -72,11 +72,11 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	myLogDb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbSlave(userToken.Allocated)
 	var cnt int64
 	myLike := false
 	myBookmark := false
-	result = myLogDb.
+	result = ldb.
 		Model(schemas.MemberLikeStep1{}).
 		Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).
 		Count(&cnt)
@@ -86,7 +86,7 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	if cnt > 0 {
 		myLike = true
 	}
-	result = myLogDb.Model(schemas.MemberBookmark{}).
+	result = ldb.Model(schemas.MemberBookmark{}).
 		Where("seq_member = ? AND seq_novel_finish = ? AND bookmark_yn = true", userToken.SeqMember, n.SeqNovelFinish).
 		Count(&cnt)
 	if corm(result, &res) {

@@ -27,7 +27,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	var cnt int64
 	var scanCount int64
 
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbMaster(userToken.Allocated)
 	mdb := db.List[define.DSN_MASTER]
 
 	// 소설 존재 여부

@@ -102,8 +102,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
-	ldb1 := db.List[define.DSN_LOG1]
-	ldb2 := db.List[define.DSN_LOG2]
+	ldb1 := db.List[define.DSN_LOG1_MASTER]
+	ldb2 := db.List[define.DSN_LOG2_MASTER]
 	if !isExist {
 		var count1, count2 int64
 		result = ldb1.Table("member_exists").Count(&count1)

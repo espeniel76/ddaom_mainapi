@@ -25,7 +25,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	var cnt int64
 	var scanCount int64
 
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbMaster(userToken.Allocated)
 	mdb := db.List[define.DSN_MASTER]
 
 	result := mdb.Model(schemas.NovelStep2{}).Select("cnt_like").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&cnt).Count(&scanCount)

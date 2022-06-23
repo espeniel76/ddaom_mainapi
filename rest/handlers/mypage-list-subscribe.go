@@ -35,7 +35,7 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	sdb := db.List[define.DSN_SLAVE]
-	ldb := getUserLogDb(sdb, _seqMember)
+	ldb := getUserLogDbSlave(sdb, _seqMember)
 
 	// 구독현황
 	var totalData int64
@@ -88,14 +88,11 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
-	fmt.Println(seqs)
-	fmt.Println(nicks)
 
-	// status  딕셔너리 (로그인 했고, 남의 구독 상태 볼 때)
 	statuses := []TmpStatinfo{}
 	if isLogin && !itsMine {
 		// 내 구독 목록 가져옴
-		myLdb := getUserLogDb(sdb, userToken.SeqMember)
+		myLdb := getUserLogDbSlave(sdb, userToken.SeqMember)
 		result = myLdb.Raw("SELECT seq_member_opponent, status FROM member_subscribes WHERE seq_member = ?", userToken.SeqMember).Scan(&statuses)
 		if corm(result, &res) {
 			return res

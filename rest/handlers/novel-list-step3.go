@@ -103,7 +103,7 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	if userToken != nil {
 		var listSeq []int64
-		ldb := GetMyLogDb(userToken.Allocated)
+		ldb := GetMyLogDbSlave(userToken.Allocated)
 		ldb.Model(schemas.MemberLikeStep3{}).
 			Select("seq_novel_step3").
 			Where("seq_member = ? AND seq_novel_step3 IN (?) AND like_yn = true", userToken.SeqMember, seqs).

@@ -70,7 +70,7 @@ func MypageListFinish(req *domain.CommonRequest) domain.CommonResponse {
 			list = append(list, v.SeqNovelFinish)
 		}
 		var list2 []int64
-		ldb := GetMyLogDb(userToken.Allocated)
+		ldb := GetMyLogDbSlave(userToken.Allocated)
 		result = ldb.Model(schemas.MemberBookmark{}).
 			Select("seq_novel_finish").
 			Where("seq_novel_finish IN (?) AND bookmark_yn = true AND seq_member = ?", list, userToken.SeqMember).

@@ -269,7 +269,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 				seqNovelStep4s = append(seqNovelStep4s, v.SeqNovelStep4)
 			}
 		}
-		ldb := GetMyLogDb(userToken.Allocated)
+		ldb := GetMyLogDbSlave(userToken.Allocated)
 		mls1 := []schemas.MemberLikeStep1{}
 		mls2 := []schemas.MemberLikeStep2{}
 		mls3 := []schemas.MemberLikeStep3{}

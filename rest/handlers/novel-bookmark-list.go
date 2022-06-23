@@ -29,7 +29,7 @@ func NovelBookmarkList(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	sdb := db.List[define.DSN_SLAVE]
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbSlave(userToken.Allocated)
 
 	var list []int64
 	result := ldb.
@@ -108,7 +108,7 @@ func NovelBookmarkDelete(req *domain.CommonRequest) domain.CommonResponse {
 	tmp = strings.ReplaceAll(tmp, "[", "")
 	tmp = strings.ReplaceAll(tmp, "]", "")
 	tmpList := strings.Split(tmp, " ")
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbMaster(userToken.Allocated)
 	result := ldb.
 		Where("seq_member = ? AND seq_novel_finish IN (?)", userToken.SeqMember, tmpList).
 		Delete(&schemas.MemberBookmark{})

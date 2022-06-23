@@ -13,8 +13,8 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	var result error
 
 	mdb := db.List[define.DSN_MASTER]
-	ldb1 := db.List[define.DSN_LOG1]
-	ldb2 := db.List[define.DSN_LOG2]
+	ldb1 := db.List[define.DSN_LOG1_MASTER]
+	ldb2 := db.List[define.DSN_LOG2_MASTER]
 
 	mdb.AutoMigrate(schemas.Member{})
 	if result != nil {

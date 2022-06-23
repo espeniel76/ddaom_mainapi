@@ -140,8 +140,8 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 	mdb.Exec("UPDATE members SET deleted_yn = true, deleted_at = NOW(), email = seq_member WHERE seq_member = ?", userToken.SeqMember)
 	mdb.Exec("UPDATE member_details SET deleted_yn = true, deleted_at = NOW() WHERE seq_member = ?", userToken.SeqMember)
 
-	ldb1 := db.List[define.DSN_LOG1]
-	ldb2 := db.List[define.DSN_LOG1]
+	ldb1 := db.List[define.DSN_LOG1_MASTER]
+	ldb2 := db.List[define.DSN_LOG2_MASTER]
 
 	// 탈퇴 회원 구독 삭제 (당사자, 상대방)
 	ldb1.Exec("DELETE FROM member_subscribes WHERE seq_member = ? OR seq_member_opponent = ?", userToken.SeqMember, userToken.SeqMember)

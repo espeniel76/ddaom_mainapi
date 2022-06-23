@@ -15,14 +15,26 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetMyLogDb(allocated int8) *gorm.DB {
+func GetMyLogDbMaster(allocated int8) *gorm.DB {
 
 	var myLogDb *gorm.DB
 	switch allocated {
 	case 1:
-		myLogDb = db.List[define.DSN_LOG1]
+		myLogDb = db.List[define.DSN_LOG1_MASTER]
 	case 2:
-		myLogDb = db.List[define.DSN_LOG2]
+		myLogDb = db.List[define.DSN_LOG2_MASTER]
+	}
+	return myLogDb
+}
+
+func GetMyLogDbSlave(allocated int8) *gorm.DB {
+
+	var myLogDb *gorm.DB
+	switch allocated {
+	case 1:
+		myLogDb = db.List[define.DSN_LOG1_SLAVE]
+	case 2:
+		myLogDb = db.List[define.DSN_LOG2_SLAVE]
 	}
 	return myLogDb
 }
@@ -37,15 +49,21 @@ func corm(o *gorm.DB, res *domain.CommonResponse) bool {
 	return isError
 }
 
-func getUserLogDb(_db *gorm.DB, seqMember int64) *gorm.DB {
+func getUserLogDbMaster(_db *gorm.DB, seqMember int64) *gorm.DB {
 	allocatedDb := 1
 	_db.Model(schemas.Member{}).
 		Select("allocated_db").
 		Where("seq_member = ?", seqMember).Scan(&allocatedDb)
+	ldb := GetMyLogDbMaster(int8(allocatedDb))
+	return ldb
+}
 
-	// fmt.Println("-------------------------")
-	// fmt.Println(allocatedDb)
-	ldb := GetMyLogDb(int8(allocatedDb))
+func getUserLogDbSlave(_db *gorm.DB, seqMember int64) *gorm.DB {
+	allocatedDb := 1
+	_db.Model(schemas.Member{}).
+		Select("allocated_db").
+		Where("seq_member = ?", seqMember).Scan(&allocatedDb)
+	ldb := GetMyLogDbSlave(int8(allocatedDb))
 	return ldb
 }
 
@@ -53,7 +71,7 @@ func getMyLike(userToken *domain.UserToken, step int8, seqNovel int64) bool {
 	if userToken == nil {
 		return false
 	}
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbSlave(userToken.Allocated)
 	likeYn := false
 	switch step {
 	case 1:
@@ -76,7 +94,7 @@ func getMySubscribe(userToken *domain.UserToken, seqMember int64) string {
 	if userToken == nil {
 		return "NONE"
 	}
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbSlave(userToken.Allocated)
 	status := "NONE"
 	ldb.Model(schemas.MemberSubscribe{}).Select("status").Where("seq_member = ? AND seq_member_opponent = ?", userToken.SeqMember, seqMember).Scan(&status)
 	return status

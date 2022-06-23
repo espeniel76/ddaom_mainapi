@@ -478,7 +478,7 @@ func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
 	userInfo := getUserInfo(userToken.SeqMember)
 
 	// 2. 구독자 정보 로딩
-	ldb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbSlave(userToken.Allocated)
 	var listMsSeq []int64
 	ldb.Model(schemas.MemberSubscribe{}).
 		Where("seq_member = ? AND status IN ('BOTH', 'FOLLOWER')", userInfo.SeqMember).

@@ -20,8 +20,8 @@ var List = make(map[string]*gorm.DB)
 func connectMySQLPooling() {
 	List[define.DSN_MASTER] = createInstance(define.DSN_MASTER)
 	List[define.DSN_SLAVE] = createInstance(define.DSN_SLAVE)
-	List[define.DSN_LOG1] = createInstance(define.DSN_LOG1)
-	List[define.DSN_LOG2] = createInstance(define.DSN_LOG2)
+	List[define.DSN_LOG1_MASTER] = createInstance(define.DSN_LOG1_MASTER)
+	List[define.DSN_LOG2_SLAVE] = createInstance(define.DSN_LOG2_SLAVE)
 }
 
 func createInstance(dsn string) *gorm.DB {

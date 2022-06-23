@@ -147,29 +147,29 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 			seqMember = int(userToken.SeqMember)
 		}
 
-		var _req string
+		// var _req string
 		var _res string
 
-		fmt.Println(req.HttpRquest.Method)
-		if contentType == "multipart/form-data" {
-			// outReq, _ := json.Marshal(req.Parameters)
-			// _req = string(outReq)
-		} else {
-			switch r.Method {
-			case http.MethodGet:
-				// outReq, _ := json.Marshal(req.Vars)
-				// _req = string(outReq)
-			case http.MethodPut:
-				fallthrough
-			case http.MethodPatch:
-				fallthrough
-			case http.MethodDelete:
-				fallthrough
-			case http.MethodPost:
-				// outReq, _ := json.Marshal(req.Parameters)
-				// _req = string(outReq)
-			}
-		}
+		// fmt.Println(req.HttpRquest.Method)
+		// if contentType == "multipart/form-data" {
+		// 	// outReq, _ := json.Marshal(req.Parameters)
+		// 	// _req = string(outReq)
+		// } else {
+		// 	switch r.Method {
+		// 	case http.MethodGet:
+		// 		// outReq, _ := json.Marshal(req.Vars)
+		// 		// _req = string(outReq)
+		// 	case http.MethodPut:
+		// 		fallthrough
+		// 	case http.MethodPatch:
+		// 		fallthrough
+		// 	case http.MethodDelete:
+		// 		fallthrough
+		// 	case http.MethodPost:
+		// 		// outReq, _ := json.Marshal(req.Parameters)
+		// 		// _req = string(outReq)
+		// 	}
+		// }
 
 		outRes, err := json.Marshal(res.ResultCode)
 		if err == nil {

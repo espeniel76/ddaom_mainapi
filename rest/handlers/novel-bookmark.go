@@ -22,7 +22,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	myBookmark := false
 	var cnt int64
 
-	myLogDb := GetMyLogDb(userToken.Allocated)
+	ldb := GetMyLogDbMaster(userToken.Allocated)
 	masterDB := db.List[define.DSN_MASTER]
 
 	// 소설 존재 여부
@@ -40,7 +40,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 북마크 상태 확인
 	memberBookmark := schemas.MemberBookmark{}
-	result = myLogDb.Model(&memberBookmark).
+	result = ldb.Model(&memberBookmark).
 		Where("seq_novel_finish = ? AND seq_member = ?", _seqNovelFinish, userToken.SeqMember).Scan(&memberBookmark)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
@@ -49,7 +49,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	if memberBookmark.SeqMemberBookmark == 0 { // 존재하지 않음
 		// 1. 로그넣기
-		result = myLogDb.Create(&schemas.MemberBookmark{
+		result = ldb.Create(&schemas.MemberBookmark{
 			SeqMember:      userToken.SeqMember,
 			SeqNovelFinish: int64(_seqNovelFinish),
 			BookmarkYn:     true,
@@ -71,7 +71,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	} else { // 존재함
 		// 1. 북마크 상태
 		if memberBookmark.BookmarkYn {
-			result = myLogDb.Model(&schemas.MemberBookmark{}).
+			result = ldb.Model(&schemas.MemberBookmark{}).
 				Where("seq_member = ? AND seq_novel_finish = ?", userToken.SeqMember, _seqNovelFinish).
 				Update("bookmark_yn", false)
 			if result.Error != nil {
@@ -87,7 +87,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 			}
 			myBookmark = false
 		} else {
-			result = myLogDb.Model(&schemas.MemberBookmark{}).
+			result = ldb.Model(&schemas.MemberBookmark{}).
 				Where("seq_member = ? AND seq_novel_finish = ?", userToken.SeqMember, _seqNovelFinish).
 				Update("bookmark_yn", true)
 			if result.Error != nil {
