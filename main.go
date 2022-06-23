@@ -3,6 +3,7 @@ package main
 import (
 	"ddaom/db"
 	"ddaom/define"
+	"ddaom/memdb"
 	"ddaom/rest"
 	"fmt"
 	"log"
@@ -20,7 +21,7 @@ func main() {
 func setInitialize() {
 	define.SetDefineApiParse()
 	db.RunMySql()
-	// memdb.RunRedis()
+	memdb.RunRedis()
 	// mlogdb.RunMongodb()
 
 	mux := mux.NewRouter()

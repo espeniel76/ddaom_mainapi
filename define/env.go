@@ -8,24 +8,26 @@ import (
 )
 
 const (
-	HTTP_SERVER   = "http://192.168.1.20:81"
-	HTTP_PORT     = "3011"
-	HTTP_PORT_SSL = "3012"
-	DSN_MASTER    = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_SLAVE     = "espeniel:anjgkrp@tcp(localhost)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_LOG1      = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_LOG2      = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
+	HTTP_SERVER     = "http://192.168.1.20:81"
+	HTTP_PORT       = "3011"
+	HTTP_PORT_SSL   = "3012"
+	DSN_MASTER      = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_SLAVE       = "espeniel:anjgkrp@tcp(localhost)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG1_MASTER = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG1_SLAVE  = "espeniel:anjgkrp@tcp(localhost)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG2_MASTER = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG2_SLAVE  = "espeniel:anjgkrp@tcp(localhost)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_REDIS       = "redis://anjgkrp@localhost:6379"
+	DSN_MONGODB     = "mongodb://172.31.33.10:27017"
 
-	DSN_REDIS   = "redis://anjgkrp@192.168.1.20:6379"
-	DSN_MONGODB = "mongodb://192.168.1.20:27017"
+	// S3 로 변경
+	FILE_UPLOAD_PATH = "/home/samba/espeniel/www_ddaom/upload/"
+	REPLACE_PATH     = "/home/samba/espeniel/www_ddaom"
+	DEFAULT_PROFILE  = "/default.png"
 
 	JWT_ACCESS_SECRET  = "a969cefccb3c64dbdc8f19f36f4400b5b35216be30667fc2671036f0bc48040cfb11ff4ad6d3384b7de874d09b03bd4be27d2fae226ff807e3982211f8db5517"
 	JWT_REFRESH_SECRET = "d83ae8d11d2cda872b0c2d510a504c65d98eccf6f9d73df46413622042d5cc6356ada1bef8becc76adadde8e600227a0f0518c631ae3c0180ab2fef86a46b659"
 	PUSH_SERVER_KEY    = "AAAAs8DEFV4:APA91bHjJF63wpyefl-6IBMhJ0PVb0VPePwirNxes3PzRgMxg7wb1Q8ykTyzxnTrCVVMX8cE5ROxvjWJLLZ9cRw8pt5daXUsd-mxiK4jqgdVkR_XWaUW1snEXBSFFnebSR_D2L-Pn-wY"
-
-	FILE_UPLOAD_PATH = "/home/samba/espeniel/www_ddaom/upload/"
-	REPLACE_PATH     = "/home/samba/espeniel/www_ddaom"
-	DEFAULT_PROFILE  = "/default.png"
 )
 
 func GetDefineApiParse() (*map[string]interface{}, error) {
