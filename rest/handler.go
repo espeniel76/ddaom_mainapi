@@ -11,14 +11,12 @@ func Handlers(mux *mux.Router) {
 	// Initialize DB
 	mux.HandleFunc("/db/initialize", common(handlers.InitialDb)) // 1
 	// auth
-	mux.HandleFunc("/auth/login", common(handlers.AuthLogin))                          // 2
-	mux.HandleFunc("/auth/login/detail", common(handlers.AuthLoginDetail))             // 3
-	mux.HandleFunc("/auth/login/refresh", common(handlers.AuthLoginRefresh))           // 4
-	mux.HandleFunc("/auth/info/update", common(handlers.AuthInfoUpdate))               // 5
-	mux.HandleFunc("/auth/info", common(handlers.AuthInfo))                            // 6
-	mux.HandleFunc("/auth/authentication", common(handlers.AuthAuthentication))        // 7
-	mux.HandleFunc("/auth/authentication/set", common(handlers.AuthAuthenticationSet)) // 8
-	mux.HandleFunc("/auth/withdrawal", common(handlers.AuthWithdrawal))                // 9
+	mux.HandleFunc("/auth/login", common(handlers.AuthLogin))                // 2
+	mux.HandleFunc("/auth/login/detail", common(handlers.AuthLoginDetail))   // 3
+	mux.HandleFunc("/auth/login/refresh", common(handlers.AuthLoginRefresh)) // 4
+	mux.HandleFunc("/auth/info/update", common(handlers.AuthInfoUpdate))     // 5
+	mux.HandleFunc("/auth/info", common(handlers.AuthInfo))                  // 6
+	mux.HandleFunc("/auth/withdrawal", common(handlers.AuthWithdrawal))      // 9
 
 	// 리소스
 	mux.HandleFunc("/assets", common(handlers.Assets))            // 10

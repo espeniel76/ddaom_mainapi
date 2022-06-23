@@ -23,11 +23,11 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	var cnt int64
 
 	ldb := GetMyLogDbMaster(userToken.Allocated)
-	masterDB := db.List[define.DSN_MASTER]
+	mdb := db.List[define.DSN_MASTER]
 
 	// 소설 존재 여부
 	fmt.Println(cnt)
-	result := masterDB.Model(schemas.NovelFinish{}).Where("seq_novel_finish = ?", _seqNovelFinish).Count(&cnt)
+	result := mdb.Model(schemas.NovelFinish{}).Where("seq_novel_finish = ?", _seqNovelFinish).Count(&cnt)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
 		res.ErrorDesc = result.Error.Error()
@@ -61,7 +61,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		// 2. 북마크 카운트 업데이트
-		result = masterDB.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
+		result = mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
 		if result.Error != nil {
 			res.ResultCode = define.DB_ERROR_ORM
 			res.ErrorDesc = result.Error.Error()
@@ -79,7 +79,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 				res.ErrorDesc = result.Error.Error()
 				return res
 			}
-			result = masterDB.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
+			result = mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
 			if result.Error != nil {
 				res.ResultCode = define.DB_ERROR_ORM
 				res.ErrorDesc = result.Error.Error()
@@ -95,7 +95,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 				res.ErrorDesc = result.Error.Error()
 				return res
 			}
-			result = masterDB.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
+			result = mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
 			if result.Error != nil {
 				res.ResultCode = define.DB_ERROR_ORM
 				res.ErrorDesc = result.Error.Error()

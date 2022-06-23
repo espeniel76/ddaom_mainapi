@@ -4,58 +4,19 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
-	"fmt"
 	"strconv"
 )
 
 func MainTempInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-	if err != nil {
-		res.ResultCode = define.INVALID_TOKEN
-		res.ErrorDesc = err.Error()
-		return res
-	}
-	fmt.Println(userToken)
 
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
 
 	sdb := db.List[define.DSN_SLAVE]
 
-	// // 1. 스텝별로 데이터 존재 체크후 최상의 존재 가져옴
-	// query := `
-	// SELECT step, seq_novel_step1, seq_novel_step2, seq_novel_step3, seq_novel_step4, created_at
-	// FROM
-	// (
-	// 	(SELECT 1 AS step, seq_novel_step1, 0 AS seq_novel_step2, 0 AS seq_novel_step3, 0 AS seq_novel_step4, created_at
-	// 	FROM novel_step1 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-	// 	UNION ALL
-	// 	(SELECT 2 AS step, 0 AS seq_novel_step1, seq_novel_step2, 0 AS seq_novel_step3, 0 AS seq_novel_step4, created_at
-	// 	FROM novel_step2 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-	// 	UNION ALL
-	// 	(SELECT 3 AS step, 0 AS seq_novel_step1, 0 AS seq_novel_step2, seq_novel_step3, 0 AS seq_novel_step4, created_at
-	// 	FROM novel_step3 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-	// 	UNION ALL
-	// 	(SELECT 4 AS step, 0 AS seq_novel_step1, 0 AS seq_novel_step2, 0 AS seq_novel_step3, seq_novel_step4, created_at
-	// 	FROM novel_step4 ns WHERE seq_member = ? AND temp_yn = true ORDER BY created_at DESC LIMIT 1)
-	// ) AS s
-	// ORDER BY s.created_at DESC
-	// LIMIT 1
-	// `
-	// seq := userToken.SeqMember
-	// tmp := make(map[string]interface{})
-	// result := sdb.Raw(query, seq, seq, seq, seq).Scan(&tmp)
-	// if corm(result, &res) {
-	// 	return res
-	// }
 	mainTempInfoRes := MainTempInfoRes{}
-	// if tmp["step"] == nil {
-	// 	mainTempInfoRes.Step = 0
-	// 	res.Data = mainTempInfoRes
-	// 	return res
-	// } else {
 	mainTempInfoRes.Step = int64(_step)
 	qstep1 := `
 			SELECT

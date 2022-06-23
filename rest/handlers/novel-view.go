@@ -15,8 +15,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep1, _ := req.Vars["seq_novel_step1"]
 	var cntTotal int64
 
-	// mdb := db.List[define.DSN_MASTER]
-	ldb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.DSN_SLAVE]
 	// 1단계 소설 가져오기
 	query := `
 	SELECT
@@ -37,7 +36,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 	INNER JOIN members m ON md.seq_member = m.seq_member
 	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`
 	step1Res := Step1Res{}
-	result := ldb.Raw(query, _seqNovelStep1).Scan(&step1Res)
+	result := sdb.Raw(query, _seqNovelStep1).Scan(&step1Res)
 	if corm(result, &res) {
 		return res
 	}
@@ -77,7 +76,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 		ORDER BY ns.updated_at DESC`
 		step2Res := Step2Res{}
-		result = ldb.Raw(query, _seqNovelStep1).Scan(&step2Res)
+		result = sdb.Raw(query, _seqNovelStep1).Scan(&step2Res)
 		if corm(result, &res) {
 			return res
 		}
@@ -91,7 +90,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 			step["cnt_like"] = step2Res.CntLike
 			step["my_like"] = getMyLike(userToken, 2, step2Res.SeqNovelStep2)
 			step["deleted_yn"] = bool(step2Res.DeletedYn)
-			result = ldb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
+			result = sdb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
 			if corm(result, &res) {
 				return res
 			}
@@ -113,7 +112,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 			WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 			ORDER BY ns.updated_at DESC`
 			step3Res := Step3Res{}
-			result = ldb.Raw(query, _seqNovelStep1).Scan(&step3Res)
+			result = sdb.Raw(query, _seqNovelStep1).Scan(&step3Res)
 			if corm(result, &res) {
 				return res
 			}
@@ -127,7 +126,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 				step["cnt_like"] = step3Res.CntLike
 				step["my_like"] = getMyLike(userToken, 3, step3Res.SeqNovelStep3)
 				step["deleted_yn"] = bool(step3Res.DeletedYn)
-				result = ldb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
+				result = sdb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
 				if corm(result, &res) {
 					return res
 				}
@@ -149,7 +148,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 				WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 				ORDER BY ns.updated_at DESC`
 				step4Res := Step4Res{}
-				result = ldb.Raw(query, _seqNovelStep1).Scan(&step4Res)
+				result = sdb.Raw(query, _seqNovelStep1).Scan(&step4Res)
 				if corm(result, &res) {
 					return res
 				}
@@ -163,7 +162,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 					step["cnt_like"] = step4Res.CntLike
 					step["my_like"] = getMyLike(userToken, 4, step4Res.SeqNovelStep4)
 					step["deleted_yn"] = bool(step4Res.DeletedYn)
-					result = ldb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
+					result = sdb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
 					if corm(result, &res) {
 						return res
 					}

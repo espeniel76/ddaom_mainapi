@@ -17,8 +17,6 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	_seqKeyword := CpInt64(req.Parameters, "seq_keyword")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
-	// _sort := Cp(req.Parameters, "sort")
-	// fmt.Println(_sort)
 
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
@@ -27,7 +25,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	var query bytes.Buffer
 	query.WriteString(`
 		SELECT
@@ -41,7 +39,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	if _seqGenre > 0 {
 		query.WriteString(" AND seq_genre = " + strconv.Itoa(int(_seqGenre)))
 	}
-	result := masterDB.Raw(query.String(), _seqKeyword).Count(&totalData)
+	result := sdb.Raw(query.String(), _seqKeyword).Count(&totalData)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()
@@ -74,7 +72,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	query.WriteString(" ORDER BY ns.updated_at DESC")
 	query.WriteString(" LIMIT ?, ?")
-	result = masterDB.Raw(query.String(), _seqKeyword, limitStart, _sizePerPage).Find(&novelListLiveRes.List)
+	result = sdb.Raw(query.String(), _seqKeyword, limitStart, _sizePerPage).Find(&novelListLiveRes.List)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()

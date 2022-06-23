@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"strconv"
 )
 
@@ -15,7 +14,6 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
-	// fmt.Println(_step, _seqNovel)
 
 	var cntTotal int64
 	var seqNovelStep1 int64
@@ -50,7 +48,6 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
 		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
 	}
-	fmt.Println(seqNovelStep1, seqNovelStep2, seqNovelStep3, seqNovelStep4)
 
 	query := `
 	SELECT

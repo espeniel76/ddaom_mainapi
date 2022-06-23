@@ -19,10 +19,10 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	_title := Cp(req.Parameters, "title")
 
-	slaveDb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.DSN_SLAVE]
 	var cnt int64
 	isExist := false
-	result := slaveDb.Model(schemas.NovelStep1{}).Where("title = ?", _title).Count(&cnt)
+	result := sdb.Model(schemas.NovelStep1{}).Where("title = ?", _title).Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
@@ -31,7 +31,7 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 		isExist = true
 	} else {
 		// 완결로 등록된 소설
-		result = slaveDb.Model(schemas.NovelFinish{}).Where("title = ?", _title).Count(&cnt)
+		result = sdb.Model(schemas.NovelFinish{}).Where("title = ?", _title).Count(&cnt)
 		if corm(result, &res) {
 			return res
 		}

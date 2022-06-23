@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"time"
 )
 
@@ -32,7 +31,7 @@ func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	memberDetailRes := MemberDetailRes{}
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	query := `
 	SELECT
 		md.name,
@@ -51,7 +50,7 @@ func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 	WHERE
 		m.seq_member = ?
 	`
-	masterDB.Raw(query, userToken.SeqMember).Scan(&memberDetailRes)
+	sdb.Raw(query, userToken.SeqMember).Scan(&memberDetailRes)
 	res.Data = memberDetailRes
 
 	return res
@@ -89,12 +88,6 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 			}
 		}
 
-		fmt.Println(_nickName)
-		fmt.Println(_email)
-		fmt.Println(isExistImage)
-		fmt.Println(_isDefaultImage)
-		fmt.Println(profilePhoto)
-
 		if isExistImage {
 			fullPath, err = SaveFile("profile", &profilePhoto)
 			if err != nil {
@@ -107,10 +100,10 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		fullPath = define.DEFAULT_PROFILE
 	}
 
-	masterDB := db.List[define.DSN_MASTER]
+	mdb := db.List[define.DSN_MASTER]
 	memberDetail := &schemas.MemberDetail{}
 	if len(_nickName) > 0 {
-		result := masterDB.Where("nick_name = ? AND seq_member != ?", _nickName, userToken.SeqMember).Find(&memberDetail)
+		result := mdb.Where("nick_name = ? AND seq_member != ?", _nickName, userToken.SeqMember).Find(&memberDetail)
 		if corm(result, &res) {
 			return res
 		}
@@ -122,7 +115,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if len(_email) > 0 {
-		result := masterDB.Where("email = ? AND seq_member != ?", _email, userToken.SeqMember).Find(&memberDetail)
+		result := mdb.Where("email = ? AND seq_member != ?", _email, userToken.SeqMember).Find(&memberDetail)
 		if corm(result, &res) {
 			return res
 		}
@@ -133,7 +126,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	result := masterDB.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Scan(&memberDetail)
+	result := mdb.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Scan(&memberDetail)
 	if corm(result, &res) {
 		return res
 	}
@@ -155,7 +148,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		memberDetail.Email = _email
 	}
 	if isExistMember {
-		result = masterDB.Model(&memberDetail).
+		result = mdb.Model(&memberDetail).
 			Where("seq_member = ?", userToken.SeqMember).
 			Updates(&memberDetail)
 		if corm(result, &res) {
@@ -170,7 +163,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 			memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
 		}
 		memberDetail.AuthenticationAt = time.Now()
-		result = masterDB.Create(&memberDetail)
+		result = mdb.Create(&memberDetail)
 		if corm(result, &res) {
 			return res
 		}

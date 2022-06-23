@@ -8,29 +8,31 @@ import (
 )
 
 const (
-	HTTP_SERVER     = "http://192.168.1.20:81"
-	HTTP_PORT       = "3011"
-	HTTP_PORT_SSL   = "3012"
-	DSN_MASTER      = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_SLAVE       = "espeniel:anjgkrp@tcp(localhost)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_LOG1_MASTER = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_LOG1_SLAVE  = "espeniel:anjgkrp@tcp(localhost)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_LOG2_MASTER = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_LOG2_SLAVE  = "espeniel:anjgkrp@tcp(localhost)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
-	DSN_REDIS       = "redis://anjgkrp@localhost:6379"
-	DSN_MONGODB     = "mongodb://172.31.33.10:27017"
-
+	// real
 	// HTTP_SERVER     = "http://192.168.1.20:81"
 	// HTTP_PORT       = "3011"
 	// HTTP_PORT_SSL   = "3012"
-	// DSN_MASTER      = "espeniel:anjgkrp@tcp(localhost)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
+	// DSN_MASTER      = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
 	// DSN_SLAVE       = "espeniel:anjgkrp@tcp(localhost)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
-	// DSN_LOG1_MASTER = "espeniel:anjgkrp@tcp(localhost)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
+	// DSN_LOG1_MASTER = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
 	// DSN_LOG1_SLAVE  = "espeniel:anjgkrp@tcp(localhost)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
-	// DSN_LOG2_MASTER = "espeniel:anjgkrp@tcp(localhost)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
+	// DSN_LOG2_MASTER = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
 	// DSN_LOG2_SLAVE  = "espeniel:anjgkrp@tcp(localhost)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
 	// DSN_REDIS       = "redis://anjgkrp@localhost:6379"
-	// DSN_MONGODB     = "mongodb://localhost:27017"
+	// DSN_MONGODB     = "mongodb://172.31.33.10:27017"
+
+	// home
+	HTTP_SERVER     = "http://192.168.1.20:81"
+	HTTP_PORT       = "3011"
+	HTTP_PORT_SSL   = "3012"
+	DSN_MASTER      = "espeniel:anjgkrp@tcp(localhost:3307)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_SLAVE       = "espeniel:anjgkrp@tcp(localhost:3307)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG1_MASTER = "espeniel:anjgkrp@tcp(localhost:3307)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG1_SLAVE  = "espeniel:anjgkrp@tcp(localhost:3307)/ddaom_user1?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG2_MASTER = "espeniel:anjgkrp@tcp(localhost:3307)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_LOG2_SLAVE  = "espeniel:anjgkrp@tcp(localhost:3307)/ddaom_user2?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN_REDIS       = "redis://anjgkrp@localhost:6379"
+	DSN_MONGODB     = "mongodb://localhost:27017"
 
 	// S3 로 변경
 	FILE_UPLOAD_PATH = "/home/samba/espeniel/www_ddaom/upload/"

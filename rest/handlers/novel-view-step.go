@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 )
 
 func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
@@ -18,17 +17,15 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	fmt.Println("호출됨?")
-
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
 	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
 	_seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
 	_seqNovelStep4 := CpInt64(req.Parameters, "seq_novel_step4")
 	query := ""
-	mdb := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	o := NovelViewStepRes{}
 	if _seqNovelStep1 > 0 {
-		result := mdb.Model(schemas.NovelStep1{}).
+		result := sdb.Model(schemas.NovelStep1{}).
 			Select("title, content, cnt_like, UNIX_TIMESTAMP(created_at) * 1000 AS created_at").
 			Where("seq_novel_step1 = ?", _seqNovelStep1).
 			Scan(&o)
@@ -48,7 +45,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN novel_step2 ns2 ON ns1.seq_novel_step1 = ns2.seq_novel_step1
 		WHERE ns2.seq_novel_step2 = ?
 		`
-		result := mdb.Raw(query, _seqNovelStep2).Scan(&o)
+		result := sdb.Raw(query, _seqNovelStep2).Scan(&o)
 		if corm(result, &res) {
 			return res
 		}
@@ -65,7 +62,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN novel_step3 ns3 ON ns1.seq_novel_step1 = ns3.seq_novel_step1
 		WHERE ns3.seq_novel_step3 = ?
 		`
-		result := mdb.Raw(query, _seqNovelStep3).Scan(&o)
+		result := sdb.Raw(query, _seqNovelStep3).Scan(&o)
 		if corm(result, &res) {
 			return res
 		}
@@ -82,7 +79,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		INNER JOIN novel_step4 ns4 ON ns1.seq_novel_step1 = ns4.seq_novel_step1
 		WHERE ns3.seq_novel_step4 = ?
 		`
-		result := mdb.Raw(query, _seqNovelStep3).Scan(&o)
+		result := sdb.Raw(query, _seqNovelStep3).Scan(&o)
 		if corm(result, &res) {
 			return res
 		}

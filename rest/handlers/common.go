@@ -35,7 +35,6 @@ func Cf(s map[string]interface{}, t string, r *http.Request) (*domain.FileStruct
 
 	item := s[t+"_header"].(*multipart.FileHeader)
 
-	fmt.Println(item.Header.Get("Content-Type"))
 	o := domain.FileStructure{
 		File:        s[t].(multipart.File),
 		FileName:    item.Filename,
@@ -49,9 +48,6 @@ func Cf(s map[string]interface{}, t string, r *http.Request) (*domain.FileStruct
 func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 
 	var err error
-	// if oFile.ContentType == "" {
-	// 	return "", err
-	// }
 
 	defer oFile.File.Close()
 

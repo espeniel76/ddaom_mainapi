@@ -7,7 +7,6 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
-	"fmt"
 	"time"
 )
 
@@ -26,7 +25,6 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 	_sort := Cp(req.Parameters, "sort")
 
-	fmt.Println(_seqNovelStep1, _page, _sizePerPage, _sort)
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
 		return res
@@ -34,10 +32,10 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	masterDB := db.List[define.DSN_MASTER]
+	sdb := db.List[define.DSN_SLAVE]
 	var query bytes.Buffer
 	query.WriteString("SELECT COUNT(seq_novel_step2) FROM novel_step2 WHERE active_yn = true AND seq_novel_step1 = ? AND temp_yn = false AND deleted_yn = false")
-	result := masterDB.Raw(query.String(), _seqNovelStep1).Count(&totalData)
+	result := sdb.Raw(query.String(), _seqNovelStep1).Count(&totalData)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()
@@ -66,7 +64,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	query.WriteString(" LIMIT ?, ?")
 	step2ResTmp := []Step2ResTmp{}
-	result = masterDB.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step2ResTmp)
+	result = sdb.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step2ResTmp)
 	if result.Error != nil {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()

@@ -6,7 +6,6 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -24,7 +23,6 @@ func ServiceInquiry(req *domain.CommonRequest) domain.CommonResponse {
 	_title := Cp(req.Parameters, "title")
 	_content := Cp(req.Parameters, "content")
 	_emailYn := CpBool(req.Parameters, "email_yn")
-	fmt.Println(_emailYn)
 
 	mdb := db.List[define.DSN_MASTER]
 	m := schemas.ServiceInquiry{
@@ -33,7 +31,6 @@ func ServiceInquiry(req *domain.CommonRequest) domain.CommonResponse {
 		Content:   _content,
 		EmailYn:   _emailYn,
 	}
-	fmt.Println(m)
 	result := mdb.Model(&m).Create(&m)
 	if corm(result, &res) {
 		return res
