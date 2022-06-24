@@ -179,8 +179,7 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 
 	outRes, err := json.Marshal(res.ResultCode)
 	if err == nil {
-		// _res = strings.ReplaceAll(string(outRes), "\"", "")
-		_res = string(outRes)
+		_res = strings.ReplaceAll(string(outRes), "\"", "")
 		document := bson.D{
 			{"seq_user", seqMember},
 			{"method", req.HttpRquest.Method},
