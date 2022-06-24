@@ -108,7 +108,6 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		if isCheck {
 			req.HttpRquest = r
 			fmt.Println("------------------")
-			// fmt.Println(r)
 			req.JWToken = token
 			if contentType == "multipart/form-data" {
 				res = f(&req)
@@ -136,13 +135,10 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		intervalEnd := time.Now().UnixMilli()
 		fmt.Println(intervalStart, intervalEnd)
 
-		fmt.Println(r)
-		// fmt.Println(ret, err)
-		// if _, err := fmt.Println(req.HttpRquest.Method); err != nil {
-		// 	fmt.Println("이건 헬스체크")
-		// } else {
-		// 	fmt.Println("사용자 요청")
-		// }
+		// fmt.Println(r)
+		for k, v := range r.RequestURI {
+			fmt.Println(k, v)
+		}
 
 		// accessLog(&req, &res, intervalEnd, intervalStart)
 
