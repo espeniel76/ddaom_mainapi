@@ -8,6 +8,9 @@ import (
 
 func Handlers(mux *mux.Router) {
 
+	// health check
+	mux.HandleFunc("/check", common(handlers.HealthCheck)) // 2
+
 	// Initialize DB
 	mux.HandleFunc("/db/initialize", common(handlers.InitialDb)) // 1
 	// auth

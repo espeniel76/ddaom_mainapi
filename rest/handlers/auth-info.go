@@ -89,7 +89,8 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		if isExistImage {
-			fullPath, err = SaveFile("profile", &profilePhoto)
+			// fullPath, err = SaveFile("profile", &profilePhoto)
+			fullPath, err = SaveFileS3("profile", &profilePhoto)
 			if err != nil {
 				res.ResultCode = define.SYSTEM_ERROR
 				res.ErrorDesc = err.Error()

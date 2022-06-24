@@ -4,6 +4,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/tools"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -12,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func Cp(s map[string]interface{}, t string) string {
@@ -86,6 +89,58 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 	}
 
 	fullPath = strings.Replace(fullPath, define.REPLACE_PATH, "", -1)
+
+	return fullPath, nil
+}
+
+func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
+
+	s3 := tools.S3Info{
+		AwsProfileName: "ddaom",
+		AwsS3Region:    define.AWS_S3_REGION,
+		AwsSecretKey:   define.AWS_SECRET_KEY,
+		AwsAccessKey:   define.AWS_ACCESS_KEY,
+		BucketName:     define.AWS_BUCKET_NAME,
+	}
+
+	err := s3.SetS3ConfigByKey()
+	if err != nil {
+		return "", err
+	}
+	if oFile.ContentType == "" {
+		return "", err
+	}
+
+	defer oFile.File.Close()
+
+	now := time.Now()
+	custom := now.Format("200601")
+	path := define.FILE_UPLOAD_PATH + _path + "/" + custom + "/"
+	uuidWithHyphen := uuid.New()
+	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
+	var ext string
+	switch oFile.ContentType {
+	case "image/png":
+		ext = "png"
+	case "image/jpeg":
+		ext = "jpg"
+	case "image/gif":
+		ext = "gif"
+	case "application/octet-stream":
+		alist := strings.Split(oFile.FileName, ".")
+		_ext := alist[len(alist)-1]
+		if _ext == "png" || _ext == "jpg" || _ext == "gif" {
+			ext = _ext
+		} else {
+			err = errors.New("not allowed image format")
+			return "", err
+		}
+	}
+
+	saveFileName := uuid + "." + ext
+	fullPath := path + saveFileName
+
+	s3.UploadFile(oFile.File, fullPath, oFile.ContentType)
 
 	return fullPath, nil
 }

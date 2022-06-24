@@ -19,6 +19,12 @@ type Contact struct {
 	Tags  []string           `bson:"tags,omitempty"`
 }
 
+func HealthCheck(req *domain.CommonRequest) domain.CommonResponse {
+	var res = domain.CommonResponse{}
+	res.ResultCode = define.OK
+	return res
+}
+
 func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
