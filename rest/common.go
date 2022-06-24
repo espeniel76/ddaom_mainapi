@@ -135,6 +135,11 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 		intervalEnd := time.Now().UnixMilli()
 		fmt.Println(intervalStart, intervalEnd)
+		if r == nil {
+			fmt.Println("헬스체크")
+		} else {
+			fmt.Println("사용자요청")
+		}
 
 		// accessLog(&req, &res, intervalEnd, intervalStart)
 
