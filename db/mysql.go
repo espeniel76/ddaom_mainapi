@@ -21,6 +21,8 @@ func connectMySQLPooling() {
 	List[define.DSN_MASTER] = createInstance(define.DSN_MASTER)
 	List[define.DSN_SLAVE] = createInstance(define.DSN_SLAVE)
 	List[define.DSN_LOG1_MASTER] = createInstance(define.DSN_LOG1_MASTER)
+	List[define.DSN_LOG1_SLAVE] = createInstance(define.DSN_LOG1_SLAVE)
+	List[define.DSN_LOG2_MASTER] = createInstance(define.DSN_LOG2_MASTER)
 	List[define.DSN_LOG2_SLAVE] = createInstance(define.DSN_LOG2_SLAVE)
 }
 
