@@ -108,6 +108,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		if isCheck {
 			req.HttpRquest = r
 			fmt.Println("------------------")
+			fmt.Println(r.URL)
 			req.JWToken = token
 			if contentType == "multipart/form-data" {
 				res = f(&req)
@@ -133,14 +134,10 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 			}
 		}
 		intervalEnd := time.Now().UnixMilli()
-		fmt.Println(intervalStart, intervalEnd)
-
-		fmt.Println(r.URL)
-		// for k, v := range r.RequestURI {
-		// 	fmt.Println(k, v)
-		// }
-
-		// accessLog(&req, &res, intervalEnd, intervalStart)
+		// fmt.Println(intervalStart, intervalEnd)
+		if string(r.URL.String()) != "/check" {
+			accessLog(&req, &res, intervalEnd, intervalStart)
+		}
 
 		data, _ := json.Marshal(res)
 		w.Header().Add("content-type", "application/json")
