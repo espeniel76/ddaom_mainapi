@@ -134,7 +134,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 		intervalEnd := time.Now().UnixMilli()
 		fmt.Println(intervalStart, intervalEnd)
-		accessLog(req, res, intervalEnd, intervalStart)
+		accessLog(&req, &res, intervalEnd, intervalStart)
 
 		data, _ := json.Marshal(res)
 		w.Header().Add("content-type", "application/json")
@@ -143,7 +143,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 	}
 }
 
-func accessLog(req domain.CommonRequest, res domain.CommonResponse, intervalEnd int64, intervalStart int64) {
+func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEnd int64, intervalStart int64) {
 	interval := intervalEnd - intervalStart
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
 	seqMember := 0
