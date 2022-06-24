@@ -134,7 +134,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 			}
 		}
 		intervalEnd := time.Now().UnixMilli()
-		go accessLog(req, res, intervalEnd, intervalStart)
+		accessLog(req, res, intervalEnd, intervalStart)
 
 		data, _ := json.Marshal(res)
 		w.Header().Add("content-type", "application/json")
