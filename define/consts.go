@@ -39,6 +39,7 @@ const (
 	INACTIVE_COLOR          = "INACTIVE_COLOR"
 	NO_EXIST_USER           = "NO_EXIST_USER"
 	CACHE_ERROR             = "CACHE_ERROR"
+	NOT_ALLOW_FORMAT        = "NOT_ALLOW_FORMAT"
 )
 
 // const LIST_PER_PAGE = 2

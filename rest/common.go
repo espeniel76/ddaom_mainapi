@@ -3,6 +3,7 @@ package rest
 import (
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/mlogdb"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.ResponseWriter, r *http.Request) {
@@ -37,8 +39,6 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 			if contentType != "application/json" {
 				contentType = strings.Split(contentType, ";")[0]
 			}
-
-			// fmt.Println("Content-Type: ", contentType)
 		}
 
 		var selectFormat map[string]interface{}
@@ -134,64 +134,62 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 			}
 		}
 		intervalEnd := time.Now().UnixMilli()
-		interval := intervalEnd - intervalStart
-		fmt.Println(interval)
-
-		// action log (무겁지 않을까...?)
-		// go func() {
-		// userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
-		// seqMember := 0
-		// if userToken != nil {
-		// 	seqMember = int(userToken.SeqMember)
-		// }
-
-		// var _req string
-		// var _res string
-
-		// fmt.Println(req.HttpRquest.Method)
-		// if contentType == "multipart/form-data" {
-		// 	// outReq, _ := json.Marshal(req.Parameters)
-		// 	// _req = string(outReq)
-		// } else {
-		// 	switch r.Method {
-		// 	case http.MethodGet:
-		// 		// outReq, _ := json.Marshal(req.Vars)
-		// 		// _req = string(outReq)
-		// 	case http.MethodPut:
-		// 		fallthrough
-		// 	case http.MethodPatch:
-		// 		fallthrough
-		// 	case http.MethodDelete:
-		// 		fallthrough
-		// 	case http.MethodPost:
-		// 		// outReq, _ := json.Marshal(req.Parameters)
-		// 		// _req = string(outReq)
-		// 	}
-		// }
-
-		// outRes, err := json.Marshal(res.ResultCode)
-		// if err == nil {
-		// 	_res = string(outRes)
-		// 	document := bson.D{
-		// 		{"seq_user", seqMember},
-		// 		{"method", r.Method},
-		// 		{"url", req.HttpRquest.URL},
-		// 		{"delay", interval},
-		// 		// {"req", _req},
-		// 		{"res", _res},
-		// 		{"at", time.Now()},
-		// 	}
-		// 	// fmt.Println(document)
-		// 	_, err := mlogdb.InsertOne(document)
-		// 	if err != nil {
-		// 		fmt.Println(err.Error())
-		// 	}
-		// }
-		// }()
+		go accessLog(req, res, intervalEnd, intervalStart)
 
 		data, _ := json.Marshal(res)
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		fmt.Fprint(w, string(data))
+	}
+}
+
+func accessLog(req domain.CommonRequest, res domain.CommonResponse, intervalEnd int64, intervalStart int64) {
+	interval := intervalEnd - intervalStart
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	seqMember := 0
+	if userToken != nil {
+		seqMember = int(userToken.SeqMember)
+	}
+
+	// var _req string
+	var _res string
+
+	// fmt.Println(req.HttpRquest.Method)
+	// if contentType == "multipart/form-data" {
+	// 	// outReq, _ := json.Marshal(req.Parameters)
+	// 	// _req = string(outReq)
+	// } else {
+	// 	switch r.Method {
+	// 	case http.MethodGet:
+	// 		// outReq, _ := json.Marshal(req.Vars)
+	// 		// _req = string(outReq)
+	// 	case http.MethodPut:
+	// 		fallthrough
+	// 	case http.MethodPatch:
+	// 		fallthrough
+	// 	case http.MethodDelete:
+	// 		fallthrough
+	// 	case http.MethodPost:
+	// 		// outReq, _ := json.Marshal(req.Parameters)
+	// 		// _req = string(outReq)
+	// 	}
+	// }
+
+	outRes, err := json.Marshal(res.ResultCode)
+	if err == nil {
+		_res = strings.ReplaceAll(string(outRes), "\"", "")
+		document := bson.D{
+			{"seq_user", seqMember},
+			{"method", req.HttpRquest.Method},
+			{"url", req.HttpRquest.URL},
+			{"delay", interval},
+			// {"req", _req},
+			{"res", _res},
+			{"at", time.Now()},
+		}
+		_, err := mlogdb.InsertOne(document)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 }

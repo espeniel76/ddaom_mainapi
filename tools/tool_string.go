@@ -21,6 +21,11 @@ func MakeUUID() string {
 	return uuid
 }
 
+func MakeShortId() string {
+	id, _ := shortid.Generate()
+	return id
+}
+
 func TodayFormattedDateFull() string {
 	t := time.Now()
 	formatted := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",

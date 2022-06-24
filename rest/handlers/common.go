@@ -13,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func Cp(s map[string]interface{}, t string) string {
@@ -62,7 +60,7 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 	if err != nil {
 		err = os.MkdirAll(path, 0755)
 	}
-	uuid := tools.MakeUUID()
+	_id := tools.MakeShortId()
 	var ext string
 	switch oFile.ContentType {
 	case "image/png":
@@ -72,11 +70,17 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 	case "image/gif":
 		ext = "gif"
 	default:
-		tmp := strings.Split(oFile.FileName, ".")
-		ext = tmp[len(tmp)-1]
+		alist := strings.Split(oFile.FileName, ".")
+		_ext := alist[len(alist)-1]
+		if _ext == "png" || _ext == "jpg" || _ext == "gif" {
+			ext = _ext
+		} else {
+			err = errors.New("not allowed image format")
+			return "", err
+		}
 	}
 
-	saveFileName := uuid + "." + ext
+	saveFileName := _id + "." + strings.ToLower(ext)
 	fullPath := path + saveFileName
 	f, err := os.OpenFile(fullPath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -116,8 +120,7 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 	now := time.Now()
 	custom := now.Format("200601")
 	path := define.FILE_UPLOAD_PATH + _path + "/" + custom + "/"
-	uuidWithHyphen := uuid.New()
-	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
+	_id := tools.MakeShortId()
 	var ext string
 	switch oFile.ContentType {
 	case "image/png":
@@ -137,7 +140,7 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 		}
 	}
 
-	saveFileName := uuid + "." + ext
+	saveFileName := _id + "." + strings.ToLower(ext)
 	fullPath := path + saveFileName
 
 	s3.UploadFile(oFile.File, fullPath, oFile.ContentType)

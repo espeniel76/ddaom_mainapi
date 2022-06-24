@@ -89,11 +89,20 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		if isExistImage {
-			// fullPath, err = SaveFile("profile", &profilePhoto)
-			fullPath, err = SaveFileS3("profile", &profilePhoto)
+			if define.HTTP_SERVER == "https://ddaom.s3.ap-northeast-2.amazonaws.com" {
+				fullPath, err = SaveFileS3("profile", &profilePhoto)
+			} else {
+				fullPath, err = SaveFile("profile", &profilePhoto)
+			}
+
 			if err != nil {
-				res.ResultCode = define.SYSTEM_ERROR
-				res.ErrorDesc = err.Error()
+				if err.Error() == "not allowed image format" {
+					res.ResultCode = define.NOT_ALLOW_FORMAT
+					res.ErrorDesc = err.Error()
+				} else {
+					res.ResultCode = define.SYSTEM_ERROR
+					res.ErrorDesc = err.Error()
+				}
 				return res
 			}
 		}
