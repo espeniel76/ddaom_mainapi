@@ -136,8 +136,8 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		intervalEnd := time.Now().UnixMilli()
 		fmt.Println(intervalStart, intervalEnd)
 
-		ret, err := fmt.Println(req.HttpRquest.Method)
-		fmt.Println(ret, err)
+		// ret, err := fmt.Println(req.HttpRquest.Method)
+		// fmt.Println(ret, err)
 		// if _, err := fmt.Println(req.HttpRquest.Method); err != nil {
 		// 	fmt.Println("이건 헬스체크")
 		// } else {
