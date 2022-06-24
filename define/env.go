@@ -15,7 +15,7 @@ const (
 
 	// real
 	HTTP_SERVER      = "https://ddaom.s3.ap-northeast-2.amazonaws.com"
-	HTTP_PORT        = "80"
+	HTTP_PORT        = "3011"
 	HTTP_PORT_SSL    = "443"
 	DSN_MASTER       = "espeniel:anjgkrp@tcp(172.31.33.10)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
 	DSN_SLAVE        = "espeniel:anjgkrp@tcp(localhost)/ddaom?charset=utf8mb4&parseTime=True&loc=Local"
