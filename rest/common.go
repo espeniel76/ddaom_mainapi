@@ -135,10 +135,10 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		intervalEnd := time.Now().UnixMilli()
 		fmt.Println(intervalStart, intervalEnd)
 
-		// fmt.Println(r)
-		for k, v := range r.RequestURI {
-			fmt.Println(k, v)
-		}
+		fmt.Println(r.URL)
+		// for k, v := range r.RequestURI {
+		// 	fmt.Println(k, v)
+		// }
 
 		// accessLog(&req, &res, intervalEnd, intervalStart)
 
