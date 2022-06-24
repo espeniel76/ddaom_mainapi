@@ -126,6 +126,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 				case http.MethodPost:
 					req.Parameters = *requestParameters
 					req.Vars = mux.Vars(r)
+					fmt.Println(req)
 					res = f(&req)
 				}
 			}
