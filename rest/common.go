@@ -108,6 +108,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		if isCheck {
 			req.HttpRquest = r
 			fmt.Println("------------------")
+			fmt.Println(req.HttpRquest.Method)
 			req.JWToken = token
 			if contentType == "multipart/form-data" {
 				res = f(&req)
