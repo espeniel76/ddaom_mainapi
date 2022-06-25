@@ -65,7 +65,7 @@ const (
 	AWS_S3_REGION   = "ap-northeast-2"
 	AWS_SECRET_KEY  = "tmdrd9InqdB6zxz0qWhFgMi2yHDSAycTDAiwFXYf"
 	AWS_ACCESS_KEY  = "AKIA225UPJLVEA7EMINP"
-	AWS_BUCKET_NAME = "ddaom"
+	AWS_BUCKET_NAME = "image.ttaom.co.kr"
 	AWS_S3_SERVER   = "https://ddaom.s3.ap-northeast-2.amazonaws.com"
 )
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"ddaom/define"
 	"fmt"
-	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -43,9 +42,9 @@ func initMongoDb() {
 func connect(uri string) {
 
 	clientOptions := options.Client().ApplyURI(uri)
-	clientOptions.SetMaxPoolSize(100)
-	clientOptions.SetMinPoolSize(10)
-	clientOptions.SetMaxConnIdleTime(10 * time.Second)
+	// clientOptions.SetMaxPoolSize(100)
+	// clientOptions.SetMinPoolSize(10)
+	// clientOptions.SetMaxConnIdleTime(10 * time.Second)
 	// client, err = mongo.NewClient(clientOptions)
 	// ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
 	// ctx = context.Background()
