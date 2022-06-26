@@ -15,7 +15,7 @@ import (
 func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -31,7 +31,7 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	mySubscribe := define.NONE
 	var cnt int64
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	ldbMe := GetMyLogDbMaster(userToken.Allocated)
 	ldbYour := getUserLogDbMaster(mdb, int64(_seqMember))
 
@@ -190,7 +190,7 @@ func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
 				Step:       0,
 				Content:    userInfoFrom.NickName + "님이 나를 구독하였습니다",
 			}
-			mdb := db.List[define.DSN_MASTER]
+			mdb := db.List[define.Mconn.DsnMaster]
 			mdb.Create(&alarm)
 
 			msg := &fcm.Message{
@@ -208,7 +208,7 @@ func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
 			}
 
 			// Create a FCM client to send the message.
-			client, err := fcm.NewClient(define.PUSH_SERVER_KEY)
+			client, err := fcm.NewClient(define.Mconn.PushServerKey)
 			if err != nil {
 				log.Fatalln(err)
 			}

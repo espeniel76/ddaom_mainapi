@@ -11,11 +11,11 @@ import (
 func MypageViewComplete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.Atoi(req.Vars["seq_novel"])
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	o := MypageViewCompleteRes{}
 	switch _step {
 	case 1:

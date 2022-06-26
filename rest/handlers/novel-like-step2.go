@@ -12,7 +12,7 @@ import (
 func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -26,7 +26,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	var scanCount int64
 
 	ldb := GetMyLogDbMaster(userToken.Allocated)
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	result := mdb.Model(schemas.NovelStep2{}).Select("cnt_like").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&cnt).Count(&scanCount)
 	if corm(result, &res) {

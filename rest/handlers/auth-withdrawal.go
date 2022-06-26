@@ -9,13 +9,13 @@ import (
 func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
 		return res
 	}
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	_reasonType := CpInt64(req.Parameters, "reason_type")
 	_reason := Cp(req.Parameters, "reason")
@@ -140,8 +140,8 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 	mdb.Exec("UPDATE members SET deleted_yn = true, deleted_at = NOW(), email = seq_member WHERE seq_member = ?", userToken.SeqMember)
 	mdb.Exec("UPDATE member_details SET deleted_yn = true, deleted_at = NOW() WHERE seq_member = ?", userToken.SeqMember)
 
-	ldb1 := db.List[define.DSN_LOG1_MASTER]
-	ldb2 := db.List[define.DSN_LOG2_MASTER]
+	ldb1 := db.List[define.Mconn.DsnLog1Master]
+	ldb2 := db.List[define.Mconn.DsnLog2Master]
 
 	// 탈퇴 회원 구독 삭제 (당사자, 상대방)
 	ldb1.Exec("DELETE FROM member_subscribes WHERE seq_member = ? OR seq_member_opponent = ?", userToken.SeqMember, userToken.SeqMember)

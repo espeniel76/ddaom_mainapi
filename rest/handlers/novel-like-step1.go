@@ -16,7 +16,7 @@ import (
 func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -28,7 +28,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	var scanCount int64
 
 	ldb := GetMyLogDbMaster(userToken.Allocated)
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	// 소설 존재 여부
 	result := mdb.Model(schemas.NovelStep1{}).Select("cnt_like").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&cnt).Count(&scanCount)
@@ -123,7 +123,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 func updateKeywordMemberLike(seqMember int64, seqKeyword int64, direction string) {
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	if direction == "PLUS" {
 		mdb.Exec("UPDATE keywords SET cnt_like = cnt_like + 1 WHERE seq_keyword = ?", seqKeyword)
 		mdb.Exec("UPDATE member_details SET cnt_like = cnt_like + 1 WHERE seq_member = ?", seqMember)
@@ -164,7 +164,7 @@ func pushLike(step int8, seqNovel int64, seqMember int64) {
 				Step:       step,
 				Content:    "\"" + info.Title + " - step" + fmt.Sprintf("%d", step) + "\"를 " + userInfoFrom.NickName + " 님이 좋아합니다.",
 			}
-			mdb := db.List[define.DSN_MASTER]
+			mdb := db.List[define.Mconn.DsnMaster]
 			mdb.Create(&alarm)
 
 			msg := &fcm.Message{
@@ -182,7 +182,7 @@ func pushLike(step int8, seqNovel int64, seqMember int64) {
 			}
 
 			// Create a FCM client to send the message.
-			client, err := fcm.NewClient(define.PUSH_SERVER_KEY)
+			client, err := fcm.NewClient(define.Mconn.PushServerKey)
 			if err != nil {
 				log.Fatalln(err)
 			}

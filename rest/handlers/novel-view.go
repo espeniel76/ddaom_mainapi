@@ -11,11 +11,11 @@ import (
 func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	_seqNovelStep1, _ := req.Vars["seq_novel_step1"]
 	var cntTotal int64
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	// 1단계 소설 가져오기
 	query := `
 	SELECT

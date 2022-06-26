@@ -16,7 +16,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	itsMe := false
 	if _seqMember == 0 && userToken != nil {
 		itsMe = true
@@ -29,7 +29,7 @@ func MypageListComplete(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	limitStart := (_page - 1) * _sizePerPage
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 
 	var totalData int64
 	seq := _seqMember

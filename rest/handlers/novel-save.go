@@ -19,7 +19,7 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	_title := Cp(req.Parameters, "title")
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var cnt int64
 	isExist := false
 	result := sdb.Model(schemas.NovelStep1{}).Where("title = ?", _title).Count(&cnt)
@@ -50,7 +50,7 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -67,7 +67,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	_tempYn := CpBool(req.Parameters, "temp_yn")
 
 	// 존재하는 닉네임 여부
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
 	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
@@ -162,7 +162,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -174,7 +174,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
 	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
@@ -260,7 +260,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -272,7 +272,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
 	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
@@ -365,7 +365,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -378,7 +378,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	_tempYn := CpBool(req.Parameters, "temp_yn")
 
 	// 존재하는 닉네임 여부
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
 	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
@@ -484,7 +484,7 @@ func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
 		Where("seq_member = ? AND status IN ('BOTH', 'FOLLOWER')", userInfo.SeqMember).
 		Select("seq_member_opponent").
 		Scan(&listMsSeq)
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	listFollower := []FollowerInfo{}
 	sql := `
 	SELECT

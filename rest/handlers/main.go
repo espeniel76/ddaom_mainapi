@@ -10,7 +10,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 	// _seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
-	// sdb := db.List[define.DSN_SLAVE]
+	// sdb := db.List[define.Mconn.DsnSlave]
 	// 고도화 DB -> Redis
 	mainRes := MainRes{}
 
@@ -40,7 +40,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 // 	var res = domain.CommonResponse{}
 // 	_seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
 
-// 	sdb := db.List[define.DSN_SLAVE]
+// 	sdb := db.List[define.Mconn.DsnSlave]
 // 	mainRes := MainRes{}
 
 // 	// 연재중인 소설 (오늘 주제어 키워드)
@@ -134,7 +134,7 @@ func MainKeyword(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	// _seqKeyword, _ := strconv.Atoi(req.Vars["seq_keyword"])
 
-	// sdb := db.List[define.DSN_SLAVE]
+	// sdb := db.List[define.Mconn.DsnSlave]
 	mainRes := ListLiveRes{}
 
 	// 연재중인 소설 (오늘 주제어 키워드)

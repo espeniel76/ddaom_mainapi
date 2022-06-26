@@ -29,7 +29,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	email := Cp(req.Parameters, "email")
 	token := Cp(req.Parameters, "token")
@@ -108,8 +108,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
-	ldb1 := db.List[define.DSN_LOG1_MASTER]
-	ldb2 := db.List[define.DSN_LOG2_MASTER]
+	ldb1 := db.List[define.Mconn.DsnLog1Master]
+	ldb2 := db.List[define.Mconn.DsnLog2Master]
 	if !isExist {
 		var count1, count2 int64
 		result = ldb1.Table("member_exists").Count(&count1)
@@ -161,13 +161,13 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		UserLevel:  5,
 		Allocated:  allocatedDb,
 	}
-	accessToken, err := define.CreateToken(&userToken, define.JWT_ACCESS_SECRET, "ACCESS")
+	accessToken, err := define.CreateToken(&userToken, define.Mconn.JwtAccessSecret, "ACCESS")
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()
 		return res
 	}
-	refreshToken, err := define.CreateToken(&userToken, define.JWT_REFRESH_SECRET, "REFRESH")
+	refreshToken, err := define.CreateToken(&userToken, define.Mconn.JwtRefreshSecret, "REFRESH")
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()
@@ -187,7 +187,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m["access_token"] = accessToken
 	m["refresh_token"] = refreshToken
 	m["nick_name"] = nickName
-	m["http_server"] = define.HTTP_SERVER
+	m["http_server"] = define.Mconn.HTTPServer
 
 	res.Data = m
 
@@ -195,7 +195,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 func setPushToken(seqMember int64, pushToken string) {
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	query := `
 	INSERT INTO member_push_tokens (seq_member, push_token, created_at, updated_at)
 	VALUES (?, ?, NOW(), NOW())

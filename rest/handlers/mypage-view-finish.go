@@ -11,7 +11,7 @@ import (
 func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -65,7 +65,7 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	case 4:
 		query += "nf.seq_novel_step4 = ?"
 	}
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	n := NovelViewFinishData{}
 	result := sdb.Raw(query, _seqNovel).Scan(&n)
 	if corm(result, &res) {

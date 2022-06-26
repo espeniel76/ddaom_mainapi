@@ -11,7 +11,7 @@ import (
 func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -53,7 +53,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	FROM novel_finishes nf
 	WHERE seq_novel_finish = ?
 	`
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	n := NovelViewFinishData{}
 	result := sdb.Raw(query, _seqNovelFinish).Scan(&n)
 	if corm(result, &res) {
@@ -83,7 +83,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		myBookmark = true
 	}
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	query = "UPDATE novel_finishes SET cnt_view = cnt_view + 1 WHERE seq_novel_finish = ?"
 	mdb.Exec(query, _seqNovelFinish)
 

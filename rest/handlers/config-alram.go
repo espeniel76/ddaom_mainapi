@@ -12,7 +12,7 @@ func ConfigAlarm(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -26,7 +26,7 @@ func ConfigAlarm(req *domain.CommonRequest) domain.CommonResponse {
 	_isNightPush := CpBool(req.Parameters, "is_night_push")
 	_isDeleted := CpBool(req.Parameters, "is_deleted")
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	m := schemas.MemberDetail{}
 	result := mdb.Model(&m).Where("seq_member = ?", userToken.SeqMember).Scan(&m)
 	if corm(result, &res) {
@@ -55,14 +55,14 @@ func ConfigAlarmGet(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
 		return res
 	}
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	m := schemas.MemberDetail{}
 	result := sdb.Model(&m).Where("seq_member = ?", userToken.SeqMember).Scan(&m)
 	if corm(result, &res) {

@@ -11,7 +11,7 @@ import (
 func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -25,7 +25,7 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	memberDetail := &schemas.MemberDetail{}
 	memberDetailBackup := &schemas.MemberDetailBackup{}
 
@@ -75,7 +75,7 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 	} else {
 		memberDetail.SeqMember = userToken.SeqMember
 		memberDetail.Email = userToken.Email
-		memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
+		memberDetail.ProfilePhoto = define.Mconn.DefaultProfile
 		memberDetail.AuthenticationAt = time.Now()
 		memberDetail.NickName = _nickName
 		memberDetail.DeletedAt = time.Now()

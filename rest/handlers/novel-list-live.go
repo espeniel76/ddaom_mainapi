@@ -25,7 +25,7 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var query bytes.Buffer
 	query.WriteString(`
 		SELECT

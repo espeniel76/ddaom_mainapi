@@ -10,7 +10,7 @@ import (
 func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -22,7 +22,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
 	_seqNovelStep4 := CpInt64(req.Parameters, "seq_novel_step4")
 	query := ""
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	o := NovelViewStepRes{}
 	if _seqNovelStep1 > 0 {
 		result := sdb.Model(schemas.NovelStep1{}).

@@ -4,6 +4,7 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/memdb"
+	"ddaom/mlogdb"
 	"ddaom/rest"
 	"fmt"
 	"log"
@@ -20,9 +21,10 @@ func main() {
 
 func setInitialize() {
 	define.SetDefineApiParse()
+	define.SetConnectionInfosParse()
 	db.RunMySql()
 	memdb.RunRedis()
-	// mlogdb.RunMongodb()
+	mlogdb.RunMongodb()
 
 	mux := mux.NewRouter()
 	rest.Handlers(mux)
@@ -35,14 +37,14 @@ func setInitialize() {
 	handler := c.Handler(mux)
 
 	// for REST HTTP
-	err := http.ListenAndServe(":"+define.HTTP_PORT, handler)
+	err := http.ListenAndServe(":"+define.Mconn.HTTPPort, handler)
 	if err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 
 	// for REST SSL
 	// go func() {
-	// err := http.ListenAndServeTLS(":"+define.HTTP_PORT_SSL, "/usr/local/ssl/cert.pem", "/usr/local/ssl/key.pem", handler)
+	// err := http.ListenAndServeTLS(":"+define.Mconn.HTTPPort_SSL, "/usr/local/ssl/cert.pem", "/usr/local/ssl/key.pem", handler)
 	// if err != nil {
 	// 	log.Fatal("ListenAndServeTLS:", err)
 	// }

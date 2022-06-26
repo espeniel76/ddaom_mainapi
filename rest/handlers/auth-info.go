@@ -23,7 +23,7 @@ type MemberDetailRes struct {
 func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -31,7 +31,7 @@ func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	memberDetailRes := MemberDetailRes{}
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	query := `
 	SELECT
 		md.name,
@@ -60,7 +60,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -89,7 +89,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		if isExistImage {
-			if define.HTTP_SERVER == "https://ddaom.s3.ap-northeast-2.amazonaws.com" {
+			if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.co.kr" {
 				fullPath, err = SaveFileS3("profile", &profilePhoto)
 			} else {
 				fullPath, err = SaveFile("profile", &profilePhoto)
@@ -107,10 +107,10 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 			}
 		}
 	} else {
-		fullPath = define.DEFAULT_PROFILE
+		fullPath = define.Mconn.DefaultProfile
 	}
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	memberDetail := &schemas.MemberDetail{}
 	if len(_nickName) > 0 {
 		result := mdb.Where("nick_name = ? AND seq_member != ?", _nickName, userToken.SeqMember).Find(&memberDetail)
@@ -148,7 +148,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		memberDetail.NickName = _nickName
 	}
 	if _isDefaultImage == "Y" {
-		memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
+		memberDetail.ProfilePhoto = define.Mconn.DefaultProfile
 	} else {
 		if isExistImage {
 			memberDetail.ProfilePhoto = fullPath
@@ -170,7 +170,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		if isExistImage {
 			memberDetail.ProfilePhoto = fullPath
 		} else {
-			memberDetail.ProfilePhoto = define.DEFAULT_PROFILE
+			memberDetail.ProfilePhoto = define.Mconn.DefaultProfile
 		}
 		memberDetail.AuthenticationAt = time.Now()
 		result = mdb.Create(&memberDetail)

@@ -57,7 +57,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 					res.ErrorDesc = "There are no tokens. You must have an appropriate authentication token."
 					isCheck = false
 				} else {
-					verifyResult, err := define.VerifyToken(token, define.JWT_ACCESS_SECRET)
+					verifyResult, err := define.VerifyToken(token, define.Mconn.JwtAccessSecret)
 					if err != nil {
 						res.ResultCode = verifyResult
 						res.ErrorDesc = err.Error()
@@ -136,7 +136,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		intervalEnd := time.Now().UnixMilli()
 		if string(r.URL.String()) != "/check" {
 			fmt.Println(intervalStart, intervalEnd)
-			// go accessLog(&req, &res, intervalEnd, intervalStart)
+			go accessLog(&req, &res, intervalEnd, intervalStart)
 		}
 
 		data, _ := json.Marshal(res)
@@ -148,7 +148,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 
 func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEnd int64, intervalStart int64) {
 	interval := intervalEnd - intervalStart
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	seqMember := 0
 	if userToken != nil {
 		seqMember = int(userToken.SeqMember)

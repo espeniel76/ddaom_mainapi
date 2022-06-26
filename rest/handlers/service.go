@@ -14,7 +14,7 @@ func ServiceInquiry(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -24,7 +24,7 @@ func ServiceInquiry(req *domain.CommonRequest) domain.CommonResponse {
 	_content := Cp(req.Parameters, "content")
 	_emailYn := CpBool(req.Parameters, "email_yn")
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	m := schemas.ServiceInquiry{
 		SeqMember: userToken.SeqMember,
 		Title:     _title,
@@ -43,7 +43,7 @@ func ServiceInquiryEdit(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -54,7 +54,7 @@ func ServiceInquiryEdit(req *domain.CommonRequest) domain.CommonResponse {
 	_content := Cp(req.Parameters, "content")
 	_emailYn := CpBool(req.Parameters, "email_yn")
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	m := schemas.ServiceInquiry{}
 	result := mdb.Model(&m).Where("seq_service_inquiry = ?", _seqServiceInquiry).Scan(&m)
 	if corm(result, &res) {
@@ -81,7 +81,7 @@ func ServiceInquiryDelete(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -89,7 +89,7 @@ func ServiceInquiryDelete(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	_seqServiceInquiry := CpInt64(req.Parameters, "seq_service_inquiry")
 
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	m := schemas.ServiceInquiry{}
 	result := mdb.Model(&m).Where("seq_service_inquiry = ?", _seqServiceInquiry).Scan(&m)
 	if corm(result, &res) {
@@ -115,7 +115,7 @@ func ServiceInquiryList(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -131,7 +131,7 @@ func ServiceInquiryList(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	result := sdb.Model(schemas.ServiceInquiry{}).
 		Where("seq_member = ?", userToken.SeqMember).
 		Count(&totalData)
@@ -199,7 +199,7 @@ func ServiceNoticeList(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	result := sdb.Model(schemas.Notice{}).Count(&totalData)
 	if corm(result, &res) {
 		return res
@@ -262,7 +262,7 @@ func ServiceFaqList(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var result *gorm.DB
 	if _seqCategoryFaq > 0 {
 		result = sdb.Model(schemas.Faq{}).Where("seq_category_faq = ?", _seqCategoryFaq).Count(&totalData)

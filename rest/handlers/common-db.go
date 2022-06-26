@@ -20,9 +20,9 @@ func GetMyLogDbMaster(allocated int8) *gorm.DB {
 	var myLogDb *gorm.DB
 	switch allocated {
 	case 1:
-		myLogDb = db.List[define.DSN_LOG1_MASTER]
+		myLogDb = db.List[define.Mconn.DsnLog1Master]
 	case 2:
-		myLogDb = db.List[define.DSN_LOG2_MASTER]
+		myLogDb = db.List[define.Mconn.DsnLog2Master]
 	}
 	return myLogDb
 }
@@ -32,9 +32,9 @@ func GetMyLogDbSlave(allocated int8) *gorm.DB {
 	var myLogDb *gorm.DB
 	switch allocated {
 	case 1:
-		myLogDb = db.List[define.DSN_LOG1_SLAVE]
+		myLogDb = db.List[define.Mconn.DsnLog1Slave]
 	case 2:
-		myLogDb = db.List[define.DSN_LOG2_SLAVE]
+		myLogDb = db.List[define.Mconn.DsnLog2Slave]
 	}
 	return myLogDb
 }
@@ -101,7 +101,7 @@ func getMySubscribe(userToken *domain.UserToken, seqMember int64) string {
 }
 
 func getSeqKeyword(step int8, seqNovel int64) int64 {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var seq int64
 	switch step {
 	case 1:
@@ -117,7 +117,7 @@ func getSeqKeyword(step int8, seqNovel int64) int64 {
 }
 
 func getNovel(step int8, seqNovel int64) GetNovelRes {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	m := GetNovelRes{}
 	sql := ""
 	switch step {
@@ -150,7 +150,7 @@ type GetNovelRes struct {
 }
 
 func isAbleKeyword(seqKeyword int64) bool {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	keyword := schemas.Keyword{}
 	sdb.Model(&keyword).
 		Where("seq_keyword = ? AND active_yn = true AND NOW() BETWEEN start_date AND end_date", seqKeyword).
@@ -162,7 +162,7 @@ func isAbleKeyword(seqKeyword int64) bool {
 	}
 }
 func isAbleImage(seqImage int64) bool {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	image := schemas.Image{}
 	sdb.Model(&image).Where("seq_image = ? AND active_yn = true", seqImage).Scan(&image)
 	if image.SeqImage > 0 {
@@ -172,7 +172,7 @@ func isAbleImage(seqImage int64) bool {
 	}
 }
 func isAbleColor(seqColor int64) bool {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	color := schemas.Color{}
 	sdb.Model(&color).Where("seq_color = ? AND active_yn = true", seqColor).Scan(&color)
 	if color.SeqColor > 0 {
@@ -183,14 +183,14 @@ func isAbleColor(seqColor int64) bool {
 }
 
 func getUserInfo(seqMember int64) schemas.MemberDetail {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	md := schemas.MemberDetail{}
 	sdb.Model(&md).Where("seq_member = ?", seqMember).Scan(&md)
 	return md
 }
 
 func isMineByStepNovelSeq(step int, seqNovel int64, seqMember int64) bool {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var _seqMember int64
 	switch step {
 	case 1:
@@ -211,7 +211,7 @@ func isMineByStepNovelSeq(step int, seqNovel int64, seqMember int64) bool {
 }
 
 func getUserInfoPush(seqMember int64) GetUserInfoPushRes {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	res := GetUserInfoPushRes{}
 	sql := `SELECT
 		m.seq_member,
@@ -237,7 +237,7 @@ type GetUserInfoPushRes struct {
 }
 
 func sendPush(pushToken string, alarm *schemas.Alarm) {
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	mdb.Create(&alarm)
 	msg := &fcm.Message{
 		To: pushToken,
@@ -254,7 +254,7 @@ func sendPush(pushToken string, alarm *schemas.Alarm) {
 	}
 
 	// Create a FCM client to send the message.
-	client, err := fcm.NewClient(define.PUSH_SERVER_KEY)
+	client, err := fcm.NewClient(define.Mconn.PushServerKey)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -270,7 +270,7 @@ func sendPush(pushToken string, alarm *schemas.Alarm) {
 }
 
 func addKeywordCnt(seqKeyword int64) {
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	var totalCnt int
 	mdb.Model(schemas.NovelStep1{}).
@@ -287,7 +287,7 @@ func addKeywordCnt(seqKeyword int64) {
 
 // novel-save (완)
 func cacheMainLive(seqKeyword int64) {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	listLive := []ListLive{}
 	query := `
 	SELECT
@@ -308,7 +308,7 @@ func cacheMainLive(seqKeyword int64) {
 // novel-view-finish (view cnt, 완)
 // complete batch (like cnt, 완)
 func cacheMainPopular() {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	listPopular := []ListPopular{}
 	query := `
 	SELECT
@@ -329,7 +329,7 @@ func cacheMainPopular() {
 // novel-subscribe (subscribe cnt)
 // like step1~4 (like cnt)
 func cacheMainPopularWriter() {
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	listPopularWriter := []ListPopularWriter{}
 	query := `
 		SELECT

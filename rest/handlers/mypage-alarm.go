@@ -12,7 +12,7 @@ import (
 func MypageListAlarm(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -29,7 +29,7 @@ func MypageListAlarm(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	result := sdb.
 		Model(schemas.Alarm{}).
 		Where("seq_member = ?", userToken.SeqMember).
@@ -72,7 +72,7 @@ func MypageListAlarm(req *domain.CommonRequest) domain.CommonResponse {
 func MypageAlarmReceiveSet(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -80,7 +80,7 @@ func MypageAlarmReceiveSet(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	_seqAlarm, _ := strconv.Atoi(req.Vars["seq_alarm"])
 	query := "UPDATE alarms SET is_read = true, updated_at = NOW() WHERE seq_alarm = ? AND seq_member = ?"
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 	result := mdb.Exec(query, _seqAlarm, userToken.SeqMember)
 	if corm(result, &res) {
 		return res

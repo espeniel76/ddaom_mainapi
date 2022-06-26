@@ -18,12 +18,12 @@ import (
 var List = make(map[string]*gorm.DB)
 
 func connectMySQLPooling() {
-	List[define.DSN_MASTER] = createInstance(define.DSN_MASTER)
-	List[define.DSN_SLAVE] = createInstance(define.DSN_SLAVE)
-	List[define.DSN_LOG1_MASTER] = createInstance(define.DSN_LOG1_MASTER)
-	List[define.DSN_LOG1_SLAVE] = createInstance(define.DSN_LOG1_SLAVE)
-	List[define.DSN_LOG2_MASTER] = createInstance(define.DSN_LOG2_MASTER)
-	List[define.DSN_LOG2_SLAVE] = createInstance(define.DSN_LOG2_SLAVE)
+	List[define.Mconn.DsnMaster] = createInstance(define.Mconn.DsnMaster)
+	List[define.Mconn.DsnSlave] = createInstance(define.Mconn.DsnSlave)
+	List[define.Mconn.DsnLog1Master] = createInstance(define.Mconn.DsnLog1Master)
+	List[define.Mconn.DsnLog1Slave] = createInstance(define.Mconn.DsnLog1Slave)
+	List[define.Mconn.DsnLog2Master] = createInstance(define.Mconn.DsnLog2Master)
+	List[define.Mconn.DsnLog2Slave] = createInstance(define.Mconn.DsnLog2Slave)
 }
 
 func createInstance(dsn string) *gorm.DB {

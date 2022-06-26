@@ -13,7 +13,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	_seqMember, _ := strconv.ParseInt(req.Vars["seq_member"], 10, 64)
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	var seqMemberToken int64
 	itsMe := false
 	if userToken != nil {
@@ -33,7 +33,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 
 	// 닉네임, 프로필
 	result := sdb.Model(schemas.MemberDetail{}).

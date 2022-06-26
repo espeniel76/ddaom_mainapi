@@ -12,9 +12,9 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	var result error
 
-	mdb := db.List[define.DSN_MASTER]
-	ldb1 := db.List[define.DSN_LOG1_MASTER]
-	ldb2 := db.List[define.DSN_LOG2_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
+	ldb1 := db.List[define.Mconn.DsnLog1Master]
+	ldb2 := db.List[define.Mconn.DsnLog2Master]
 
 	mdb.AutoMigrate(schemas.Member{})
 	if result != nil {

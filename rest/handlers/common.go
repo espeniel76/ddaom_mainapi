@@ -55,7 +55,7 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 	now := time.Now()
 	custom := now.Format("200601")
 
-	path := define.FILE_UPLOAD_PATH + _path + "/" + custom + "/"
+	path := define.Mconn.FileUploadPath + _path + "/" + custom + "/"
 	_, err = os.ReadDir(path)
 	if err != nil {
 		err = os.MkdirAll(path, 0755)
@@ -92,7 +92,7 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 		fmt.Println(err)
 	}
 
-	fullPath = strings.Replace(fullPath, define.REPLACE_PATH, "", -1)
+	fullPath = strings.Replace(fullPath, define.Mconn.ReplacePath, "", -1)
 
 	return fullPath, nil
 }
@@ -101,10 +101,10 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 
 	s3 := tools.S3Info{
 		AwsProfileName: "ddaom",
-		AwsS3Region:    define.AWS_S3_REGION,
-		AwsSecretKey:   define.AWS_SECRET_KEY,
-		AwsAccessKey:   define.AWS_ACCESS_KEY,
-		BucketName:     define.AWS_BUCKET_NAME,
+		AwsS3Region:    define.Mconn.AwsS3Region,
+		AwsSecretKey:   define.Mconn.AwsSecretKey,
+		AwsAccessKey:   define.Mconn.AwsAccessKey,
+		BucketName:     define.Mconn.AwsBucketName,
 	}
 
 	err := s3.SetS3ConfigByKey()
@@ -119,7 +119,7 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 
 	now := time.Now()
 	custom := now.Format("200601")
-	path := define.FILE_UPLOAD_PATH + _path + "/" + custom + "/"
+	path := define.Mconn.FileUploadPath + _path + "/" + custom + "/"
 	_id := tools.MakeShortId()
 	var ext string
 	switch oFile.ContentType {

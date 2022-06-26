@@ -12,7 +12,7 @@ import (
 func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if err != nil {
 		res.ResultCode = define.INVALID_TOKEN
 		res.ErrorDesc = err.Error()
@@ -23,7 +23,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	var cnt int64
 
 	ldb := GetMyLogDbMaster(userToken.Allocated)
-	mdb := db.List[define.DSN_MASTER]
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	// 소설 존재 여부
 	fmt.Println(cnt)

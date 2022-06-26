@@ -30,7 +30,7 @@ func initPool() {
 		MaxIdle:   80,
 		MaxActive: 12000,
 		Dial: func() (redis.Conn, error) {
-			conn, err := redis.DialURL(define.DSN_REDIS_MASTER, redis.DialDatabase(1))
+			conn, err := redis.DialURL(define.Mconn.DsnRedisMaster, redis.DialDatabase(1))
 			if err != nil {
 				log.Printf("ERROR: fail init redis: %s", err.Error())
 				os.Exit(1)
@@ -42,7 +42,7 @@ func initPool() {
 		MaxIdle:   80,
 		MaxActive: 12000,
 		Dial: func() (redis.Conn, error) {
-			conn, err := redis.DialURL(define.DSN_REDIS_SLAVE, redis.DialDatabase(1))
+			conn, err := redis.DialURL(define.Mconn.DsnRedisSlave, redis.DialDatabase(1))
 			if err != nil {
 				log.Printf("ERROR: fail init redis: %s", err.Error())
 				os.Exit(1)

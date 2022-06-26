@@ -14,7 +14,7 @@ func MainTempInfo(req *domain.CommonRequest) domain.CommonResponse {
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
 
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 
 	mainTempInfoRes := MainTempInfoRes{}
 	mainTempInfoRes.Step = int64(_step)

@@ -11,7 +11,7 @@ import (
 func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	_step, _ := strconv.Atoi(req.Vars["step"])
 	_seqNovel, _ := strconv.ParseInt(req.Vars["seq_novel"], 10, 64)
 
@@ -21,7 +21,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	var seqNovelStep3 int64
 	var seqNovelStep4 int64
 
-	ldb := db.List[define.DSN_SLAVE]
+	ldb := db.List[define.Mconn.DsnSlave]
 
 	switch _step {
 	case 1:

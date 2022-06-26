@@ -246,7 +246,7 @@ type CategoryFaqRes struct {
 // 	var res = domain.CommonResponse{}
 
 // 	today, _ := strconv.Atoi(tools.TodayFormattedDate())
-// 	sdb := db.List[define.DSN_SLAVE]
+// 	sdb := db.List[define.Mconn.DsnSlave]
 // 	query := `
 // 			SELECT
 // 			seq_keyword,
@@ -336,7 +336,7 @@ type CategoryFaqRes struct {
 // 	fmt.Println(today)
 
 // 	// 데이터 가져온다.
-// 	sdb := db.List[define.DSN_SLAVE]
+// 	sdb := db.List[define.Mconn.DsnSlave]
 // 	query := `
 // 		SELECT
 // 			seq_keyword,
@@ -377,7 +377,7 @@ type CategoryFaqRes struct {
 // 	var res = domain.CommonResponse{}
 
 // 	// 데이터 가져온다.
-// 	sdb := db.List[define.DSN_SLAVE]
+// 	sdb := db.List[define.Mconn.DsnSlave]
 // 	skinRes := SkinRes{}
 // 	result := sdb.Model(&schemas.Image{}).Where("active_yn = true").Find(&skinRes.List)
 // 	if corm(result, &res) {
@@ -401,7 +401,7 @@ type CategoryFaqRes struct {
 // 	var res = domain.CommonResponse{}
 
 // 	// 데이터 가져온다.
-// 	sdb := db.List[define.DSN_SLAVE]
+// 	sdb := db.List[define.Mconn.DsnSlave]
 // 	genreRes := GenreRes{}
 // 	result := sdb.Model(&schemas.Genre{}).Where("active_yn = true").Find(&genreRes.List)
 // 	if corm(result, &res) {

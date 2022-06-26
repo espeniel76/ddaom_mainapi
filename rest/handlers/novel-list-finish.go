@@ -26,7 +26,7 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	limitStart := (_page - 1) * _sizePerPage
 
 	var totalData int64
-	sdb := db.List[define.DSN_SLAVE]
+	sdb := db.List[define.Mconn.DsnSlave]
 	if _seqGenre > 0 {
 		sdb.Model(schemas.NovelFinish{}).Where("active_yn = true AND seq_genre = ?", _seqGenre).Count(&totalData)
 	} else {
@@ -66,7 +66,7 @@ func NovelListFinish(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	//finish seq 구한다
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.JWT_ACCESS_SECRET)
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	if userToken != nil {
 		var seqNovelFinishes []int64
 		var listMy []int64

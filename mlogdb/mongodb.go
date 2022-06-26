@@ -23,7 +23,7 @@ func RunMongodb() {
 }
 
 func initMongoDb() {
-	connect(define.DSN_MONGODB)
+	connect(define.Mconn.DsnMongodb)
 	if err != nil {
 		fmt.Println(err)
 	}
