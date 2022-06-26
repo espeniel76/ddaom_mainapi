@@ -147,6 +147,12 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 }
 
 func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEnd int64, intervalStart int64) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
 	interval := intervalEnd - intervalStart
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	seqMember := 0

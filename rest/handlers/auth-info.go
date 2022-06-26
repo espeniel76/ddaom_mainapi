@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"time"
 )
 
@@ -90,6 +91,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 
 		if isExistImage {
 			if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.co.kr" {
+				fmt.Println("여기다 이미지 업로드")
 				fullPath, err = SaveFileS3("profile", &profilePhoto)
 			} else {
 				fullPath, err = SaveFile("profile", &profilePhoto)

@@ -4,7 +4,7 @@
 	"push_server_key": "aaaas8defv4:apa91bhjjf63wpyefl-6ibmhj0pvb0vpepwirnxes3pzrgmxg7wb1q8yktyzxntrcvvmx8ce5roxvjwjllz9crw8pt5daxusd-mxik4jqgdvkr_xwauw1snexbsffnebsr_d2l-pn-wy",
 	"default_profile": "/default.png",
 
-	"http_server": "http://192.168.1.20:81",
+	"http_server": "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.co.kr",
 	"http_port": "3011",
 	"http_port_ssl": "3012",
 	"dsn_master": "espeniel:anjgkrp@tcp(localhost:3307)/ddaom?charset=utf8mb4&parseTime=True&loc=Local",
@@ -20,8 +20,8 @@
 	"replace_path": "www",
 
 	"aws_s3_region": "ap-northeast-2",
-	"aws_secret_key": "tmdrd9inqdb6zxz0qwhfgmi2yhdsayctdaiwfxyf",
-	"aws_access_key": "akia225upjlvea7eminp",
+	"aws_secret_key": "tmdrd9InqdB6zxz0qWhFgMi2yHDSAycTDAiwFXYf",
+	"aws_access_key": "AKIA225UPJLVEA7EMINP",
 	"aws_bucket_name": "image.ttaom.co.kr",
 	"aws_s3_server": "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.co.kr"
 }
