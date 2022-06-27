@@ -135,7 +135,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 		intervalEnd := time.Now().UnixMilli()
 		if string(r.URL.String()) != "/check" {
-			fmt.Println(intervalStart, intervalEnd)
+			// fmt.Println(intervalStart, intervalEnd)
 			go accessLog(&req, &res, intervalEnd, intervalStart)
 		}
 

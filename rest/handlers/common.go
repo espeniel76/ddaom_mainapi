@@ -107,9 +107,6 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 		BucketName:     define.Mconn.AwsBucketName,
 	}
 
-	fmt.Println(define.AWS_SECRET_KEY)
-	fmt.Println(define.Mconn.AwsSecretKey)
-
 	err := s3.SetS3ConfigByKey()
 	if err != nil {
 		return "", err
