@@ -4,6 +4,7 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"strconv"
 )
 
@@ -80,12 +81,25 @@ func MainTempInfo(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		result = sdb.Model(schemas.NovelStep1{}).Select("deleted_yn").Where("seq_novel_step1 = ?", mainTempInfoRes.Step1.SeqNovelStep1).Scan(&mainTempInfoRes.Step2.IsParentDeleted)
+		if corm(result, &res) {
+			return res
+		}
+
 	case 3:
 		result := sdb.Raw(qstep3, _seqNovel).Scan(&mainTempInfoRes.Step3)
 		if corm(result, &res) {
 			return res
 		}
 		result = sdb.Raw(qstep2, mainTempInfoRes.Step3.SeqNovelStep2).Scan(&mainTempInfoRes.Step2)
+		if corm(result, &res) {
+			return res
+		}
+		result = sdb.Raw(qstep1, mainTempInfoRes.Step2.SeqNovelStep1).Scan(&mainTempInfoRes.Step1)
+		if corm(result, &res) {
+			return res
+		}
+		result = sdb.Model(schemas.NovelStep2{}).Select("deleted_yn").Where("seq_novel_step2 = ?", mainTempInfoRes.Step2.SeqNovelStep2).Scan(&mainTempInfoRes.Step3.IsParentDeleted)
 		if corm(result, &res) {
 			return res
 		}
@@ -98,8 +112,21 @@ func MainTempInfo(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
+		result = sdb.Raw(qstep2, mainTempInfoRes.Step3.SeqNovelStep2).Scan(&mainTempInfoRes.Step2)
+		if corm(result, &res) {
+			return res
+		}
+		result = sdb.Raw(qstep1, mainTempInfoRes.Step2.SeqNovelStep1).Scan(&mainTempInfoRes.Step1)
+		if corm(result, &res) {
+			return res
+		}
+		result = sdb.Model(schemas.NovelStep3{}).Select("deleted_yn").Where("seq_novel_step3 = ?", mainTempInfoRes.Step3.SeqNovelStep3).Scan(&mainTempInfoRes.Step4.IsParentDeleted)
+		if corm(result, &res) {
+			return res
+		}
 	}
-	// }
+
+	// 상위글 삭제 여부 검수
 
 	res.Data = mainTempInfoRes
 	return res
@@ -120,30 +147,33 @@ type MainTempInfoRes struct {
 		Content       string  `json:"content"`
 	} `json:"step1"`
 	Step2 struct {
-		SeqNovelStep1 int64   `json:"seq_novel_step1"`
-		SeqNovelStep2 int64   `json:"seq_novel_step2"`
-		SeqMember     int64   `json:"seq_member"`
-		NickName      string  `json:"nick_name"`
-		CreatedAt     float64 `json:"created_at"`
-		Content       string  `json:"content"`
+		SeqNovelStep1   int64   `json:"seq_novel_step1"`
+		SeqNovelStep2   int64   `json:"seq_novel_step2"`
+		SeqMember       int64   `json:"seq_member"`
+		NickName        string  `json:"nick_name"`
+		CreatedAt       float64 `json:"created_at"`
+		Content         string  `json:"content"`
+		IsParentDeleted bool    `json:"is_parent_deleted"`
 	} `json:"step2"`
 	Step3 struct {
-		SeqNovelStep1 int64   `json:"seq_novel_step1"`
-		SeqNovelStep2 int64   `json:"seq_novel_step2"`
-		SeqNovelStep3 int64   `json:"seq_novel_step3"`
-		SeqMember     int64   `json:"seq_member"`
-		NickName      string  `json:"nick_name"`
-		CreatedAt     float64 `json:"created_at"`
-		Content       string  `json:"content"`
+		SeqNovelStep1   int64   `json:"seq_novel_step1"`
+		SeqNovelStep2   int64   `json:"seq_novel_step2"`
+		SeqNovelStep3   int64   `json:"seq_novel_step3"`
+		SeqMember       int64   `json:"seq_member"`
+		NickName        string  `json:"nick_name"`
+		CreatedAt       float64 `json:"created_at"`
+		Content         string  `json:"content"`
+		IsParentDeleted bool    `json:"is_parent_deleted"`
 	} `json:"step3"`
 	Step4 struct {
-		SeqNovelStep1 int64   `json:"seq_novel_step1"`
-		SeqNovelStep2 int64   `json:"seq_novel_step2"`
-		SeqNovelStep3 int64   `json:"seq_novel_step3"`
-		SeqNovelStep4 int64   `json:"seq_novel_step4"`
-		SeqMember     int64   `json:"seq_member"`
-		NickName      string  `json:"nick_name"`
-		CreatedAt     float64 `json:"created_at"`
-		Content       string  `json:"content"`
+		SeqNovelStep1   int64   `json:"seq_novel_step1"`
+		SeqNovelStep2   int64   `json:"seq_novel_step2"`
+		SeqNovelStep3   int64   `json:"seq_novel_step3"`
+		SeqNovelStep4   int64   `json:"seq_novel_step4"`
+		SeqMember       int64   `json:"seq_member"`
+		NickName        string  `json:"nick_name"`
+		CreatedAt       float64 `json:"created_at"`
+		Content         string  `json:"content"`
+		IsParentDeleted bool    `json:"is_parent_deleted"`
 	} `json:"step4"`
 }

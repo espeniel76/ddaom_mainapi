@@ -25,8 +25,15 @@ func NovelLikeStep4(req *domain.CommonRequest) domain.CommonResponse {
 	ldb := GetMyLogDbMaster(userToken.Allocated)
 	mdb := db.List[define.Mconn.DsnMaster]
 
-	result := mdb.Model(schemas.NovelStep4{}).Select("cnt_like").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&cnt).Count(&scanCount)
+	// 소설 존재/삭제 여부
+	novelStep := schemas.NovelStep4{}
+	result := mdb.Model(&novelStep).Select("cnt_like, deleted_yn").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&novelStep).Count(&scanCount)
 	if corm(result, &res) {
+		return res
+	}
+	cnt = novelStep.CntLike
+	if novelStep.DeletedYn {
+		res.ResultCode = define.DELETED_NOVEL
 		return res
 	}
 	if scanCount == 0 {

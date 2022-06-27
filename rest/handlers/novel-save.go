@@ -91,6 +91,10 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.INACTIVE_COLOR
 		return res
 	}
+	if isAbleGenre(_seqGenre) != true {
+		res.ResultCode = define.INACTIVE_GENRE
+		return res
+	}
 
 	if _seqNovelStep1 == 0 { // 신규 작성
 		novelWriteStep1 := schemas.NovelStep1{
@@ -142,7 +146,8 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			seq_keyword = ?,
 			title = ?,
 			content = ?,
-			temp_yn = ?
+			temp_yn = ?,
+			updated_at = NOW()
 		WHERE seq_novel_step1 = ?
 		`
 		result = mdb.Exec(query, _seqGenre, _seqImage, _seqColor, _seqKeyword, _title, _content, _tempYn, _seqNovelStep1)
@@ -187,6 +192,17 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	// step 2 단계 글 신규
 	if _seqNovelStep2 == 0 {
+		// 상위글 삭제 여부 검사
+		isDeleted := false
+		result = mdb.Model(schemas.NovelStep1{}).Select("deleted_yn").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&isDeleted)
+		if corm(result, &res) {
+			return res
+		}
+		if isDeleted {
+			res.ResultCode = define.DELETED_PARENT
+			return res
+		}
+
 		// 가용 키워드 검사
 		seqKeyword := getSeqKeyword(1, int64(_seqNovelStep1))
 		if isAbleKeyword(seqKeyword) != true {
@@ -235,16 +251,26 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
+		// 상위글 삭제 여부 검사
+		// for push
+		_seqNovelStep1 = novelStep.SeqNovelStep1
+		isDeleted := false
+		result = mdb.Model(schemas.NovelStep1{}).Select("deleted_yn").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&isDeleted)
+		if corm(result, &res) {
+			return res
+		}
+		if isDeleted {
+			res.ResultCode = define.DELETED_PARENT
+			return res
+		}
 		if novelStep.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
 		}
-		// for push
-		_seqNovelStep1 = novelStep.SeqNovelStep1
 
 		result = mdb.Model(&novelStep).
 			Where("seq_novel_step2 = ?", _seqNovelStep2).
-			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn})
+			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn, "updated_at": time.Now()})
 		if corm(result, &res) {
 			return res
 		}
@@ -284,6 +310,17 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if _seqNovelStep3 == 0 {
+		// 상위글 삭제 여부 검사
+		isDeleted := false
+		result = mdb.Model(schemas.NovelStep2{}).Select("deleted_yn").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&isDeleted)
+		if corm(result, &res) {
+			return res
+		}
+		if isDeleted {
+			res.ResultCode = define.DELETED_PARENT
+			return res
+		}
+
 		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
@@ -340,6 +377,17 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
+		// 상위글 삭제 여부 검사
+		_seqNovelStep2 = novelStep.SeqNovelStep2
+		isDeleted := false
+		result = mdb.Model(schemas.NovelStep2{}).Select("deleted_yn").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&isDeleted)
+		if corm(result, &res) {
+			return res
+		}
+		if isDeleted {
+			res.ResultCode = define.DELETED_PARENT
+			return res
+		}
 		if novelStep.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
@@ -347,7 +395,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 		result = mdb.Model(&novelStep).
 			Where("seq_novel_step3 = ?", _seqNovelStep3).
-			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn})
+			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn, "updated_at": time.Now()})
 		if corm(result, &res) {
 			return res
 		}
@@ -390,6 +438,17 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if _seqNovelStep4 == 0 {
+		// 상위글 삭제 여부 검사
+		isDeleted := false
+		result = mdb.Model(schemas.NovelStep3{}).Select("deleted_yn").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&isDeleted)
+		if corm(result, &res) {
+			return res
+		}
+		if isDeleted {
+			res.ResultCode = define.DELETED_PARENT
+			return res
+		}
+
 		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
@@ -446,6 +505,17 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
+		// 상위글 삭제 여부 검사
+		_seqNovelStep3 = novelStep.SeqNovelStep3
+		isDeleted := false
+		result = mdb.Model(schemas.NovelStep3{}).Select("deleted_yn").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&isDeleted)
+		if corm(result, &res) {
+			return res
+		}
+		if isDeleted {
+			res.ResultCode = define.DELETED_PARENT
+			return res
+		}
 		if novelStep.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
@@ -453,7 +523,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 		result = mdb.Model(&novelStep).
 			Where("seq_novel_step4 = ?", _seqNovelStep4).
-			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn})
+			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn, "updated_at": time.Now()})
 		if corm(result, &res) {
 			return res
 		}

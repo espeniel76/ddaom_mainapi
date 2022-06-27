@@ -272,7 +272,7 @@ type NovelStep4 struct {
 	SeqNovelStep3  int64     `gorm:"index" json:"seq_novel_step3"`
 	SeqMember      int64     `gorm:"index" json:"seq_member"`
 	Content        string    `gorm:"type:varchar(5120)" json:"content"`
-	CntLike        int       `gorm:"default:0" json:"cnt_like"`
+	CntLike        int64     `gorm:"default:0" json:"cnt_like"`
 	CntView        int64     `gorm:"default:0" json:"cnt_view"`
 	ActiveYn       bool      `gorm:"default:true" json:"active_yn"`
 	TempYn         bool      `gorm:"default:false" json:"temp_yn"`

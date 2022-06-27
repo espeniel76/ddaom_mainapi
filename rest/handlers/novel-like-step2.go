@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"strconv"
 )
 
@@ -19,7 +18,6 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 	_seqNovelStep2, _ := strconv.Atoi(req.Vars["seq_novel_step2"])
-	fmt.Println(_seqNovelStep2)
 
 	myLike := false
 	var cnt int64
@@ -28,8 +26,15 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 	ldb := GetMyLogDbMaster(userToken.Allocated)
 	mdb := db.List[define.Mconn.DsnMaster]
 
-	result := mdb.Model(schemas.NovelStep2{}).Select("cnt_like").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&cnt).Count(&scanCount)
+	// 소설 존재/삭제 여부
+	novelStep := schemas.NovelStep2{}
+	result := mdb.Model(&novelStep).Select("cnt_like, deleted_yn").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep).Count(&scanCount)
 	if corm(result, &res) {
+		return res
+	}
+	cnt = novelStep.CntLike
+	if novelStep.DeletedYn {
+		res.ResultCode = define.DELETED_NOVEL
 		return res
 	}
 	if scanCount == 0 {

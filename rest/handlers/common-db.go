@@ -181,6 +181,16 @@ func isAbleColor(seqColor int64) bool {
 		return false
 	}
 }
+func isAbleGenre(seqGenre int64) bool {
+	sdb := db.List[define.Mconn.DsnSlave]
+	genre := schemas.Genre{}
+	sdb.Model(&genre).Where("seq_genre = ? AND active_yn = true", seqGenre).Scan(&genre)
+	if genre.SeqGenre > 0 {
+		return true
+	} else {
+		return false
+	}
+}
 
 func getUserInfo(seqMember int64) schemas.MemberDetail {
 	sdb := db.List[define.Mconn.DsnSlave]
