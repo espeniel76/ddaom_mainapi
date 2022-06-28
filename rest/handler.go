@@ -42,6 +42,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/novel/list/step4", common(handlers.NovelListStep4))               // 23
 	mux.HandleFunc("/novel/view/{seq_novel_step1:[0-9]+}", common(handlers.NovelView)) // 24
 	mux.HandleFunc("/novel/view/step", common(handlers.NovelViewStep))                 // 25
+	mux.HandleFunc("/novel/view/rolling", common(handlers.NovelViewRolling))           // 25
 
 	// 완결 소설
 	mux.HandleFunc("/novel/list/finish", common(handlers.NovelListFinish))                           // 26
