@@ -11,7 +11,6 @@ type Member struct {
 	ProfileImageUrl string    `gorm:"type:varchar(512)" json:"profile_image_url"`
 	SnsType         string    `gorm:"type:ENUM('KAKAO','NAVER','FACEBOOK','GOOGLE','APPLE'); DEFAULT:'GOOGLE'" json:"sns_type"`
 	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
-	BlockYn         bool      `gorm:"default:false" json:"block_yn"`
 	UserLevel       int8      `gorm:"default:5" json:"user_level"`
 	AllocatedDb     int8      `json:"allocted_db"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -19,6 +18,16 @@ type Member struct {
 	PushToken       string    `gorm:"type:varchar(5120)" json:"push_token"`
 	DeletedYn       bool      `gorm:"default:false" json:"deleted_yn"`
 	DeletedAt       time.Time `json:"deleted_at"`
+	BlockedYn       bool      `gorm:"default:false" json:"blocked_yn"`
+	BlockedAt       time.Time `json:"blocked_at"`
+}
+
+type MemberBlock struct {
+	SeqMemberBlock int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_block"`
+	SeqMember      int64     `gorm:"unique" json:"seq_member"`
+	BlockedYn      bool      `gorm:"default:false" json:"blocked_yn"`
+	BlockReason    string    `gorm:"type:varchar(2014)" json:"block_reason"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type MemberDetail struct {

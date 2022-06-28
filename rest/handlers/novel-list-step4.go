@@ -7,7 +7,6 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
-	"fmt"
 	"time"
 )
 
@@ -35,7 +34,6 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 	sdb := db.List[define.Mconn.DsnSlave]
 	var query bytes.Buffer
 	query.WriteString("SELECT COUNT(seq_novel_step4) FROM novel_step4 WHERE active_yn = true AND seq_novel_step1 = ? AND temp_yn = false AND deleted_yn = false")
-	fmt.Println(query.String(), _seqNovelStep1)
 	result := sdb.Raw(query.String(), _seqNovelStep1).Count(&totalData)
 	if result.Error != nil {
 		res.ResultCode = define.OK
