@@ -448,6 +448,11 @@
 				"required": true
 			},
 			{
+				"name": "seq_novel_step2",
+				"type": "int",
+				"required": true
+			},
+			{
 				"name": "page",
 				"type": "int",
 				"required": true
@@ -472,6 +477,11 @@
 		"require_parameters": [
 			{
 				"name": "seq_novel_step1",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_novel_step3",
 				"type": "int",
 				"required": true
 			},

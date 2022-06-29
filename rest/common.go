@@ -28,6 +28,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 
 		authorization := r.Header["Authorization"]
 		isToken, token := checkToken(authorization)
+		req.HttpRquest = r
 
 		if len(r.Header["Content-Type"]) < 1 {
 			res.ResultCode = define.NO_EXIST_CONTENT_TYPE
@@ -106,7 +107,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 
 		if isCheck {
-			req.HttpRquest = r
+			// req.HttpRquest = r
 			fmt.Println("------------------")
 			fmt.Println(r.URL)
 			req.JWToken = token
@@ -160,9 +161,6 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 		seqMember = int(userToken.SeqMember)
 	}
 
-	// var _req string
-	var _res string
-
 	// fmt.Println(req.HttpRquest.Method)
 	// if contentType == "multipart/form-data" {
 	// 	// outReq, _ := json.Marshal(req.Parameters)
@@ -186,8 +184,8 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 
 	outRes, err := json.Marshal(res.ResultCode)
 	if err == nil {
-		_res = strings.ReplaceAll(string(outRes), "\"", "")
-		document := bson.D{
+		_res := strings.ReplaceAll(string(outRes), "\"", "")
+		doc := bson.D{
 			{"seq_user", seqMember},
 			{"method", req.HttpRquest.Method},
 			{"url", req.HttpRquest.URL},
@@ -196,7 +194,7 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 			{"res", _res},
 			{"at", time.Now()},
 		}
-		_, err := mlogdb.InsertOne(document)
+		_, err := mlogdb.InsertOne(doc)
 		if err != nil {
 			fmt.Println(err.Error())
 		}

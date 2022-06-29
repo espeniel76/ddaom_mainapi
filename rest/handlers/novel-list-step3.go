@@ -7,6 +7,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
+	"fmt"
 	"time"
 )
 
@@ -20,6 +21,7 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 	_seqNovelStep1 := CpInt64(req.Parameters, "seq_novel_step1")
+	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 	_sort := Cp(req.Parameters, "sort")
@@ -33,12 +35,18 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 	var totalData int64
 	sdb := db.List[define.Mconn.DsnSlave]
 	var query bytes.Buffer
-	query.WriteString("SELECT COUNT(seq_novel_step3) FROM novel_step3 WHERE active_yn = true AND seq_novel_step1 = ? AND temp_yn = false AND deleted_yn = false")
-	result := sdb.Raw(query.String(), _seqNovelStep1).Count(&totalData)
-	if result.Error != nil {
-		res.ResultCode = define.OK
-		res.ErrorDesc = result.Error.Error()
-		return res
+	if _seqNovelStep2 > 0 {
+		query.WriteString("SELECT COUNT(seq_novel_step3) FROM novel_step3 WHERE active_yn = true AND seq_novel_step1 = ? AND seq_novel_step2 = ? AND temp_yn = false AND deleted_yn = false")
+		result := sdb.Raw(query.String(), _seqNovelStep1, _seqNovelStep2).Count(&totalData)
+		if corm(result, &res) {
+			return res
+		}
+	} else {
+		query.WriteString("SELECT COUNT(seq_novel_step3) FROM novel_step3 WHERE active_yn = true AND seq_novel_step1 = ? AND temp_yn = false AND deleted_yn = false")
+		result := sdb.Raw(query.String(), _seqNovelStep1).Count(&totalData)
+		if corm(result, &res) {
+			return res
+		}
 	}
 
 	query.Reset()
@@ -52,8 +60,12 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 			ns.content
 		FROM novel_step3 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
-		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
 	`)
+	if _seqNovelStep2 > 0 {
+		query.WriteString(`WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.seq_novel_step2 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`)
+	} else {
+		query.WriteString(`WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`)
+	}
 	switch _sort {
 	case define.LIKE:
 		query.WriteString(" ORDER BY ns.cnt_like DESC, ns.updated_at DESC")
@@ -63,12 +75,21 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 		query.WriteString(" ORDER BY ns.updated_at DESC")
 	}
 	query.WriteString(" LIMIT ?, ?")
+
+	fmt.Println(query.String())
+
 	step3ResTmp := []Step3ResTmp{}
-	result = sdb.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step3ResTmp)
-	if result.Error != nil {
-		res.ResultCode = define.OK
-		res.ErrorDesc = result.Error.Error()
-		return res
+
+	if _seqNovelStep2 > 0 {
+		result := sdb.Raw(query.String(), _seqNovelStep1, _seqNovelStep2, limitStart, _sizePerPage).Find(&step3ResTmp)
+		if corm(result, &res) {
+			return res
+		}
+	} else {
+		result := sdb.Raw(query.String(), _seqNovelStep1, limitStart, _sizePerPage).Find(&step3ResTmp)
+		if corm(result, &res) {
+			return res
+		}
 	}
 
 	novelListStep3Res := NovelListStep3Res{
