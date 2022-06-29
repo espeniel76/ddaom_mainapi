@@ -3,7 +3,6 @@ package define
 import (
 	"ddaom/domain"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -26,5 +25,4 @@ func SetConnectionInfosParse() {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	Mconn = domain.ConnectionInfos{}
 	_ = json.Unmarshal([]byte(byteValue), &Mconn)
-	fmt.Println(Mconn)
 }
