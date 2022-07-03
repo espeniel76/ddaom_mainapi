@@ -4,7 +4,6 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/memdb"
-	"ddaom/mlogdb"
 	"ddaom/rest"
 	"fmt"
 	"log"
@@ -24,7 +23,7 @@ func setInitialize() {
 	define.SetConnectionInfosParse()
 	db.RunMySql()
 	memdb.RunRedis()
-	mlogdb.RunMongodb()
+	// mlogdb.RunMongodb()
 
 	mux := mux.NewRouter()
 	rest.Handlers(mux)
