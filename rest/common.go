@@ -136,14 +136,16 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 		intervalEnd := time.Now().UnixMilli()
 		if string(r.URL.String()) != "/check" {
-			// fmt.Println(intervalStart, intervalEnd)
-			go accessLog(&req, &res, intervalEnd, intervalStart)
+			fmt.Println(intervalEnd - intervalStart)
+			// go accessLog(&req, &res, intervalEnd, intervalStart)
 		}
 
 		data, _ := json.Marshal(res)
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
+
 		fmt.Fprint(w, string(data))
+		// fmt.Println(string(data))
 	}
 }
 
@@ -182,19 +184,20 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 	// 	}
 	// }
 
-	outRes, err := json.Marshal(res.ResultCode)
+	_, err := json.Marshal(res)
 	if err == nil {
-		_res := strings.ReplaceAll(string(outRes), "\"", "")
-		doc := bson.D{
+
+		_res := res.ResultCode
+		// _res := strings.ReplaceAll(string(outRes), "\"", "")
+		document := bson.D{
 			{"seq_user", seqMember},
 			{"method", req.HttpRquest.Method},
 			{"url", req.HttpRquest.URL},
 			{"delay", interval},
-			// {"req", _req},
 			{"res", _res},
 			{"at", time.Now()},
 		}
-		_, err := mlogdb.InsertOne(doc)
+		_, err := mlogdb.InsertOne(document)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
