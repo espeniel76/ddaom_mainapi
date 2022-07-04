@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -210,13 +211,15 @@ func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
 			// Create a FCM client to send the message.
 			client, err := fcm.NewClient(define.Mconn.PushServerKey)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			// Send the message and receive the response without retries.
 			response, err := client.Send(msg)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			log.Printf("%#v\n", response)
