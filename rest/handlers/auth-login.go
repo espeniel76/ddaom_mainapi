@@ -66,6 +66,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		SnsType:   snsType,
 		PushToken: pushToken,
 		DeletedAt: time.Now(),
+		BlockedAt: time.Now(),
 	}
 
 	// 1. 신규인가
