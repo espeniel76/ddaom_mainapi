@@ -6,6 +6,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
+	"fmt"
 	"time"
 )
 
@@ -157,8 +158,8 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
-		cacheMainLive(_seqKeyword)
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go cacheMainLive(_seqKeyword)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -277,7 +278,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -404,7 +405,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	var _seqNovelStep1 int64
 	mdb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -532,13 +533,19 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	var _seqNovelStep1 int64
 	mdb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
 }
 
 func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	if seqNovel < 1 {
 		return

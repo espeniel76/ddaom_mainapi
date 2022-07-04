@@ -120,7 +120,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	// push 날리기
 	if myLike {
-		pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
+		go pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
 	}
 
 	cacheMainPopularWriter()
@@ -141,6 +141,12 @@ func updateKeywordMemberLike(seqMember int64, seqKeyword int64, direction string
 }
 
 func pushLike(step int8, seqNovel int64, seqMember int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	info := getNovel(step, seqNovel)
 	isNight := false
@@ -190,13 +196,15 @@ func pushLike(step int8, seqNovel int64, seqMember int64) {
 			// Create a FCM client to send the message.
 			client, err := fcm.NewClient(define.Mconn.PushServerKey)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			// Send the message and receive the response without retries.
 			response, err := client.Send(msg)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			log.Printf("%#v\n", response)

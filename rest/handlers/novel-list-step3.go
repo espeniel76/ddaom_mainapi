@@ -7,7 +7,6 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
-	"fmt"
 	"time"
 )
 
@@ -76,7 +75,7 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	query.WriteString(" LIMIT ?, ?")
 
-	fmt.Println(query.String())
+	// fmt.Println(query.String())
 
 	step3ResTmp := []Step3ResTmp{}
 

@@ -266,7 +266,8 @@ func sendPush(pushToken string, alarm *schemas.Alarm) {
 	// Create a FCM client to send the message.
 	client, err := fcm.NewClient(define.Mconn.PushServerKey)
 	if err != nil {
-		log.Fatalln(err)
+		// log.Fatalln(err)
+		fmt.Println(err)
 	}
 
 	// Send the message and receive the response without retries.
