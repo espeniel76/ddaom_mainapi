@@ -138,7 +138,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 
-		result = mdb.Model(&member).Update("allocated_db", allocatedDb)
+		result = mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
 		if corm(result, &res) {
 			return res
 		}
