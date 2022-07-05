@@ -113,7 +113,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 		go pushLike(2, int64(_seqNovelStep2), userToken.SeqMember)
 	}
 
-	cacheMainPopularWriter()
+	go cacheMainPopularWriter()
 
 	return res
 }

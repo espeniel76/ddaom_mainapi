@@ -179,5 +179,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
+	go cacheMainPopularWriter()
+
 	return res
 }
