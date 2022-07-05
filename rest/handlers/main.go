@@ -15,21 +15,28 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	mainRes := MainRes{}
 
 	// 연재중인 소설 (오늘 주제어 키워드)
-	list, _ := memdb.Get("CACHES:MAIN:LIST_LIVE:" + req.Vars["seq_keyword"])
-	json.Unmarshal([]byte(list), &mainRes.ListLive)
+	list, err := memdb.Get("CACHES:MAIN:LIST_LIVE:" + req.Vars["seq_keyword"])
+	if err == nil {
+		json.Unmarshal([]byte(list), &mainRes.ListLive)
+	}
 
 	// 인기작
-	list, _ = memdb.Get("CACHES:MAIN:LIST_POPULAR")
-
-	json.Unmarshal([]byte(list), &mainRes.ListPopular)
+	list, err = memdb.Get("CACHES:MAIN:LIST_POPULAR")
+	if err == nil {
+		json.Unmarshal([]byte(list), &mainRes.ListPopular)
+	}
 
 	// 완결작
-	list, _ = memdb.Get("CACHES:MAIN:LIST_FINISH")
-	json.Unmarshal([]byte(list), &mainRes.ListFinish)
+	list, err = memdb.Get("CACHES:MAIN:LIST_FINISH")
+	if err == nil {
+		json.Unmarshal([]byte(list), &mainRes.ListFinish)
+	}
 
 	// 인기작가
-	list, _ = memdb.Get("CACHES:MAIN:LIST_POPULAR_WRITER")
-	json.Unmarshal([]byte(list), &mainRes.ListPopularWriter)
+	list, err = memdb.Get("CACHES:MAIN:LIST_POPULAR_WRITER")
+	if err == nil {
+		json.Unmarshal([]byte(list), &mainRes.ListPopularWriter)
+	}
 
 	res.Data = mainRes
 
