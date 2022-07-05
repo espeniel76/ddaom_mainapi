@@ -17,6 +17,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/appleboy/go-fcm"
 	"gorm.io/gorm"
@@ -406,7 +407,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 			return
 		}
 
-		s3.DownloadFile("/tmp/thumb", imgPath)
+		s3.DownloadFile("/tmp/thumb", strings.Replace(imgPath, "/", "", 1))
 	}
 
 	// 4. MERGE 작업
