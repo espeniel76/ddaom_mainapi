@@ -402,14 +402,6 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 
 	// 3. 가져온 경로로 이미지 다운 (AWS 일 시)
 	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
-		s3 := tools.S3Info{
-			AwsProfileName: "ddaom",
-			AwsS3Region:    define.Mconn.AwsS3Region,
-			AwsSecretKey:   define.Mconn.AwsSecretKey,
-			AwsAccessKey:   define.Mconn.AwsAccessKey,
-			BucketName:     define.Mconn.AwsBucketName,
-		}
-
 		err := s3.SetS3ConfigByKey()
 		if err != nil {
 			return
