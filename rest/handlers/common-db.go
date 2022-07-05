@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
@@ -362,26 +363,47 @@ func cacheMainPopularWriter() {
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))
 }
 
-// 배경색, 이미지 병합
-func MergeImage(seqColor int64, seqImage int64) {
-	image1, _ := os.Open("/home/samba/espeniel/ddaom_mainapi/tmp/Jellyfish.jpg")
-	first, _ := jpeg.Decode(image1)
-	defer image1.Close()
+func educeImage(seqColor int64, seqImage int64) {
 
-	image2, _ := os.Open("/home/samba/espeniel/ddaom_mainapi/tmp/pokeball.png")
-	second, _ := png.Decode(image2)
-	defer image2.Close()
+	// 1. 해당 조합의 DB 데이터가 있는지 확인
+	// 2. 없으면, DB 에서 경로 가져옴
+	// 3.
 
-	offset := image.Pt(0, 0)
-	b := first.Bounds()
-	image3 := image.NewRGBA(b)
-	draw.Draw(image3, b, first, image.Point{}, draw.Src)
-	draw.Draw(image3, second.Bounds().Add(offset), second, image.Point{}, draw.Over)
+	imgSrc := "/home/samba/espeniel/ddaom_mainapi/tmp/pokeball.png"
+	hexValue := "#B8F500"
+	imgSource, _ := os.Open(imgSrc)
+	imgLayer, _ := png.Decode(imgSource)
+	defer imgSource.Close()
 
-	third, err := os.Create("/home/samba/espeniel/ddaom_mainapi/tmp/result.jpg")
-	if err != nil {
-		log.Fatalf("failed to create: %s", err)
-	}
-	jpeg.Encode(third, image3, &jpeg.Options{90})
+	b := imgLayer.Bounds()
+	imgResult := image.NewRGBA(b)
+
+	m := image.NewRGBA(b)
+	colorRgba, _ := parseHexColor(hexValue)
+	draw.Draw(m, m.Bounds(), &image.Uniform{colorRgba}, image.Point{}, draw.Src)
+
+	draw.Draw(imgResult, b, m, image.Point{}, draw.Src)
+	draw.Draw(imgResult, b, imgLayer, image.Point{}, draw.Over)
+
+	third, _ := os.Create("/home/samba/espeniel/ddaom_mainapi/tmp/imgResult.jpg")
+	jpeg.Encode(third, imgResult, &jpeg.Options{90})
 	defer third.Close()
+}
+
+func parseHexColor(s string) (c color.RGBA, err error) {
+	c.A = 0xff
+	switch len(s) {
+	case 7:
+		_, err = fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
+	case 4:
+		_, err = fmt.Sscanf(s, "#%1x%1x%1x", &c.R, &c.G, &c.B)
+		// Double the hex digits:
+		c.R *= 17
+		c.G *= 17
+		c.B *= 17
+	default:
+		err = fmt.Errorf("invalid length, must be 7 or 4")
+
+	}
+	return
 }
