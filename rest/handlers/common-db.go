@@ -6,6 +6,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/memdb"
+	"ddaom/tools"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -372,6 +373,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	}()
 
 	imageName := strconv.Itoa(int(seqColor)) + "_" + strconv.Itoa(int(seqImage)) + ".jpg"
+	savePath := define.Mconn.ReplacePath + "/thumb/"
 
 	mdb := db.List[define.Mconn.DsnMaster]
 
@@ -390,6 +392,22 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	mdb.Model(schemas.Color{}).Select("color").Where("seq_color = ?", seqColor).Scan(&hexValue)
 
 	// 3. 가져온 경로로 이미지 다운 (AWS 일 시)
+	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
+		s3 := tools.S3Info{
+			AwsProfileName: "ddaom",
+			AwsS3Region:    define.Mconn.AwsS3Region,
+			AwsSecretKey:   define.Mconn.AwsSecretKey,
+			AwsAccessKey:   define.Mconn.AwsAccessKey,
+			BucketName:     define.Mconn.AwsBucketName,
+		}
+
+		err := s3.SetS3ConfigByKey()
+		if err != nil {
+			return
+		}
+		s3.DownloadFile("upload/202206", "43325uFlw.png")
+		return
+	}
 
 	// 4. MERGE 작업
 	imgSource, _ := os.Open(imgSrc)
@@ -406,7 +424,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	draw.Draw(imgResult, b, m, image.Point{}, draw.Src)
 	draw.Draw(imgResult, b, imgLayer, image.Point{}, draw.Over)
 
-	resultPath := define.Mconn.ReplacePath + "/thumb/" + imageName
+	resultPath := savePath + imageName
 	third, err := os.Create(resultPath)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -418,6 +436,8 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", seqNovelStep1).Update("endure_image", imageName)
 
 	// 6. MERGE 한 파일 업로드 (AWS 일 시)
+	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
+	}
 }
 
 func parseHexColor(s string) (c color.RGBA, err error) {
