@@ -4,7 +4,6 @@ import (
 	"ddaom/domain"
 	"ddaom/memdb"
 	"encoding/json"
-	"fmt"
 )
 
 func Main(req *domain.CommonRequest) domain.CommonResponse {
@@ -30,7 +29,6 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	// 완결작
 	list, err = memdb.Get("CACHES:MAIN:LIST_FINISH")
 	if err == nil {
-		fmt.Println(list)
 		json.Unmarshal([]byte(list), &mainRes.ListFinish)
 	}
 
