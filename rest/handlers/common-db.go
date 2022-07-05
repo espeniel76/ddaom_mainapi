@@ -363,23 +363,35 @@ func cacheMainPopularWriter() {
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))
 }
 
-func educeImage(seqColor int64, seqImage int64) {
+func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
+	imageName := strconv.Itoa(int(seqColor)) + "_" + strconv.Itoa(int(seqImage)) + ".jpg"
+
+	mdb := db.List[define.Mconn.DsnMaster]
 
 	// 1. 해당 조합의 DB 데이터가 있는지 확인
-	sdb := db.List[define.Mconn.DsnSlave]
-	var imgPath string
-	var hexValue string
-	sdb.Model(schemas.Image{}).Select("image").Where("seq_image = ?", seqImage).Scan(&imgPath)
-	imgSrc := define.Mconn.ReplacePath + imgPath
-	sdb.Model(schemas.Color{}).Select("color").Where("seq_color = ?", seqColor).Scan(&hexValue)
+	var cnt int64
+	mdb.Model(schemas.NovelStep1{}).Select("COUNT(*)").Where("endure_image = ?", imageName).Scan(&cnt)
+	if cnt > 0 {
+		return
+	}
 
 	// 2. 없으면, DB 에서 경로 가져옴
-	// 3. 가져온 경로로 이미지 다운 (AWS 일 시)
-	// 4. MERGE 작업
-	// 5. MERGE 한 파일 업로드 (AWS 일 시)
+	var imgPath string
+	var hexValue string
+	mdb.Model(schemas.Image{}).Select("image").Where("seq_image = ?", seqImage).Scan(&imgPath)
+	imgSrc := define.Mconn.ReplacePath + imgPath
+	mdb.Model(schemas.Color{}).Select("color").Where("seq_color = ?", seqColor).Scan(&hexValue)
 
-	// imgSrc := "/home/samba/espeniel/ddaom_mainapi/tmp/pokeball.png"
-	// hexValue := "#B8F500"
+	// 3. 가져온 경로로 이미지 다운 (AWS 일 시)
+
+	// 4. MERGE 작업
 	imgSource, _ := os.Open(imgSrc)
 	imgLayer, _ := png.Decode(imgSource)
 	defer imgSource.Close()
@@ -394,13 +406,18 @@ func educeImage(seqColor int64, seqImage int64) {
 	draw.Draw(imgResult, b, m, image.Point{}, draw.Src)
 	draw.Draw(imgResult, b, imgLayer, image.Point{}, draw.Over)
 
-	resultPath := define.Mconn.ReplacePath + "/thumb/" + strconv.Itoa(int(seqColor)) + "_" + strconv.Itoa(int(seqImage)) + ".jpg"
+	resultPath := define.Mconn.ReplacePath + "/thumb/" + imageName
 	third, err := os.Create(resultPath)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	jpeg.Encode(third, imgResult, &jpeg.Options{90})
 	defer third.Close()
+
+	// 5. DB save
+	mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", seqNovelStep1).Update("endure_image", imageName)
+
+	// 6. MERGE 한 파일 업로드 (AWS 일 시)
 }
 
 func parseHexColor(s string) (c color.RGBA, err error) {

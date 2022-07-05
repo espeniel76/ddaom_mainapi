@@ -236,6 +236,7 @@ type NovelStep1 struct {
 	DeletedYn      bool      `gorm:"default:false" json:"deleted_yn"`
 	DeletedAt      time.Time `json:"deleted_at"`
 	SeqNovelDelete int64     `gorm:"default:0" json:"seq_novel_delete"`
+	EndureImage    string    `gorm:"type:varchar(50); index" json:"endure_image"`
 }
 
 type NovelStep2 struct {
