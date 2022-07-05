@@ -366,11 +366,20 @@ func cacheMainPopularWriter() {
 func educeImage(seqColor int64, seqImage int64) {
 
 	// 1. 해당 조합의 DB 데이터가 있는지 확인
-	// 2. 없으면, DB 에서 경로 가져옴
-	// 3.
+	sdb := db.List[define.Mconn.DsnSlave]
+	var imgPath string
+	var hexValue string
+	sdb.Model(schemas.Image{}).Select("image").Where("seq_image = ?", seqImage).Scan(&imgPath)
+	imgSrc := define.Mconn.ReplacePath + imgPath
+	sdb.Model(schemas.Color{}).Select("color").Where("seq_color = ?", seqColor).Scan(&hexValue)
 
-	imgSrc := "/home/samba/espeniel/ddaom_mainapi/tmp/pokeball.png"
-	hexValue := "#B8F500"
+	// 2. 없으면, DB 에서 경로 가져옴
+	// 3. 가져온 경로로 이미지 다운 (AWS 일 시)
+	// 4. MERGE 작업
+	// 5. MERGE 한 파일 업로드 (AWS 일 시)
+
+	// imgSrc := "/home/samba/espeniel/ddaom_mainapi/tmp/pokeball.png"
+	// hexValue := "#B8F500"
 	imgSource, _ := os.Open(imgSrc)
 	imgLayer, _ := png.Decode(imgSource)
 	defer imgSource.Close()
@@ -385,7 +394,11 @@ func educeImage(seqColor int64, seqImage int64) {
 	draw.Draw(imgResult, b, m, image.Point{}, draw.Src)
 	draw.Draw(imgResult, b, imgLayer, image.Point{}, draw.Over)
 
-	third, _ := os.Create("/home/samba/espeniel/ddaom_mainapi/tmp/imgResult.jpg")
+	resultPath := define.Mconn.ReplacePath + "/thumb/" + strconv.Itoa(int(seqColor)) + "_" + strconv.Itoa(int(seqImage)) + ".jpg"
+	third, err := os.Create(resultPath)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	jpeg.Encode(third, imgResult, &jpeg.Options{90})
 	defer third.Close()
 }
