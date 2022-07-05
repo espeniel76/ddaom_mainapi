@@ -373,6 +373,14 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 		}
 	}()
 
+	s3 := tools.S3Info{
+		AwsProfileName: "ddaom",
+		AwsS3Region:    define.Mconn.AwsS3Region,
+		AwsSecretKey:   define.Mconn.AwsSecretKey,
+		AwsAccessKey:   define.Mconn.AwsAccessKey,
+		BucketName:     define.Mconn.AwsBucketName,
+	}
+
 	imageName := strconv.Itoa(int(seqColor)) + "_" + strconv.Itoa(int(seqImage)) + ".jpg"
 	savePath := define.Mconn.ReplacePath + "/thumb/"
 
@@ -441,6 +449,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 
 	// 6. MERGE 한 파일 업로드 (AWS 일 시)
 	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
+		s3.UploadFile(third, "thumb/"+imageName, "image/jpeg")
 	}
 }
 
