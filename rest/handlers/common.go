@@ -109,11 +109,9 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 
 	err := s3.SetS3ConfigByKey()
 	if err != nil {
-		fmt.Println("1")
 		return "", err
 	}
 	if oFile.ContentType == "" {
-		fmt.Println("2")
 		return "", err
 	}
 	defer oFile.File.Close()
@@ -143,8 +141,6 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 
 	saveFileName := _id + "." + strings.ToLower(ext)
 	fullPath := path + saveFileName
-
-	fmt.Println(fullPath)
 
 	s3.UploadFile(oFile.File, fullPath, oFile.ContentType)
 

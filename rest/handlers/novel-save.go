@@ -161,7 +161,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	if !_tempYn {
 		go cacheMainLive(_seqKeyword)
 		go pushWrite(userToken, 1, _seqNovelStep1)
-		go educeImage(_seqColor, _seqImage)
+		// go educeImage(_seqColor, _seqImage)
 	}
 
 	return res
