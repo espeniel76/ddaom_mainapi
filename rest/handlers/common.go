@@ -109,12 +109,13 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 
 	err := s3.SetS3ConfigByKey()
 	if err != nil {
+		fmt.Println("1")
 		return "", err
 	}
 	if oFile.ContentType == "" {
+		fmt.Println("2")
 		return "", err
 	}
-
 	defer oFile.File.Close()
 
 	now := time.Now()
