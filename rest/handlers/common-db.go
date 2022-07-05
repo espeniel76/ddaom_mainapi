@@ -387,11 +387,11 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	mdb := db.List[define.Mconn.DsnMaster]
 
 	// 1. 해당 조합의 DB 데이터가 있는지 확인
-	// var cnt int64
-	// mdb.Model(schemas.NovelStep1{}).Select("COUNT(*)").Where("endure_image = ?", imageName).Scan(&cnt)
-	// if cnt > 0 {
-	// 	return
-	// }
+	var cnt int64
+	mdb.Model(schemas.NovelStep1{}).Select("COUNT(*)").Where("endure_image = ?", imageName).Scan(&cnt)
+	if cnt > 0 {
+		return
+	}
 
 	// 2. 없으면, DB 에서 경로 가져옴
 	var imgPath string
