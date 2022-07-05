@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 )
 
 func ConfigAlarm(req *domain.CommonRequest) domain.CommonResponse {
@@ -77,7 +76,7 @@ func ConfigAlarmGet(req *domain.CommonRequest) domain.CommonResponse {
 	o["is_night_push"] = m.IsNightPush
 	o["is_deleted"] = m.IsDeleted
 	res.Data = o
-	fmt.Println(o)
+	// fmt.Println(o)
 
 	return res
 }
