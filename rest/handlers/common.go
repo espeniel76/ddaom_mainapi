@@ -144,5 +144,7 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 
 	s3.UploadFile(oFile.File, fullPath, oFile.ContentType)
 
+	fullPath = strings.Replace(fullPath, define.Mconn.ReplacePath, "", -1)
+
 	return fullPath, nil
 }
