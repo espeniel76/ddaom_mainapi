@@ -142,7 +142,7 @@ func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
 	saveFileName := _id + "." + strings.ToLower(ext)
 	fullPath := path + saveFileName
 
-	s3.UploadFile(oFile.File, strings.Replace(fullPath, define.Mconn.ReplacePath, "", -1), oFile.ContentType)
+	s3.UploadFile(oFile.File, fullPath, oFile.ContentType)
 
-	return fullPath, nil
+	return "/" + fullPath, nil
 }
