@@ -24,7 +24,7 @@ type Member struct {
 
 type MemberBlock struct {
 	SeqMemberBlock int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_block"`
-	SeqMember      int64     `gorm:"unique" json:"seq_member"`
+	SeqMember      int64     `gorm:"index" json:"seq_member"`
 	BlockedYn      bool      `gorm:"default:false" json:"blocked_yn"`
 	BlockReason    string    `gorm:"type:varchar(2014)" json:"block_reason"`
 	CreatedAt      time.Time `json:"created_at"`

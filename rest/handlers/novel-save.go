@@ -124,6 +124,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		}
 		addKeywordCnt(_seqKeyword)
 		_seqNovelStep1 = novelWriteStep1.SeqNovelStep1
+
 	} else { // 업데이트
 
 		novelStep := schemas.NovelStep1{}
@@ -160,9 +161,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	if !_tempYn {
 		go cacheMainLive(_seqKeyword)
 		go pushWrite(userToken, 1, _seqNovelStep1)
-
-		// 명일 코드 다시 가져와서...18
-		// go MergeImage(_seqColor, _seqImage)
+		go educeImage(_seqColor, _seqImage)
 	}
 
 	return res

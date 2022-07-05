@@ -89,7 +89,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		if isExistImage {
-			if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.co.kr" {
+			if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
 				fullPath, err = SaveFileS3("profile", &profilePhoto)
 			} else {
 				fullPath, err = SaveFile("profile", &profilePhoto)
