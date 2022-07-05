@@ -408,6 +408,9 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 		}
 
 		s3.DownloadFile("/tmp/thumb", strings.Replace(imgPath, "/", "", 1))
+		fileNames := strings.Split(imgPath, "/")
+		fileName := fileNames[len(fileNames)-1]
+		imgSrc = "/tmp/thumb/" + fileName
 	}
 
 	// 4. MERGE 작업
