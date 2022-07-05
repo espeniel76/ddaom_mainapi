@@ -48,6 +48,12 @@ func Cf(s map[string]interface{}, t string, r *http.Request) (*domain.FileStruct
 
 func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
 	var err error
 
 	defer oFile.File.Close()
@@ -98,6 +104,12 @@ func SaveFile(_path string, oFile *domain.FileStructure) (string, error) {
 }
 
 func SaveFileS3(_path string, oFile *domain.FileStructure) (string, error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	s3 := tools.S3Info{
 		AwsProfileName: "ddaom",
