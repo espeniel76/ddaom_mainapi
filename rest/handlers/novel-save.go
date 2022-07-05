@@ -160,6 +160,9 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	if !_tempYn {
 		go cacheMainLive(_seqKeyword)
 		go pushWrite(userToken, 1, _seqNovelStep1)
+
+		// 명일 코드 다시 가져와서...18
+		// go MergeImage(_seqColor, _seqImage)
 	}
 
 	return res

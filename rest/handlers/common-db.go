@@ -8,7 +8,12 @@ import (
 	"ddaom/memdb"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/jpeg"
+	"image/png"
 	"log"
+	"os"
 	"strconv"
 
 	"github.com/appleboy/go-fcm"
@@ -355,4 +360,28 @@ func cacheMainPopularWriter() {
 	sdb.Raw(query).Scan(&listPopularWriter)
 	j, _ := json.Marshal(listPopularWriter)
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))
+}
+
+// 배경색, 이미지 병합
+func MergeImage(seqColor int64, seqImage int64) {
+	image1, _ := os.Open("/home/samba/espeniel/ddaom_mainapi/tmp/Jellyfish.jpg")
+	first, _ := jpeg.Decode(image1)
+	defer image1.Close()
+
+	image2, _ := os.Open("/home/samba/espeniel/ddaom_mainapi/tmp/pokeball.png")
+	second, _ := png.Decode(image2)
+	defer image2.Close()
+
+	offset := image.Pt(0, 0)
+	b := first.Bounds()
+	image3 := image.NewRGBA(b)
+	draw.Draw(image3, b, first, image.Point{}, draw.Src)
+	draw.Draw(image3, second.Bounds().Add(offset), second, image.Point{}, draw.Over)
+
+	third, err := os.Create("/home/samba/espeniel/ddaom_mainapi/tmp/result.jpg")
+	if err != nil {
+		log.Fatalf("failed to create: %s", err)
+	}
+	jpeg.Encode(third, image3, &jpeg.Options{90})
+	defer third.Close()
 }

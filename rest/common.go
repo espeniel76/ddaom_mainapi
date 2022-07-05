@@ -30,10 +30,10 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		isToken, token := checkToken(authorization)
 		req.HttpRquest = r
 
-		if len(r.Header["Content-Type"]) < 1 {
-			res.ResultCode = define.NO_EXIST_CONTENT_TYPE
-			isCheck = false
-		}
+		// if len(r.Header["Content-Type"]) < 1 {
+		// 	res.ResultCode = define.NO_EXIST_CONTENT_TYPE
+		// 	isCheck = false
+		// }
 
 		if isCheck {
 			contentType = r.Header["Content-Type"][0]
