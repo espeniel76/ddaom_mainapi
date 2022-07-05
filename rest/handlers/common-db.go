@@ -442,7 +442,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	// 6. MERGE 한 파일 업로드 (AWS 일 시)
 	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
 		fmt.Println("/tmp/thumb/" + imageName)
-		s3.UploadFileByFileName("/tmp/thumb/"+imageName, "image/jpeg")
+		s3.UploadFileByFileName("/tmp/thumb/"+imageName, "tmp/"+imageName, "image/jpeg")
 	}
 }
 

@@ -87,13 +87,13 @@ func (s *S3Info) UploadFile(file io.Reader, filename, contentType string) *manag
 }
 
 //파일이름을 통해 파일을 불러와 서버에 업로드
-func (s *S3Info) UploadFileByFileName(filename, contentType string) *manager.UploadOutput {
+func (s *S3Info) UploadFileByFileName(filename, target, contentType string) *manager.UploadOutput {
 
 	file, err := ioutil.ReadFile(filename)
 	uploader := manager.NewUploader(s.S3Client)
 	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(s.BucketName),
-		Key:         aws.String(filename),
+		Key:         aws.String(target),
 		Body:        bytes.NewReader(file),
 		ContentType: aws.String(contentType),
 	})
