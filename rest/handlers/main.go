@@ -20,6 +20,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 인기작
 	list, _ = memdb.Get("CACHES:MAIN:LIST_POPULAR")
+
 	json.Unmarshal([]byte(list), &mainRes.ListPopular)
 
 	// 완결작
