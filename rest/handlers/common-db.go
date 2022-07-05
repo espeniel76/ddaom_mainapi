@@ -407,7 +407,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 			return
 		}
 
-		s3.DownloadFile("/tmp/thumb", strings.Replace(imgSrc, "/upload", "upload", 0))
+		s3.DownloadFile("/tmp/thumb", strings.Replace(imgSrc, "/upload", "upload", 1))
 		return
 	}
 
