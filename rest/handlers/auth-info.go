@@ -111,7 +111,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
-	memberDetail := &schemas.MemberDetail{}
+	memberDetail := &schemas.MemberDetail{DeletedAt: time.Now()}
 	if len(_nickName) > 0 {
 		result := mdb.Where("nick_name = ? AND seq_member != ?", _nickName, userToken.SeqMember).Find(&memberDetail)
 		if corm(result, &res) {
