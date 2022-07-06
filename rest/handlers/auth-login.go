@@ -113,15 +113,11 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	if !isExist {
 		var count1, count2 int64
 		result = ldb1.Table("member_exists").Count(&count1)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		if corm(result, &res) {
 			return res
 		}
 		result = ldb2.Table("member_exists").Count(&count2)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
+		if corm(result, &res) {
 			return res
 		}
 

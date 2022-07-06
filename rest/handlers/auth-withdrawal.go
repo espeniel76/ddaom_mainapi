@@ -152,7 +152,7 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 	ldb2.Exec("DELETE FROM member_bookmarks WHERE seq_member = ?", userToken.SeqMember)
 
 	// 유명작가 캐쉬
-	cacheMainPopularWriter()
+	go cacheMainPopularWriter()
 
 	// 각종 탈퇴 프로세스 처리
 	/*
