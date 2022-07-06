@@ -103,9 +103,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		}
 		nickName = memberDetail.NickName
 	}
-	if pushToken != "<nil>" && pushToken != "" {
-		setPushToken(member.SeqMember, pushToken)
-	}
+
+	go setPushToken(member.SeqMember, pushToken)
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
@@ -196,11 +195,14 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 func setPushToken(seqMember int64, pushToken string) {
-	mdb := db.List[define.Mconn.DsnMaster]
-	query := `
-	INSERT INTO member_push_tokens (seq_member, push_token, created_at, updated_at)
-	VALUES (?, ?, NOW(), NOW())
-	ON DUPLICATE KEY UPDATE updated_at = NOW()
-	`
-	mdb.Exec(query, seqMember, pushToken)
+	if len(pushToken) > 100 && seqMember > 0 {
+		mdb := db.List[define.Mconn.DsnMaster]
+		mdb.Model(schemas.Member{}).Where("seq_member = ?", seqMember).Update("push_token", pushToken)
+		query := `
+			INSERT INTO member_push_tokens (seq_member, push_token, created_at, updated_at)
+			VALUES (?, ?, NOW(), NOW())
+			ON DUPLICATE KEY UPDATE updated_at = NOW()
+		`
+		mdb.Exec(query, seqMember, pushToken)
+	}
 }
