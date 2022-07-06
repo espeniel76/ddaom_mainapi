@@ -400,6 +400,8 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 
 	mdb := db.List[define.Mconn.DsnMaster]
 
+	fmt.Println("공유이미지 만들기", imageName)
+
 	// 1. 해당 조합의 DB 데이터가 있는지 확인
 	var cnt int64
 	mdb.Model(schemas.NovelStep1{}).Select("COUNT(*)").Where("endure_image = ?", imageName).Scan(&cnt)
@@ -443,6 +445,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 	draw.Draw(imgResult, b, imgLayer, image.Point{}, draw.Over)
 
 	resultPath := savePath + imageName
+	// fmt.Println(resultPath)
 	third, err := os.Create(resultPath)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -455,7 +458,7 @@ func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 
 	// 6. MERGE 한 파일 업로드 (AWS 일 시)
 	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
-		fmt.Println("/tmp/thumb/" + imageName)
+		// fmt.Println("/tmp/thumb/" + imageName)
 		s3.UploadFileByFileName("/tmp/thumb/"+imageName, "thumb/"+imageName, "image/jpeg")
 	}
 }
