@@ -61,20 +61,40 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	ldb := GetMyLogDbSlave(userToken.Allocated)
-	var cnt1 int64
-	var cnt2 int64
-	var cnt3 int64
-	var cnt4 int64
 	var cnt int64
 	myLike := false
 	myBookmark := false
-	ldb.Model(schemas.MemberLikeStep1{}).Where("seq_member = ? AND seq_novel_step1 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep1).Count(&cnt1)
-	ldb.Model(schemas.MemberLikeStep2{}).Where("seq_member = ? AND seq_novel_step2 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep2).Count(&cnt2)
-	ldb.Model(schemas.MemberLikeStep3{}).Where("seq_member = ? AND seq_novel_step3 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep3).Count(&cnt3)
-	ldb.Model(schemas.MemberLikeStep4{}).Where("seq_member = ? AND seq_novel_step4 = ? AND like_yn = true", userToken.SeqMember, n.SeqNovelStep4).Count(&cnt4)
-	if cnt1 > 0 || cnt2 > 0 || cnt3 > 0 || cnt4 > 0 {
+	query = `
+	SELECT
+		(SELECT COUNT(*) FROM member_like_step1 mls WHERE seq_member = ? AND seq_novel_step1 = ? AND like_yn = true) AS cnt1,
+		(SELECT COUNT(*) FROM member_like_step2 mls WHERE seq_member = ? AND seq_novel_step2 = ? AND like_yn = true) AS cnt2,
+		(SELECT COUNT(*) FROM member_like_step3 mls WHERE seq_member = ? AND seq_novel_step3 = ? AND like_yn = true) AS cnt3,
+		(SELECT COUNT(*) FROM member_like_step4 mls WHERE seq_member = ? AND seq_novel_step4 = ? AND like_yn = true) AS cnt4
+	`
+	var cntAll CntAll
+	ldb.Raw(query,
+		userToken.SeqMember, n.SeqNovelStep1,
+		userToken.SeqMember, n.SeqNovelStep2,
+		userToken.SeqMember, n.SeqNovelStep3,
+		userToken.SeqMember, n.SeqNovelStep4).Scan(&cntAll)
+	if cntAll.Cnt1 > 0 || cntAll.Cnt2 > 0 || cntAll.Cnt3 > 0 || cntAll.Cnt4 > 0 {
 		myLike = true
 	}
+
+	query = `
+	SELECT
+		(SELECT blocked_yn FROM members WHERE seq_member = ?) AS step1,
+		(SELECT blocked_yn FROM members WHERE seq_member = ?) AS step2,
+		(SELECT blocked_yn FROM members WHERE seq_member = ?) AS step3,
+		(SELECT blocked_yn FROM members WHERE seq_member = ?) AS step4
+	`
+	var blockedAll BlockedYnAll
+	sdb.Raw(query,
+		n.SeqMemberStep1,
+		n.SeqMemberStep2,
+		n.SeqMemberStep3,
+		n.SeqMemberStep4).Scan(&blockedAll)
+
 	result = ldb.Model(schemas.MemberBookmark{}).Where("seq_member = ? AND seq_novel_finish = ? AND bookmark_yn = true", userToken.SeqMember, _seqNovelFinish).Count(&cnt)
 	if corm(result, &res) {
 		return res
@@ -103,44 +123,52 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep1,
 			NickName:  n.NickNameStep1,
 			DeletedYn: n.DeletedYnStep1,
+			BlockedYn: blockedAll.Step1,
 			Content:   n.ContentStep1,
 		},
 		Step2: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep2,
 			NickName:  n.NickNameStep2,
 			DeletedYn: n.DeletedYnStep2,
+			BlockedYn: blockedAll.Step2,
 			Content:   n.ContentStep2,
 		},
 		Step3: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep3,
 			NickName:  n.NickNameStep3,
 			DeletedYn: n.DeletedYnStep3,
+			BlockedYn: blockedAll.Step3,
 			Content:   n.ContentStep3,
 		},
 		Step4: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep4,
 			NickName:  n.NickNameStep4,
 			DeletedYn: n.DeletedYnStep4,
+			BlockedYn: blockedAll.Step4,
 			Content:   n.ContentStep4,
 		},
 	}
@@ -150,6 +178,20 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 	cacheMainPopular()
 
 	return res
+}
+
+type CntAll struct {
+	Cnt1 int64 `json:"cnt1"`
+	Cnt2 int64 `json:"cnt2"`
+	Cnt3 int64 `json:"cnt3"`
+	Cnt4 int64 `json:"cnt4"`
+}
+
+type BlockedYnAll struct {
+	Step1 bool `json:"step1"`
+	Step2 bool `json:"step2"`
+	Step3 bool `json:"step3"`
+	Step4 bool `json:"step4"`
 }
 
 type NovelViewFinishData struct {
@@ -202,24 +244,28 @@ type NovelViewFinishRes struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
 		DeletedYn bool   `json:"deleted_yn"`
+		BlockedYn bool   `json:"blocked_yn"`
 		Content   string `json:"content"`
 	} `json:"step1"`
 	Step2 struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
 		DeletedYn bool   `json:"deleted_yn"`
+		BlockedYn bool   `json:"blocked_yn"`
 		Content   string `json:"content"`
 	} `json:"step2"`
 	Step3 struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
 		DeletedYn bool   `json:"deleted_yn"`
+		BlockedYn bool   `json:"blocked_yn"`
 		Content   string `json:"content"`
 	} `json:"step3"`
 	Step4 struct {
 		SeqMember int64  `json:"seq_member"`
 		NickName  string `json:"nick_name"`
 		DeletedYn bool   `json:"deleted_yn"`
+		BlockedYn bool   `json:"blocked_yn"`
 		Content   string `json:"content"`
 	} `json:"step4"`
 }

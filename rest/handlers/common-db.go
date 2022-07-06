@@ -157,6 +157,13 @@ type GetNovelRes struct {
 	IsNightPush bool   `json:"is_night_push"`
 }
 
+func isBlocked(seqMember int64) bool {
+	sdb := db.List[define.Mconn.DsnSlave]
+	isBlocked := false
+	sdb.Model(schemas.Member{}).Select("blocked_yn").Where("seq_member = ?", seqMember).Scan(&isBlocked)
+	return isBlocked
+}
+
 func isAbleKeyword(seqKeyword int64) bool {
 	sdb := db.List[define.Mconn.DsnSlave]
 	keyword := schemas.Keyword{}
@@ -255,6 +262,13 @@ type GetUserInfoPushRes struct {
 }
 
 func sendPush(pushToken string, alarm *schemas.Alarm) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
 	mdb := db.List[define.Mconn.DsnMaster]
 	mdb.Create(&alarm)
 	msg := &fcm.Message{

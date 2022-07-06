@@ -22,6 +22,12 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
+	// 블록처리된 유저 여부 (보내는 사람, 받는사람 둘다)
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
+
 	_seqNovelStep1, _ := strconv.Atoi(req.Vars["seq_novel_step1"])
 	myLike := false
 	var cnt int64
@@ -36,6 +42,11 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+	if isBlocked(novelStep.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
+
 	cnt = novelStep.CntLike
 	if novelStep.DeletedYn {
 		res.ResultCode = define.DELETED_NOVEL

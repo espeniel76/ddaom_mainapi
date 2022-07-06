@@ -67,6 +67,12 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
 
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
+
 	// 존재하는 닉네임 여부
 	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
@@ -181,6 +187,12 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
@@ -300,6 +312,12 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
@@ -427,6 +445,12 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep4 := CpInt64(req.Parameters, "seq_novel_step4")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
 
 	// 존재하는 닉네임 여부
 	mdb := db.List[define.Mconn.DsnMaster]

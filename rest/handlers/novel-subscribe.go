@@ -22,7 +22,17 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
+
 	_seqMember, _ := strconv.Atoi(req.Vars["seq_member"])
+	// 블록처리된 유저 여부 (보내는 사람, 받는사람 둘다)
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
+	if isBlocked(int64(_seqMember)) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
 
 	if _seqMember == int(userToken.SeqMember) {
 		res.ResultCode = define.SELF_SUBSCRIBE
@@ -165,6 +175,12 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	userInfoTo := getUserInfoPush(seqMemberTo)
 	isNight := false

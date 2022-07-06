@@ -43,6 +43,7 @@ const (
 	NOT_ALLOW_FORMAT        = "NOT_ALLOW_FORMAT"
 	DELETED_PARENT          = "DELETED_PARENT"
 	DELETED_NOVEL           = "DELETED_NOVEL"
+	BLOCKED_USER            = "BLOCKED_USER"
 )
 
 // const LIST_PER_PAGE = 2

@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"strconv"
 )
 
@@ -25,8 +24,13 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	ldb := GetMyLogDbMaster(userToken.Allocated)
 	mdb := db.List[define.Mconn.DsnMaster]
 
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
+
 	// 소설 존재 여부
-	fmt.Println(cnt)
 	result := mdb.Model(schemas.NovelFinish{}).Where("seq_novel_finish = ?", _seqNovelFinish).Count(&cnt)
 	if result.Error != nil {
 		res.ResultCode = define.DB_ERROR_ORM
