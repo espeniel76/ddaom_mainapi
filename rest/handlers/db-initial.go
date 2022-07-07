@@ -12,6 +12,8 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	var result error
 
+	// 아무나 실행 못 시키는 장치가 필요하다...
+
 	mdb := db.List[define.Mconn.DsnMaster]
 	ldb1 := db.List[define.Mconn.DsnLog1Master]
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
@@ -25,6 +27,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 
 	mdb.AutoMigrate(schemas.Member{})
 	mdb.AutoMigrate(schemas.MemberBlock{})
+	mdb.AutoMigrate(schemas.MemberDormacy{})
 	mdb.AutoMigrate(schemas.MemberDetail{})
 	mdb.AutoMigrate(schemas.MemberPushToken{})
 

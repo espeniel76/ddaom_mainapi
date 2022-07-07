@@ -20,6 +20,7 @@ type Member struct {
 	DeletedAt       time.Time `json:"deleted_at"`
 	BlockedYn       bool      `gorm:"default:false" json:"blocked_yn"`
 	BlockedAt       time.Time `json:"blocked_at"`
+	DormacyYn       bool      `gorm:"default:false" json:"dormacy_yn"`
 }
 
 type MemberBlock struct {
@@ -28,6 +29,13 @@ type MemberBlock struct {
 	BlockedYn      bool      `gorm:"default:false" json:"blocked_yn"`
 	BlockReason    string    `gorm:"type:varchar(2014)" json:"block_reason"`
 	CreatedAt      time.Time `json:"created_at"`
+}
+
+type MemberDormacy struct {
+	SeqMemberDormacy int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_dormacy"`
+	SeqMember        int64     `gorm:"index" json:"seq_member"`
+	DormacyYn        bool      `gorm:"default:false" json:"dormacy_yn"`
+	CreatedAt        time.Time `json:"created_at"`
 }
 
 type MemberDetail struct {
