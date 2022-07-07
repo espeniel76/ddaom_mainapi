@@ -18,6 +18,7 @@ type MemberDetailRes struct {
 	Email         string `json:"email"`
 	NickName      string `json:"nick_name"`
 	SnsType       string `json:"sns_type"`
+	BlockedYn     bool   `json:"blocked_yn"`
 }
 
 func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
@@ -42,7 +43,8 @@ func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 		md.address_detail,
 		md.email,
 		md.nick_name,
-		m.sns_type 
+		m.sns_type,
+		m.blocked_yn
 	FROM
 		members m
 	INNER JOIN

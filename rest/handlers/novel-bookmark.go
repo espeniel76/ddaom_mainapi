@@ -26,7 +26,7 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 

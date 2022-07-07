@@ -48,6 +48,22 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	return res
 }
 
+func NovelCheckBlocked(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	data := make(map[string]bool)
+	data["blocked_yn"] = isBlocked(userToken.SeqMember)
+	res.Data = data
+
+	return res
+}
+
 func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
@@ -69,7 +85,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 
@@ -190,7 +206,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 
@@ -315,7 +331,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 
@@ -448,7 +464,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 

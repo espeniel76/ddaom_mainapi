@@ -40,6 +40,9 @@ const (
 	DELETED_PARENT          = "DELETED_PARENT"
 	DELETED_NOVEL           = "DELETED_NOVEL"
 	BLOCKED_USER            = "BLOCKED_USER"
+	BLOCKED_ME              = "BLOCKED_ME"
+	DORMANCY                = "DORMANCY"
+	UJDTBLOCKED             = "UJDTBLOCKED"
 )
 
 // const LIST_PER_PAGE = 2

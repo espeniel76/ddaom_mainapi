@@ -36,7 +36,7 @@ func GetMyLogDbMaster(allocated int8) *gorm.DB {
 }
 
 func GetMyLogDbSlave(allocated int8) *gorm.DB {
-
+	fmt.Println("allocated: ", allocated)
 	var myLogDb *gorm.DB
 	switch allocated {
 	case 1:

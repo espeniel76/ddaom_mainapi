@@ -75,17 +75,55 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		mdb.Create(member)
 
 		// 2. 탈퇴회원인가
-	} else if tmpMember.SeqMember > 0 && tmpMember.DeletedYn {
-		fmt.Println("탈퇴회원")
-		// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
-		// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
-		mdb.Create(member)
+		// } else if tmpMember.SeqMember > 0 && tmpMember.DeletedYn {
+		// 	fmt.Println("탈퇴회원")
+		// 	// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
+		// 	// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
+
+		// 	// 블록 상태인가?
+		// 	if member.BlockedYn {
+		// 		// 블록 상태가 된지 90일이 지났는가? (이건 배치를 믿어본다)
+		// 		res.ResultCode = define.UJDTBLOCKED
+		// 		return res
+		// 	}
+
+		// 	mdb.Create(member)
+
+		// 2. 탈퇴 여부 확인
+		memberBackup := schemas.MemberBackup{}
+		query := "SELECT * FROM member_backups WHERE email = ? ORDER BY created_at DESC LIMIT 1"
+		result = mdb.Raw(query, email).Scan(&memberBackup)
+		if corm(result, &res) {
+			return res
+		}
+		// 2.1. 데이터가 있다
+		if memberBackup.SeqMember > 0 {
+			fmt.Println("탈퇴이력 있음")
+			// members 에는 데이터가 없고, member_backups 에는 있다 면 탈퇴 후 재 가입으로 간주
+			// seq_member 로, 블랙 처리 여부 판단
+			blockedYn := false
+			result = mdb.Model(schemas.Member{}).Select("blocked_yn").Where("seq_member = ?", memberBackup.SeqMember).Scan(&blockedYn)
+			if corm(result, &res) {
+				return res
+			}
+			if blockedYn {
+				fmt.Println("블랙인데 탈퇴한 유저임, 가입 안됨")
+				res.ResultCode = define.UJDTBLOCKED
+				return res
+			}
+		}
 
 		// 3. 기존회원인가
 	} else {
 		fmt.Println("기존회원")
 		result = mdb.Find(&member, "email", email)
 		if corm(result, &res) {
+			return res
+		}
+
+		// 휴면 상태 회원인가
+		if member.DormacyYn {
+			res.ResultCode = define.DORMANCY
 			return res
 		}
 
@@ -112,15 +150,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
 	if !isExist {
 		var count1, count2 int64
-		result = ldb1.Table("member_exists").Count(&count1)
-		if corm(result, &res) {
-			return res
-		}
-		result = ldb2.Table("member_exists").Count(&count2)
-		if corm(result, &res) {
-			return res
-		}
-
+		ldb1.Table("member_exists").Count(&count1)
+		ldb2.Table("member_exists").Count(&count2)
 		if count1 > count2 {
 			myLogDB = ldb2
 			allocatedDb = 2
@@ -128,15 +159,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			myLogDB = ldb1
 			allocatedDb = 1
 		}
-		result = myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
-		if corm(result, &res) {
-			return res
-		}
-
-		result = mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
-		if corm(result, &res) {
-			return res
-		}
+		myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
+		mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
 	} else {
 		result = mdb.Find(&member, "email", email)
 		if corm(result, &res) {
@@ -145,8 +169,24 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		allocatedDb = member.AllocatedDb
 		if allocatedDb == 1 {
 			myLogDB = ldb1
-		} else {
+		} else if allocatedDb == 1 {
 			myLogDB = ldb2
+		} else {
+			// 1,2 다 아니면 다시 할당 한다
+			// 원래 이 상황이 생기면 안 되는데, 없으면 안 되므로
+			// 에러방지용
+			var count1, count2 int64
+			ldb1.Table("member_exists").Count(&count1)
+			ldb2.Table("member_exists").Count(&count2)
+			if count1 > count2 {
+				myLogDB = ldb2
+				allocatedDb = 2
+			} else {
+				myLogDB = ldb1
+				allocatedDb = 1
+			}
+			myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
+			mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
 		}
 	}
 
@@ -184,6 +224,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m["refresh_token"] = refreshToken
 	m["nick_name"] = nickName
 	m["http_server"] = define.Mconn.HTTPServer
+	m["blocked_yn"] = member.BlockedYn
 
 	res.Data = m
 

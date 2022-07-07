@@ -111,6 +111,19 @@
 			}
 		]
 	},
+	"/auth/dormancy": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "email",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
 	"/auth/login/detail": {
 		"allow_method": "POST",
 		"data_type": "multipart/form-data",
@@ -242,6 +255,13 @@
 				"required": true
 			}
 		]
+	},
+	"/novel/check/blocked": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
 	},
 	"/novel/write/step1": {
 		"allow_method": "POST",

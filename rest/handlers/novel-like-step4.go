@@ -19,7 +19,7 @@ func NovelLikeStep4(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	// 블록처리된 유저 여부 (보내는 사람, 받는사람 둘다)
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 	_seqNovelStep4, _ := strconv.Atoi(req.Vars["seq_novel_step4"])
@@ -32,7 +32,7 @@ func NovelLikeStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 소설 존재/삭제 여부
 	novelStep := schemas.NovelStep4{}
-	result := mdb.Model(&novelStep).Select("cnt_like, deleted_yn").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&novelStep).Count(&scanCount)
+	result := mdb.Model(&novelStep).Select("cnt_like, deleted_yn, seq_member").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&novelStep).Count(&scanCount)
 	if corm(result, &res) {
 		return res
 	}

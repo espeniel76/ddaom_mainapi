@@ -26,7 +26,7 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	_seqMember, _ := strconv.Atoi(req.Vars["seq_member"])
 	// 블록처리된 유저 여부 (보내는 사람, 받는사람 둘다)
 	if isBlocked(userToken.SeqMember) {
-		res.ResultCode = define.BLOCKED_USER
+		res.ResultCode = define.BLOCKED_ME
 		return res
 	}
 	if isBlocked(int64(_seqMember)) {

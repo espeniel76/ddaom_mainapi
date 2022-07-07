@@ -28,11 +28,6 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// mdb := db.List[define.Mconn.DsnMaster]
-	// if pushToken != "<nil>" && len(pushToken) > 100 && userToken.SeqMember > 0 {
-	// 	mdb.Model(schemas.Member{}).Where("seq_member = ?", userToken.SeqMember).Update("push_token", pushToken)
-	// 	setPushToken(userToken.SeqMember, pushToken)
-	// }
 	go setPushToken(userToken.SeqMember, pushToken)
 
 	// 2. 신규 access_token 과 refresh_token 을 발급한다.
@@ -50,12 +45,20 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	member := schemas.Member{}
 	memberDetail := schemas.MemberDetail{}
 	sdb := db.List[define.Mconn.DsnSlave]
-	result := sdb.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
-	if result.Error != nil {
-		res.ResultCode = define.OK
-		res.ErrorDesc = result.Error.Error()
+	result := sdb.Select("blocked_yn, dormacy_yn").Where("seq_member = ?", userToken.SeqMember).Find(&member)
+	if corm(result, &res) {
+		return res
+	}
+	result = sdb.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
+	if corm(result, &res) {
+		return res
+	}
+
+	if member.DormacyYn {
+		res.ResultCode = define.DORMANCY
 		return res
 	}
 
@@ -64,6 +67,7 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	m["refresh_token"] = refreshToken
 	m["http_server"] = define.Mconn.HTTPServer
 	m["nick_name"] = memberDetail.NickName
+	m["blocked_yn"] = member.BlockedYn
 
 	res.Data = m
 
