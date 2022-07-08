@@ -34,9 +34,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	mdb.AutoMigrate(schemas.MemberBackup{})
 	mdb.AutoMigrate(schemas.MemberDetailBackup{})
 
-	ldb1.AutoMigrate(schemas.MemberExist{})
 	ldb1.AutoMigrate(schemas.MemberLoginLog{})
-	ldb2.AutoMigrate(schemas.MemberExist{})
 	ldb2.AutoMigrate(schemas.MemberLoginLog{})
 
 	mdb.AutoMigrate(schemas.MemberAdmin{})

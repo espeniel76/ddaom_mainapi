@@ -11,18 +11,6 @@ type MemberLoginLog struct {
 	LoginAt           time.Time
 }
 
-type MemberExist struct {
-	SeqMember int64 `gorm:"unique" json:"seq_member"`
-}
-
-// type MemberSubscribe struct {
-// 	SeqMemberSubscribe int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_subscribe"`
-// 	SeqMember          int64     `gorm:"index" json:"seq_member"`
-// 	SeqMemberFollowing int64     `gorm:"index" json:"seq_member_following"`
-// 	SubscribeYn        bool      `gorm:"default:false" json:"subscribe_yn"`
-// 	CreatedAt          time.Time `json:"created_at"`
-// }
-
 type MemberSubscribe struct {
 	SeqMemberSubscribe int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_subscribe"`
 	SeqMember          int64     `gorm:"index" json:"seq_member"`

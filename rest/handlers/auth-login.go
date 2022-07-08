@@ -146,20 +146,31 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
+	var lastAllocatedDb int8
 	ldb1 := db.List[define.Mconn.DsnLog1Master]
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
 	if !isExist {
-		var count1, count2 int64
-		ldb1.Table("member_exists").Count(&count1)
-		ldb2.Table("member_exists").Count(&count2)
-		if count1 > count2 {
-			myLogDB = ldb2
+		// var count1, count2 int64
+		// ldb1.Table("member_exists").Count(&count1)
+		// ldb2.Table("member_exists").Count(&count2)
+		// if count1 > count2 {
+		// 	myLogDB = ldb2
+		// 	allocatedDb = 2
+		// } else {
+		// 	myLogDB = ldb1
+		// 	allocatedDb = 1
+		// }
+		// myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
+
+		mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
+		if lastAllocatedDb == 1 {
 			allocatedDb = 2
+			myLogDB = ldb2
 		} else {
-			myLogDB = ldb1
 			allocatedDb = 1
+			myLogDB = ldb1
 		}
-		myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
+
 		mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
 	} else {
 		result = mdb.Find(&member, "email", email)
@@ -169,24 +180,20 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		allocatedDb = member.AllocatedDb
 		if allocatedDb == 1 {
 			myLogDB = ldb1
-		} else if allocatedDb == 1 {
+		} else if allocatedDb == 2 {
 			myLogDB = ldb2
 		} else {
 			// 1,2 다 아니면 다시 할당 한다
 			// 원래 이 상황이 생기면 안 되는데, 없으면 안 되므로
 			// 에러방지용
-			var count1, count2 int64
-			ldb1.Table("member_exists").Count(&count1)
-			ldb2.Table("member_exists").Count(&count2)
-			if count1 > count2 {
-				myLogDB = ldb2
+			mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
+			if lastAllocatedDb == 1 {
 				allocatedDb = 2
+				myLogDB = ldb2
 			} else {
-				myLogDB = ldb1
 				allocatedDb = 1
+				myLogDB = ldb1
 			}
-			myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
-			mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
 		}
 	}
 

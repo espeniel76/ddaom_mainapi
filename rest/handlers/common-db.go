@@ -370,9 +370,9 @@ func cacheMainPopularWriter() {
 		FROM
 			member_details md INNER JOIN members m ON md.seq_member = m.seq_member
 		WHERE
-			m.deleted_yn = false
+			m.deleted_yn = false AND md.cnt_subscribe > 0
 		ORDER BY
-			md.cnt_like DESC, md.cnt_subscribe DESC
+			md.cnt_subscribe DESC
 		LIMIT 10`
 	sdb.Raw(query).Scan(&listPopularWriter)
 	j, _ := json.Marshal(listPopularWriter)

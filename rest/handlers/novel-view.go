@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"time"
 )
 
@@ -187,6 +188,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		data["step3"] = nil
 		data["step4"] = nil
 	}
+
+	fmt.Println(data)
 
 	res.Data = data
 
