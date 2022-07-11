@@ -59,6 +59,14 @@ type MemberPushToken struct {
 	UpdatedAt          time.Time `json:"updated_at"` // Last USE
 }
 
+type MemberLog struct {
+	SeqMemberLog int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_log"`
+	SeqMember    int64     `gorm:"index" json:"seq_member"`
+	CreatedAt    time.Time `json:"created_at"`
+	Contents     string    `gorm:"type:varchar(512)" json:"contents"`
+	Type         int8      `json:"type"`
+}
+
 type MemberBackup struct {
 	SeqMember       int64     `gorm:"index" json:"seq_member"`
 	Email           string    `gorm:"type:varchar(255)" json:"email"`
