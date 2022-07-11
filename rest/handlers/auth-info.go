@@ -5,7 +5,6 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
-	"fmt"
 	"time"
 )
 
@@ -19,6 +18,7 @@ type MemberDetailRes struct {
 	Email         string `json:"email"`
 	NickName      string `json:"nick_name"`
 	SnsType       string `json:"sns_type"`
+	BlockedYn     bool   `json:"blocked_yn"`
 }
 
 func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
@@ -43,7 +43,8 @@ func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 		md.address_detail,
 		md.email,
 		md.nick_name,
-		m.sns_type 
+		m.sns_type,
+		m.blocked_yn
 	FROM
 		members m
 	INNER JOIN
@@ -90,8 +91,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		if isExistImage {
-			if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.co.kr" {
-				fmt.Println("여기다 이미지 업로드")
+			if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
 				fullPath, err = SaveFileS3("profile", &profilePhoto)
 			} else {
 				fullPath, err = SaveFile("profile", &profilePhoto)
@@ -113,7 +113,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
-	memberDetail := &schemas.MemberDetail{}
+	memberDetail := &schemas.MemberDetail{DeletedAt: time.Now()}
 	if len(_nickName) > 0 {
 		result := mdb.Where("nick_name = ? AND seq_member != ?", _nickName, userToken.SeqMember).Find(&memberDetail)
 		if corm(result, &res) {
@@ -180,6 +180,8 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 			return res
 		}
 	}
+
+	go cacheMainPopularWriter()
 
 	return res
 }

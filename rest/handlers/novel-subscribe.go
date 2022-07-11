@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -21,7 +22,17 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
+
 	_seqMember, _ := strconv.Atoi(req.Vars["seq_member"])
+	// 블록처리된 유저 여부 (보내는 사람, 받는사람 둘다)
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_ME
+		return res
+	}
+	if isBlocked(int64(_seqMember)) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
 
 	if _seqMember == int(userToken.SeqMember) {
 		res.ResultCode = define.SELF_SUBSCRIBE
@@ -158,12 +169,18 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		pushSubscribe(userToken.SeqMember, int64(_seqMember))
 	}
 
-	cacheMainPopularWriter()
+	go cacheMainPopularWriter()
 
 	return res
 }
 
 func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	userInfoTo := getUserInfoPush(seqMemberTo)
 	isNight := false
@@ -210,13 +227,15 @@ func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
 			// Create a FCM client to send the message.
 			client, err := fcm.NewClient(define.Mconn.PushServerKey)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			// Send the message and receive the response without retries.
 			response, err := client.Send(msg)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			log.Printf("%#v\n", response)

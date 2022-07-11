@@ -32,7 +32,8 @@ type S3Info struct {
 func (s *S3Info) SetS3ConfigByDefault() error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		fmt.Println(err)
 		return errors.New(err.Error())
 	}
 	s.S3Client = s3.NewFromConfig(cfg)
@@ -45,7 +46,8 @@ func (s *S3Info) SetS3ConfigByProfile() error {
 		config.WithRegion(s.AwsS3Region),
 		config.WithSharedConfigProfile(s.AwsProfileName))
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		fmt.Println(err)
 		return errors.New(err.Error())
 	}
 	s.S3Client = s3.NewFromConfig(cfg)
@@ -77,26 +79,28 @@ func (s *S3Info) UploadFile(file io.Reader, filename, contentType string) *manag
 		Body:        file,
 	})
 	if err != nil {
-		log.Fatal(err)
-		panic(err)
+		// log.Fatal(err)
+		fmt.Println(err)
+		// panic(err)
 	}
 	return result
 }
 
 //파일이름을 통해 파일을 불러와 서버에 업로드
-func (s *S3Info) UploadFileByFileName(filename, contentType string) *manager.UploadOutput {
+func (s *S3Info) UploadFileByFileName(filename, target, contentType string) *manager.UploadOutput {
 
 	file, err := ioutil.ReadFile(filename)
 	uploader := manager.NewUploader(s.S3Client)
 	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(s.BucketName),
-		Key:         aws.String(filename),
+		Key:         aws.String(target),
 		Body:        bytes.NewReader(file),
 		ContentType: aws.String(contentType),
 	})
 	if err != nil {
-		log.Fatal(err)
-		panic(err)
+		// log.Fatal(err)
+		fmt.Println(err)
+		// panic(err)
 	}
 	return result
 }
@@ -136,7 +140,8 @@ func (s *S3Info) GetItems(prefix string) {
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(context.TODO())
 		if err != nil {
-			log.Fatalln("error:", err)
+			// log.Fatalln("error:", err)
+			fmt.Println(err)
 		}
 		for _, obj := range page.Contents {
 

@@ -6,6 +6,7 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
+	"fmt"
 	"time"
 )
 
@@ -47,6 +48,22 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	return res
 }
 
+func NovelCheckBlocked(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	data := make(map[string]bool)
+	data["blocked_yn"] = isBlocked(userToken.SeqMember)
+	res.Data = data
+
+	return res
+}
+
 func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
@@ -65,6 +82,12 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	_title := Cp(req.Parameters, "title")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_ME
+		return res
+	}
 
 	// 존재하는 닉네임 여부
 	mdb := db.List[define.Mconn.DsnMaster]
@@ -123,6 +146,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		}
 		addKeywordCnt(_seqKeyword)
 		_seqNovelStep1 = novelWriteStep1.SeqNovelStep1
+
 	} else { // 업데이트
 
 		novelStep := schemas.NovelStep1{}
@@ -157,8 +181,9 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
-		cacheMainLive(_seqKeyword)
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go cacheMainLive(_seqKeyword)
+		go pushWrite(userToken, 1, _seqNovelStep1)
+		go educeImage(_seqColor, _seqImage, _seqNovelStep1)
 	}
 
 	return res
@@ -178,6 +203,12 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep2 := CpInt64(req.Parameters, "seq_novel_step2")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_ME
+		return res
+	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
@@ -277,7 +308,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -297,6 +328,12 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_ME
+		return res
+	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
@@ -404,7 +441,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	var _seqNovelStep1 int64
 	mdb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -424,6 +461,12 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep4 := CpInt64(req.Parameters, "seq_novel_step4")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+
+	// 블록처리된 유저 여부
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_ME
+		return res
+	}
 
 	// 존재하는 닉네임 여부
 	mdb := db.List[define.Mconn.DsnMaster]
@@ -532,13 +575,19 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	var _seqNovelStep1 int64
 	mdb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWrite(userToken, 1, _seqNovelStep1)
 	}
 
 	return res
 }
 
 func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	if seqNovel < 1 {
 		return

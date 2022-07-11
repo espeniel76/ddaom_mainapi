@@ -22,7 +22,6 @@ type ConnectionInfos struct {
 	DefaultProfile   string `json:"default_profile"`
 	HTTPServer       string `json:"http_server"`
 	HTTPPort         string `json:"http_port"`
-	HTTPPortSsl      string `json:"http_port_ssl"`
 	DsnMaster        string `json:"dsn_master"`
 	DsnSlave         string `json:"dsn_slave"`
 	DsnLog1Master    string `json:"dsn_log1_master"`

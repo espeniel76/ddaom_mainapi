@@ -20,6 +20,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/auth/info/update", common(handlers.AuthInfoUpdate))     // 5
 	mux.HandleFunc("/auth/info", common(handlers.AuthInfo))                  // 6
 	mux.HandleFunc("/auth/withdrawal", common(handlers.AuthWithdrawal))      // 9
+	mux.HandleFunc("/auth/dormancy", common(handlers.AuthDormancy))          // 9
 
 	// 리소스
 	mux.HandleFunc("/assets", common(handlers.Assets))            // 10
@@ -29,11 +30,12 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/asset/slangs", common(handlers.Slangs))      // 14
 
 	// 소설 등록
-	mux.HandleFunc("/novel/check/title", common(handlers.NovelCheckTitle)) // 15
-	mux.HandleFunc("/novel/write/step1", common(handlers.NovelWriteStep1)) // 16
-	mux.HandleFunc("/novel/write/step2", common(handlers.NovelWriteStep2)) // 17
-	mux.HandleFunc("/novel/write/step3", common(handlers.NovelWriteStep3)) // 18
-	mux.HandleFunc("/novel/write/step4", common(handlers.NovelWriteStep4)) // 19
+	mux.HandleFunc("/novel/check/title", common(handlers.NovelCheckTitle))     // 15
+	mux.HandleFunc("/novel/check/blocked", common(handlers.NovelCheckBlocked)) // 15
+	mux.HandleFunc("/novel/write/step1", common(handlers.NovelWriteStep1))     // 16
+	mux.HandleFunc("/novel/write/step2", common(handlers.NovelWriteStep2))     // 17
+	mux.HandleFunc("/novel/write/step3", common(handlers.NovelWriteStep3))     // 18
+	mux.HandleFunc("/novel/write/step4", common(handlers.NovelWriteStep4))     // 19
 
 	// 진행중 소설
 	mux.HandleFunc("/novel/list/live", common(handlers.NovelListLive))                 // 20
@@ -42,6 +44,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/novel/list/step4", common(handlers.NovelListStep4))               // 23
 	mux.HandleFunc("/novel/view/{seq_novel_step1:[0-9]+}", common(handlers.NovelView)) // 24
 	mux.HandleFunc("/novel/view/step", common(handlers.NovelViewStep))                 // 25
+	mux.HandleFunc("/novel/view/rolling", common(handlers.NovelViewRolling))           // 25
 
 	// 완결 소설
 	mux.HandleFunc("/novel/list/finish", common(handlers.NovelListFinish))                           // 26

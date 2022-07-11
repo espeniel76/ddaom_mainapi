@@ -28,6 +28,9 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 
 		authorization := r.Header["Authorization"]
 		isToken, token := checkToken(authorization)
+		req.HttpRquest = r
+
+		// fmt.Println(r.Header["Content-Type"])
 
 		if len(r.Header["Content-Type"]) < 1 {
 			res.ResultCode = define.NO_EXIST_CONTENT_TYPE
@@ -106,7 +109,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 
 		if isCheck {
-			req.HttpRquest = r
+			// req.HttpRquest = r
 			fmt.Println("------------------")
 			fmt.Println(r.URL)
 			req.JWToken = token
@@ -135,14 +138,16 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		}
 		intervalEnd := time.Now().UnixMilli()
 		if string(r.URL.String()) != "/check" {
-			// fmt.Println(intervalStart, intervalEnd)
-			go accessLog(&req, &res, intervalEnd, intervalStart)
+			fmt.Println(intervalEnd - intervalStart)
+			// go accessLog(&req, &res, intervalEnd, intervalStart)
 		}
 
 		data, _ := json.Marshal(res)
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
+
 		fmt.Fprint(w, string(data))
+		// fmt.Println(string(data))
 	}
 }
 
@@ -159,9 +164,6 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 	if userToken != nil {
 		seqMember = int(userToken.SeqMember)
 	}
-
-	// var _req string
-	var _res string
 
 	// fmt.Println(req.HttpRquest.Method)
 	// if contentType == "multipart/form-data" {
@@ -184,15 +186,16 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 	// 	}
 	// }
 
-	outRes, err := json.Marshal(res.ResultCode)
+	_, err := json.Marshal(res)
 	if err == nil {
-		_res = strings.ReplaceAll(string(outRes), "\"", "")
+
+		_res := res.ResultCode
+		// _res := strings.ReplaceAll(string(outRes), "\"", "")
 		document := bson.D{
 			{"seq_user", seqMember},
 			{"method", req.HttpRquest.Method},
 			{"url", req.HttpRquest.URL},
 			{"delay", interval},
-			// {"req", _req},
 			{"res", _res},
 			{"at", time.Now()},
 		}

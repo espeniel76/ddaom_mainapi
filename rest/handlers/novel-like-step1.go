@@ -22,6 +22,12 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
+	// 블록처리된 유저 여부 (보내는 사람, 받는사람 둘다)
+	if isBlocked(userToken.SeqMember) {
+		res.ResultCode = define.BLOCKED_ME
+		return res
+	}
+
 	_seqNovelStep1, _ := strconv.Atoi(req.Vars["seq_novel_step1"])
 	myLike := false
 	var cnt int64
@@ -32,10 +38,15 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 소설 존재/삭제 여부
 	novelStep := schemas.NovelStep1{}
-	result := mdb.Model(&novelStep).Select("cnt_like, deleted_yn").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep).Count(&scanCount)
+	result := mdb.Model(&novelStep).Select("cnt_like, deleted_yn, seq_member").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep).Count(&scanCount)
 	if corm(result, &res) {
 		return res
 	}
+	if isBlocked(novelStep.SeqMember) {
+		res.ResultCode = define.BLOCKED_USER
+		return res
+	}
+
 	cnt = novelStep.CntLike
 	if novelStep.DeletedYn {
 		res.ResultCode = define.DELETED_NOVEL
@@ -120,10 +131,10 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	// push 날리기
 	if myLike {
-		pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
+		go pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
 	}
 
-	cacheMainPopularWriter()
+	go cacheMainPopularWriter()
 
 	return res
 }
@@ -141,6 +152,12 @@ func updateKeywordMemberLike(seqMember int64, seqKeyword int64, direction string
 }
 
 func pushLike(step int8, seqNovel int64, seqMember int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
 
 	info := getNovel(step, seqNovel)
 	isNight := false
@@ -190,13 +207,15 @@ func pushLike(step int8, seqNovel int64, seqMember int64) {
 			// Create a FCM client to send the message.
 			client, err := fcm.NewClient(define.Mconn.PushServerKey)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			// Send the message and receive the response without retries.
 			response, err := client.Send(msg)
 			if err != nil {
-				log.Fatalln(err)
+				// log.Fatalln(err)
+				fmt.Println(err)
 			}
 
 			log.Printf("%#v\n", response)

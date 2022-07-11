@@ -1,3 +1,5 @@
+// 이거 왜 만들었을까?
+
 package handlers
 
 import (
@@ -112,44 +114,52 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep1,
 			NickName:  n.NickNameStep1,
 			DeletedYn: n.DeletedYnStep1,
+			BlockedYn: false,
 			Content:   n.ContentStep1,
 		},
 		Step2: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep2,
 			NickName:  n.NickNameStep2,
 			DeletedYn: n.DeletedYnStep2,
+			BlockedYn: false,
 			Content:   n.ContentStep2,
 		},
 		Step3: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep3,
 			NickName:  n.NickNameStep3,
 			DeletedYn: n.DeletedYnStep3,
+			BlockedYn: false,
 			Content:   n.ContentStep3,
 		},
 		Step4: struct {
 			SeqMember int64  "json:\"seq_member\""
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
+			BlockedYn bool   "json:\"blocked_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep4,
 			NickName:  n.NickNameStep4,
 			DeletedYn: n.DeletedYnStep4,
+			BlockedYn: false,
 			Content:   n.ContentStep4,
 		},
 	}

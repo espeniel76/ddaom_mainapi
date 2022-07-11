@@ -66,6 +66,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		SnsType:   snsType,
 		PushToken: pushToken,
 		DeletedAt: time.Now(),
+		BlockedAt: time.Now(),
 	}
 
 	// 1. 신규인가
@@ -74,17 +75,55 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		mdb.Create(member)
 
 		// 2. 탈퇴회원인가
-	} else if tmpMember.SeqMember > 0 && tmpMember.DeletedYn {
-		fmt.Println("탈퇴회원")
-		// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
-		// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
-		mdb.Create(member)
+		// } else if tmpMember.SeqMember > 0 && tmpMember.DeletedYn {
+		// 	fmt.Println("탈퇴회원")
+		// 	// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
+		// 	// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
+
+		// 	// 블록 상태인가?
+		// 	if member.BlockedYn {
+		// 		// 블록 상태가 된지 90일이 지났는가? (이건 배치를 믿어본다)
+		// 		res.ResultCode = define.UJDTBLOCKED
+		// 		return res
+		// 	}
+
+		// 	mdb.Create(member)
+
+		// 2. 탈퇴 여부 확인
+		memberBackup := schemas.MemberBackup{}
+		query := "SELECT * FROM member_backups WHERE email = ? ORDER BY created_at DESC LIMIT 1"
+		result = mdb.Raw(query, email).Scan(&memberBackup)
+		if corm(result, &res) {
+			return res
+		}
+		// 2.1. 데이터가 있다
+		if memberBackup.SeqMember > 0 {
+			fmt.Println("탈퇴이력 있음")
+			// members 에는 데이터가 없고, member_backups 에는 있다 면 탈퇴 후 재 가입으로 간주
+			// seq_member 로, 블랙 처리 여부 판단
+			blockedYn := false
+			result = mdb.Model(schemas.Member{}).Select("blocked_yn").Where("seq_member = ?", memberBackup.SeqMember).Scan(&blockedYn)
+			if corm(result, &res) {
+				return res
+			}
+			if blockedYn {
+				fmt.Println("블랙인데 탈퇴한 유저임, 가입 안됨")
+				res.ResultCode = define.UJDTBLOCKED
+				return res
+			}
+		}
 
 		// 3. 기존회원인가
 	} else {
 		fmt.Println("기존회원")
 		result = mdb.Find(&member, "email", email)
 		if corm(result, &res) {
+			return res
+		}
+
+		// 휴면 상태 회원인가
+		if member.DormacyYn {
+			res.ResultCode = define.DORMANCY
 			return res
 		}
 
@@ -102,45 +141,37 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		}
 		nickName = memberDetail.NickName
 	}
-	if pushToken != "<nil>" && pushToken != "" {
-		setPushToken(member.SeqMember, pushToken)
-	}
+
+	go setPushToken(member.SeqMember, pushToken)
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
+	var lastAllocatedDb int8
 	ldb1 := db.List[define.Mconn.DsnLog1Master]
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
 	if !isExist {
-		var count1, count2 int64
-		result = ldb1.Table("member_exists").Count(&count1)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
-			return res
-		}
-		result = ldb2.Table("member_exists").Count(&count2)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
-			return res
-		}
+		// var count1, count2 int64
+		// ldb1.Table("member_exists").Count(&count1)
+		// ldb2.Table("member_exists").Count(&count2)
+		// if count1 > count2 {
+		// 	myLogDB = ldb2
+		// 	allocatedDb = 2
+		// } else {
+		// 	myLogDB = ldb1
+		// 	allocatedDb = 1
+		// }
+		// myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
 
-		if count1 > count2 {
-			myLogDB = ldb2
+		mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
+		if lastAllocatedDb == 1 {
 			allocatedDb = 2
+			myLogDB = ldb2
 		} else {
-			myLogDB = ldb1
 			allocatedDb = 1
-		}
-		result = myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
-		if corm(result, &res) {
-			return res
+			myLogDB = ldb1
 		}
 
-		result = mdb.Model(&member).Update("allocated_db", allocatedDb)
-		if corm(result, &res) {
-			return res
-		}
+		mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
 	} else {
 		result = mdb.Find(&member, "email", email)
 		if corm(result, &res) {
@@ -149,8 +180,20 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		allocatedDb = member.AllocatedDb
 		if allocatedDb == 1 {
 			myLogDB = ldb1
-		} else {
+		} else if allocatedDb == 2 {
 			myLogDB = ldb2
+		} else {
+			// 1,2 다 아니면 다시 할당 한다
+			// 원래 이 상황이 생기면 안 되는데, 없으면 안 되므로
+			// 에러방지용
+			mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
+			if lastAllocatedDb == 1 {
+				allocatedDb = 2
+				myLogDB = ldb2
+			} else {
+				allocatedDb = 1
+				myLogDB = ldb1
+			}
 		}
 	}
 
@@ -188,6 +231,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m["refresh_token"] = refreshToken
 	m["nick_name"] = nickName
 	m["http_server"] = define.Mconn.HTTPServer
+	m["blocked_yn"] = member.BlockedYn
 
 	res.Data = m
 
@@ -195,11 +239,14 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 func setPushToken(seqMember int64, pushToken string) {
-	mdb := db.List[define.Mconn.DsnMaster]
-	query := `
-	INSERT INTO member_push_tokens (seq_member, push_token, created_at, updated_at)
-	VALUES (?, ?, NOW(), NOW())
-	ON DUPLICATE KEY UPDATE updated_at = NOW()
-	`
-	mdb.Exec(query, seqMember, pushToken)
+	if len(pushToken) > 100 && seqMember > 0 {
+		mdb := db.List[define.Mconn.DsnMaster]
+		mdb.Model(schemas.Member{}).Where("seq_member = ?", seqMember).Update("push_token", pushToken)
+		query := `
+			INSERT INTO member_push_tokens (seq_member, push_token, created_at, updated_at)
+			VALUES (?, ?, NOW(), NOW())
+			ON DUPLICATE KEY UPDATE updated_at = NOW()
+		`
+		mdb.Exec(query, seqMember, pushToken)
+	}
 }

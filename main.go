@@ -4,7 +4,6 @@ import (
 	"ddaom/db"
 	"ddaom/define"
 	"ddaom/memdb"
-	"ddaom/mlogdb"
 	"ddaom/rest"
 	"fmt"
 	"log"
@@ -15,7 +14,7 @@ import (
 )
 
 func main() {
-	fmt.Println("ddaom API v0.3")
+	fmt.Println("ddaom API v0.4")
 	setInitialize()
 }
 
@@ -24,7 +23,7 @@ func setInitialize() {
 	define.SetConnectionInfosParse()
 	db.RunMySql()
 	memdb.RunRedis()
-	mlogdb.RunMongodb()
+	// mlogdb.RunMongodb()
 
 	mux := mux.NewRouter()
 	rest.Handlers(mux)
@@ -41,14 +40,4 @@ func setInitialize() {
 	if err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
-
-	// for REST SSL
-	// go func() {
-	// err := http.ListenAndServeTLS(":"+define.Mconn.HTTPPort_SSL, "/usr/local/ssl/cert.pem", "/usr/local/ssl/key.pem", handler)
-	// if err != nil {
-	// 	log.Fatal("ListenAndServeTLS:", err)
-	// }
-	// }()
-
-	fmt.Println("Test Edit")
 }

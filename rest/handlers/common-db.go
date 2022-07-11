@@ -6,10 +6,18 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/memdb"
+	"ddaom/tools"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/jpeg"
+	"image/png"
 	"log"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/appleboy/go-fcm"
 	"gorm.io/gorm"
@@ -28,7 +36,7 @@ func GetMyLogDbMaster(allocated int8) *gorm.DB {
 }
 
 func GetMyLogDbSlave(allocated int8) *gorm.DB {
-
+	fmt.Println("allocated: ", allocated)
 	var myLogDb *gorm.DB
 	switch allocated {
 	case 1:
@@ -149,6 +157,13 @@ type GetNovelRes struct {
 	IsNightPush bool   `json:"is_night_push"`
 }
 
+func isBlocked(seqMember int64) bool {
+	sdb := db.List[define.Mconn.DsnSlave]
+	isBlocked := false
+	sdb.Model(schemas.Member{}).Select("blocked_yn").Where("seq_member = ?", seqMember).Scan(&isBlocked)
+	return isBlocked
+}
+
 func isAbleKeyword(seqKeyword int64) bool {
 	sdb := db.List[define.Mconn.DsnSlave]
 	keyword := schemas.Keyword{}
@@ -247,6 +262,13 @@ type GetUserInfoPushRes struct {
 }
 
 func sendPush(pushToken string, alarm *schemas.Alarm) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
 	mdb := db.List[define.Mconn.DsnMaster]
 	mdb.Create(&alarm)
 	msg := &fcm.Message{
@@ -266,7 +288,8 @@ func sendPush(pushToken string, alarm *schemas.Alarm) {
 	// Create a FCM client to send the message.
 	client, err := fcm.NewClient(define.Mconn.PushServerKey)
 	if err != nil {
-		log.Fatalln(err)
+		// log.Fatalln(err)
+		fmt.Println(err)
 	}
 
 	// Send the message and receive the response without retries.
@@ -347,11 +370,113 @@ func cacheMainPopularWriter() {
 		FROM
 			member_details md INNER JOIN members m ON md.seq_member = m.seq_member
 		WHERE
-			m.deleted_yn = false
+			m.deleted_yn = false AND md.cnt_subscribe > 0
 		ORDER BY
-			md.cnt_like DESC, md.cnt_subscribe DESC
+			md.cnt_subscribe DESC
 		LIMIT 10`
 	sdb.Raw(query).Scan(&listPopularWriter)
 	j, _ := json.Marshal(listPopularWriter)
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))
+}
+
+func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
+	s3 := tools.S3Info{
+		AwsProfileName: "ddaom",
+		AwsS3Region:    define.Mconn.AwsS3Region,
+		AwsSecretKey:   define.Mconn.AwsSecretKey,
+		AwsAccessKey:   define.Mconn.AwsAccessKey,
+		BucketName:     define.Mconn.AwsBucketName,
+	}
+
+	imageName := strconv.Itoa(int(seqColor)) + "_" + strconv.Itoa(int(seqImage)) + ".jpg"
+	savePath := define.Mconn.ReplacePath + "/thumb/"
+
+	mdb := db.List[define.Mconn.DsnMaster]
+
+	fmt.Println("공유이미지 만들기", imageName)
+
+	// 1. 해당 조합의 DB 데이터가 있는지 확인
+	var cnt int64
+	mdb.Model(schemas.NovelStep1{}).Select("COUNT(*)").Where("endure_image = ?", imageName).Scan(&cnt)
+	if cnt > 0 {
+		return
+	}
+
+	// 2. 없으면, DB 에서 경로 가져옴
+	var imgPath string
+	var hexValue string
+	mdb.Model(schemas.Image{}).Select("image").Where("seq_image = ?", seqImage).Scan(&imgPath)
+	imgSrc := define.Mconn.ReplacePath + imgPath
+	mdb.Model(schemas.Color{}).Select("color").Where("seq_color = ?", seqColor).Scan(&hexValue)
+
+	// 3. 가져온 경로로 이미지 다운 (AWS 일 시)
+	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
+		err := s3.SetS3ConfigByKey()
+		if err != nil {
+			return
+		}
+
+		s3.DownloadFile("/tmp/thumb", strings.Replace(imgPath, "/", "", 1))
+		fileNames := strings.Split(imgPath, "/")
+		fileName := fileNames[len(fileNames)-1]
+		imgSrc = "/tmp/thumb/" + fileName
+	}
+
+	// 4. MERGE 작업
+	imgSource, _ := os.Open(imgSrc)
+	imgLayer, _ := png.Decode(imgSource)
+	defer imgSource.Close()
+
+	b := imgLayer.Bounds()
+	imgResult := image.NewRGBA(b)
+
+	m := image.NewRGBA(b)
+	colorRgba, _ := parseHexColor(hexValue)
+	draw.Draw(m, m.Bounds(), &image.Uniform{colorRgba}, image.Point{}, draw.Src)
+
+	draw.Draw(imgResult, b, m, image.Point{}, draw.Src)
+	draw.Draw(imgResult, b, imgLayer, image.Point{}, draw.Over)
+
+	resultPath := savePath + imageName
+	// fmt.Println(resultPath)
+	third, err := os.Create(resultPath)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	jpeg.Encode(third, imgResult, &jpeg.Options{90})
+	defer third.Close()
+
+	// 5. DB save
+	mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", seqNovelStep1).Update("endure_image", imageName)
+
+	// 6. MERGE 한 파일 업로드 (AWS 일 시)
+	if define.Mconn.HTTPServer == "https://s3.ap-northeast-2.amazonaws.com/image.ttaom.com" {
+		// fmt.Println("/tmp/thumb/" + imageName)
+		s3.UploadFileByFileName("/tmp/thumb/"+imageName, "thumb/"+imageName, "image/jpeg")
+	}
+}
+
+func parseHexColor(s string) (c color.RGBA, err error) {
+	c.A = 0xff
+	switch len(s) {
+	case 7:
+		_, err = fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
+	case 4:
+		_, err = fmt.Sscanf(s, "#%1x%1x%1x", &c.R, &c.G, &c.B)
+		// Double the hex digits:
+		c.R *= 17
+		c.G *= 17
+		c.B *= 17
+	default:
+		err = fmt.Errorf("invalid length, must be 7 or 4")
+
+	}
+	return
 }

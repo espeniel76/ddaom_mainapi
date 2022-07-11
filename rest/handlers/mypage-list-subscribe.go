@@ -6,7 +6,6 @@ import (
 	"ddaom/domain"
 	"ddaom/domain/schemas"
 	"ddaom/tools"
-	"fmt"
 	"time"
 )
 
@@ -97,7 +96,7 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		fmt.Println(statuses)
+		// fmt.Println(statuses)
 	}
 
 	nickName := ""
