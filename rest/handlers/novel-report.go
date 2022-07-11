@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 )
 
 func NovelReportLive(req *domain.CommonRequest) domain.CommonResponse {
@@ -22,6 +23,8 @@ func NovelReportLive(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovel := CpInt64(req.Parameters, "seq_novel")
 	_reasonType := CpInt64(req.Parameters, "reason_type")
 	_reason := Cp(req.Parameters, "reason")
+
+	fmt.Println(_step, _seqNovel, _reasonType, _reason)
 
 	novelReport := schemas.NovelReport{
 		SeqMember:  userToken.SeqMember,
