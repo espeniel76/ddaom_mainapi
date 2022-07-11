@@ -446,3 +446,15 @@ type Alarm struct {
 	IsRead     bool      `gorm:"default:false" json:"is_read"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
+
+type NovelReport struct {
+	SeqNovelReport int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_novel_report"`
+	SeqMember      int64     `gorm:"index" json:"seq_member"`
+	NovelType      string    `gorm:"type:ENUM('LIVE','FINISH'); DEFAULT:'LIVE'" json:"novel_type"`
+	Step           int8      `gorm:"default:1" json:"step"`
+	SeqNovel       int64     `gorm:"index" json:"seq_novel"`
+	ReasonType     int8      `gorm:"default:0" json:"reason_type"`
+	Reason         string    `json:"reason"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
