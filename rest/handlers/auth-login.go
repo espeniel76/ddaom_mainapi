@@ -74,21 +74,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		fmt.Println("신규회원")
 		mdb.Create(member)
 
-		// 2. 탈퇴회원인가
-		// } else if tmpMember.SeqMember > 0 && tmpMember.DeletedYn {
-		// 	fmt.Println("탈퇴회원")
-		// 	// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.Member{})
-		// 	// mdb.Where("seq_member = ?", tmpMember.SeqMember).Delete(schemas.MemberDetail{})
-
-		// 	// 블록 상태인가?
-		// 	if member.BlockedYn {
-		// 		// 블록 상태가 된지 90일이 지났는가? (이건 배치를 믿어본다)
-		// 		res.ResultCode = define.UJDTBLOCKED
-		// 		return res
-		// 	}
-
-		// 	mdb.Create(member)
-
 		// 2. 탈퇴 여부 확인
 		memberBackup := schemas.MemberBackup{}
 		query := "SELECT * FROM member_backups WHERE email = ? ORDER BY created_at DESC LIMIT 1"
@@ -99,8 +84,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		// 2.1. 데이터가 있다
 		if memberBackup.SeqMember > 0 {
 			fmt.Println("탈퇴이력 있음")
-			// members 에는 데이터가 없고, member_backups 에는 있다 면 탈퇴 후 재 가입으로 간주
-			// seq_member 로, 블랙 처리 여부 판단
 			blockedYn := false
 			result = mdb.Model(schemas.Member{}).Select("blocked_yn").Where("seq_member = ?", memberBackup.SeqMember).Scan(&blockedYn)
 			if corm(result, &res) {
@@ -112,6 +95,9 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 				return res
 			}
 		}
+
+		// 신규 회원 로그
+		go setUserActionLog(member.SeqMember, 1, "")
 
 		// 3. 기존회원인가
 	} else {
@@ -150,17 +136,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	ldb1 := db.List[define.Mconn.DsnLog1Master]
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
 	if !isExist {
-		// var count1, count2 int64
-		// ldb1.Table("member_exists").Count(&count1)
-		// ldb2.Table("member_exists").Count(&count2)
-		// if count1 > count2 {
-		// 	myLogDB = ldb2
-		// 	allocatedDb = 2
-		// } else {
-		// 	myLogDB = ldb1
-		// 	allocatedDb = 1
-		// }
-		// myLogDB.Create(&schemas.MemberExist{SeqMember: member.SeqMember})
 
 		mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
 		if lastAllocatedDb == 1 {
@@ -183,9 +158,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		} else if allocatedDb == 2 {
 			myLogDB = ldb2
 		} else {
-			// 1,2 다 아니면 다시 할당 한다
-			// 원래 이 상황이 생기면 안 되는데, 없으면 안 되므로
-			// 에러방지용
 			mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
 			if lastAllocatedDb == 1 {
 				allocatedDb = 2
@@ -233,7 +205,12 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m["http_server"] = define.Mconn.HTTPServer
 	m["blocked_yn"] = member.BlockedYn
 
+	go setUserActionLog(member.SeqMember, 1, "")
+
 	res.Data = m
+
+	// 로그인 완료 로그
+	go setUserActionLog(member.SeqMember, 2, "")
 
 	return res
 }

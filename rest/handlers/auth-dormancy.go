@@ -32,5 +32,8 @@ func AuthDormancy(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
+	// 회원 상태 (휴면 -> 정상)
+	go setUserActionLog(seqMember, 3, "")
+
 	return res
 }

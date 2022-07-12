@@ -71,5 +71,8 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 
 	res.Data = m
 
+	// 로그인 완료 로그
+	go setUserActionLog(userToken.SeqMember, 2, "")
+
 	return res
 }
