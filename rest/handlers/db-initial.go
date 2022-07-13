@@ -82,6 +82,7 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 
 	mdb.AutoMigrate(schemas.KeywordAlarmLog{})
 	mdb.AutoMigrate(schemas.Alarm{})
+	mdb.AutoMigrate(schemas.NovelReport{})
 
 	return res
 }

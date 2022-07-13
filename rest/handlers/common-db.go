@@ -482,3 +482,12 @@ func parseHexColor(s string) (c color.RGBA, err error) {
 	}
 	return
 }
+
+func setUserActionLog(_seqMember int64, _type int8, _contents string) {
+	mdb := db.List[define.Mconn.DsnMaster]
+	mdb.Create(&schemas.MemberLog{
+		SeqMember: _seqMember,
+		Type:      _type,
+		Contents:  _contents,
+	})
+}

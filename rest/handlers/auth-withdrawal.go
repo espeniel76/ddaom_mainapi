@@ -167,5 +167,8 @@ func AuthWithdrawal(req *domain.CommonRequest) domain.CommonResponse {
 		    - 다른 일반 회원이 탈퇴 회원을 구독한 건이 있는 경우, 삭제 처리 (보낸 구독 수 제외, 마이페이지 구독 상세 리스트에서 삭제)
 	*/
 
+	// 회원 상태 (정상 -> 탈퇴)
+	go setUserActionLog(userToken.SeqMember, 5, "")
+
 	return res
 }

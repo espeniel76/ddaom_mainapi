@@ -1183,5 +1183,61 @@
 				"required": true
 			}
 		]
+	},
+	"/novel/report/live": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "step",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_novel",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason_type",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/novel/report/finish": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "step",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_novel_finish",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason_type",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason",
+				"type": "string",
+				"required": true
+			}
+		]
 	}
 }

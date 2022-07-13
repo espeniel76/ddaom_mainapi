@@ -59,6 +59,10 @@ func Handlers(mux *mux.Router) {
 	// 소설 북마크
 	mux.HandleFunc("/novel/bookmark/{seq_novel_finish:[0-9]+}", common(handlers.NovelBookmark)) // 32
 
+	// 소설 신고
+	mux.HandleFunc("/novel/report/live", common(handlers.NovelReportLive))     // 32
+	mux.HandleFunc("/novel/report/finish", common(handlers.NovelReportFinish)) // 32
+
 	// 작가 구독
 	mux.HandleFunc("/novel/subscribe/{seq_member:[0-9]+}", common(handlers.NovelSubscribe)) // 33
 
