@@ -308,7 +308,9 @@ func addKeywordCnt(seqKeyword int64) {
 	var totalCnt int
 	mdb.Model(schemas.NovelStep1{}).
 		Select("COUNT(*) + SUM(cnt_step2) + SUM(cnt_step3) + SUM(cnt_step4)").
-		Where("seq_keyword = ?", seqKeyword).Scan(&totalCnt)
+		Where("seq_keyword = ?", seqKeyword).
+		Where("deleted_yn = false AND temp_yn = false AND active_yn = true").
+		Scan(&totalCnt)
 	mdb.Model(schemas.Keyword{}).
 		Where("seq_keyword = ?", seqKeyword).
 		Update("cnt_total", totalCnt)
