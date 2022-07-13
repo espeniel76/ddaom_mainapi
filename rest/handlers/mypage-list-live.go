@@ -14,7 +14,6 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
-	itsMe := false
 
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
