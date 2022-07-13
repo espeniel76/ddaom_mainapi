@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"time"
 )
 
@@ -17,6 +18,7 @@ func AuthLoginDetail(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
+	fmt.Println(userToken)
 
 	_nickName := req.HttpRquest.FormValue("nick_name")
 	if len(_nickName) < 1 {
