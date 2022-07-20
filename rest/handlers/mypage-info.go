@@ -16,8 +16,6 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	_seqMember, _ := strconv.ParseInt(req.Vars["seq_member"], 10, 64)
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 
-	fmt.Println(userToken)
-
 	var seqMemberToken int64
 	itsMe := false
 	if userToken != nil {
@@ -95,7 +93,7 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_writed"] = cntWrited
 
 	// 구독현황
-	fmt.Println("구독현황: ", _seqMember)
+	fmt.Println("사용자고유번호: ", _seqMember)
 	ldb := getUserLogDbSlave(sdb, _seqMember)
 	listStatus := []string{}
 	result = ldb.Model(&schemas.MemberSubscribe{}).Select("status").

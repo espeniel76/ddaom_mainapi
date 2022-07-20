@@ -135,8 +135,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	var lastAllocatedDb int8
 	ldb1 := db.List[define.Mconn.DsnLog1Master]
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
-	if !isExist {
 
+	if !isExist {
 		mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
 		if lastAllocatedDb == 1 {
 			allocatedDb = 2
@@ -145,8 +145,8 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			allocatedDb = 1
 			myLogDB = ldb1
 		}
-
-		mdb.Model(&member).Update("allocated_db", allocatedDb).Where("seq_member = ?", member.SeqMember)
+		fmt.Println("Allocated DB: ", allocatedDb)
+		mdb.Exec("UPDATE members SET allocated_db = ? WHERE seq_member = ?", allocatedDb, member.SeqMember)
 	} else {
 		result = mdb.Find(&member, "email", email)
 		if corm(result, &res) {
@@ -157,15 +157,6 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			myLogDB = ldb1
 		} else if allocatedDb == 2 {
 			myLogDB = ldb2
-		} else {
-			mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
-			if lastAllocatedDb == 1 {
-				allocatedDb = 2
-				myLogDB = ldb2
-			} else {
-				allocatedDb = 1
-				myLogDB = ldb1
-			}
 		}
 	}
 
