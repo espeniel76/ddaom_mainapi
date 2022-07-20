@@ -137,7 +137,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	if !isExist {
 		var lastAllocatedDb int8
-		mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
+		mdb.Raw("SELECT allocated_db FROM members WHERE seq_member != ? ORDER BY seq_member DESC LIMIT 1", member.SeqMember).Scan(&lastAllocatedDb)
 		if lastAllocatedDb == 1 {
 			allocatedDb = 2
 			myLogDB = ldb2
