@@ -36,6 +36,9 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	sdb := db.List[define.Mconn.DsnSlave]
+	var lastAllocatedDb int8
+	sdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
+	fmt.Println("Allocated DB: ", lastAllocatedDb)
 
 	// 닉네임, 프로필
 	result := sdb.Model(schemas.MemberDetail{}).
