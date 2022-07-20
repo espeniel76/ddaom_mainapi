@@ -593,6 +593,8 @@ func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
 		return
 	}
 
+	isNight := tools.IsNight()
+
 	// 1. 작가 정보 로딩
 	userInfo := getUserInfo(userToken.SeqMember)
 
@@ -603,37 +605,36 @@ func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {
 		Where("seq_member = ? AND status IN ('BOTH', 'FOLLOWER')", userInfo.SeqMember).
 		Select("seq_member_opponent").
 		Scan(&listMsSeq)
-	sdb := db.List[define.Mconn.DsnSlave]
-	listFollower := []FollowerInfo{}
-	sql := `
-	SELECT
-		m.seq_member,
-		m.push_token,
-		md.is_night_push
-	FROM
-		members m INNER JOIN member_details md ON m.seq_member = md.seq_member
-	WHERE
-		m.seq_member IN (?) AND md.is_new_following = true
-	`
-	sdb.Raw(sql, listMsSeq).Scan(&listFollower)
+	mdb := db.List[define.Mconn.DsnMaster]
+	alarm := schemas.Alarm{
+		SeqMember:  0,
+		Title:      "따옴",
+		TypeAlarm:  5,
+		ValueAlarm: int(seqNovel),
+		Step:       step,
+		Content:    userInfo.NickName + "님의 신규 소설이 등록되었습니다",
+	}
+	for _, v := range listMsSeq {
+		alarm.SeqMember = v
+		mdb.Create(&alarm)
+	}
 
-	isNight := false
-	for _, o := range listFollower {
-		isNight = false
-		if o.IsNightPush == false {
-			isNight = tools.IsNight()
-		}
-		if !isNight {
-			alarm := schemas.Alarm{
-				SeqMember:  o.SeqMember,
-				Title:      "따옴",
-				TypeAlarm:  5,
-				ValueAlarm: int(seqNovel),
-				Step:       step,
-				Content:    userInfo.NickName + "님의 신규 소설이 등록되었습니다",
+	listPush := []InfoPush{}
+	listFinalPush := []InfoPush{}
+	query := "SELECT mpt.push_token, mpt.seq_member, md.is_night_push FROM member_push_tokens mpt LEFT JOIN member_details md ON md.seq_member = mpt.seq_member WHERE md.seq_member IN (?) AND md.is_new_following = true"
+	mdb.Raw(query, listMsSeq).Scan(&listPush)
+	for _, o := range listPush {
+		if isNight {
+			if o.IsNightPush {
+				listFinalPush = append(listFinalPush, o)
 			}
-			sendPush(o.PushToken, &alarm)
+		} else {
+			listFinalPush = append(listFinalPush, o)
 		}
+	}
+	for _, o := range listFinalPush {
+		alarm.SeqMember = o.SeqMember
+		go tools.SendPushMessage(o.PushToken, &alarm)
 	}
 }
 

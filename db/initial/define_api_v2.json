@@ -1,4 +1,11 @@
 {
+	"/check": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": []
+	},
 	"/samples": {
 		"allow_method": "POST",
 		"data_type": "application/json",

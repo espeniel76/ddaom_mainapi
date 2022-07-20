@@ -5,12 +5,9 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"ddaom/tools"
 	"fmt"
-	"log"
 	"strconv"
-	"time"
-
-	"github.com/appleboy/go-fcm"
 )
 
 func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
@@ -160,65 +157,43 @@ func pushLike(step int8, seqNovel int64, seqMember int64) {
 	}()
 
 	info := getNovel(step, seqNovel)
-	isNight := false
+	isNight := tools.IsNight()
 	if info.SeqMember > 0 {
+		mdb := db.List[define.Mconn.DsnMaster]
 
-		// 야간 푸쉬는 받지 않는다
-		if info.IsNightPush == false {
-			// 낮인지 체크
-			now := time.Now()
-			if now.Hour() >= 9 && now.Hour() <= 20 {
-				isNight = false
+		// 로그 쌓기
+		userInfoFrom := getUserInfo(seqMember)
+		alarm := schemas.Alarm{
+			SeqMember:  info.SeqMember,
+			Title:      "따옴",
+			TypeAlarm:  2,
+			ValueAlarm: int(seqNovel),
+			Step:       step,
+			Content:    "\"" + info.Title + " - step" + fmt.Sprintf("%d", step) + "\"를 " + userInfoFrom.NickName + " 님이 좋아합니다.",
+		}
+		mdb.Create(&alarm)
+		listPush := []InfoPush{}
+		listFinalPush := []InfoPush{}
+		query := "SELECT mpt.push_token, mpt.seq_member, md.is_night_push FROM member_push_tokens mpt LEFT JOIN member_details md ON md.seq_member = mpt.seq_member WHERE md.seq_member = ? AND md.is_liked = true"
+		mdb.Raw(query, info.SeqMember).Scan(&listPush)
+		for _, o := range listPush {
+			if isNight {
+				if o.IsNightPush {
+					listFinalPush = append(listFinalPush, o)
+				}
 			} else {
-				isNight = true
+				listFinalPush = append(listFinalPush, o)
 			}
 		}
-		fmt.Println(isNight)
-
-		if !isNight {
-			userInfoFrom := getUserInfo(seqMember)
-
-			// 1. 푸쉬 테이블 삽입
-			alarm := schemas.Alarm{
-				SeqMember:  info.SeqMember,
-				Title:      "따옴",
-				TypeAlarm:  2,
-				ValueAlarm: int(seqNovel),
-				Step:       step,
-				Content:    "\"" + info.Title + " - step" + fmt.Sprintf("%d", step) + "\"를 " + userInfoFrom.NickName + " 님이 좋아합니다.",
-			}
-			mdb := db.List[define.Mconn.DsnMaster]
-			mdb.Create(&alarm)
-
-			msg := &fcm.Message{
-				To: info.PushToken,
-				Data: map[string]interface{}{
-					"seq_alarm":   alarm.SeqAlarm,
-					"type_alarm":  2,
-					"value_alarm": seqNovel,
-					"step":        step,
-				},
-				Notification: &fcm.Notification{
-					Title: alarm.Title,
-					Body:  alarm.Content,
-				},
-			}
-
-			// Create a FCM client to send the message.
-			client, err := fcm.NewClient(define.Mconn.PushServerKey)
-			if err != nil {
-				// log.Fatalln(err)
-				fmt.Println(err)
-			}
-
-			// Send the message and receive the response without retries.
-			response, err := client.Send(msg)
-			if err != nil {
-				// log.Fatalln(err)
-				fmt.Println(err)
-			}
-
-			log.Printf("%#v\n", response)
+		for _, o := range listFinalPush {
+			go tools.SendPushMessage(o.PushToken, &alarm)
 		}
 	}
+}
+
+// 발송 대상 추출
+type InfoPush struct {
+	PushToken   string
+	SeqMember   int64
+	IsNightPush bool
 }
