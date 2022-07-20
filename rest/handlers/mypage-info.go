@@ -15,6 +15,9 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 
 	_seqMember, _ := strconv.ParseInt(req.Vars["seq_member"], 10, 64)
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+
+	fmt.Println(userToken)
+
 	var seqMemberToken int64
 	itsMe := false
 	if userToken != nil {
