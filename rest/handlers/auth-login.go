@@ -132,11 +132,11 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
-	var lastAllocatedDb int8
 	ldb1 := db.List[define.Mconn.DsnLog1Master]
 	ldb2 := db.List[define.Mconn.DsnLog2Master]
 
 	if !isExist {
+		var lastAllocatedDb int8
 		mdb.Raw("SELECT allocated_db FROM members ORDER BY seq_member DESC LIMIT 1").Scan(&lastAllocatedDb)
 		if lastAllocatedDb == 1 {
 			allocatedDb = 2
