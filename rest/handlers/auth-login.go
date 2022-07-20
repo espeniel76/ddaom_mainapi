@@ -145,6 +145,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 			allocatedDb = 1
 			myLogDB = ldb1
 		}
+		fmt.Println("Last allocated DB: ", lastAllocatedDb)
 		fmt.Println("Allocated DB: ", allocatedDb)
 		mdb.Exec("UPDATE members SET allocated_db = ? WHERE seq_member = ?", allocatedDb, member.SeqMember)
 	} else {
