@@ -5,12 +5,9 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"ddaom/tools"
 	"fmt"
-	"log"
 	"strconv"
-	"time"
-
-	"github.com/appleboy/go-fcm"
 )
 
 func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
@@ -166,7 +163,7 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	case define.FOLLOWING:
 		fallthrough
 	case define.BOTH:
-		pushSubscribe(userToken.SeqMember, int64(_seqMember))
+		go pushSubscribe(userToken.SeqMember, int64(_seqMember))
 	}
 
 	go cacheMainPopularWriter()
@@ -182,63 +179,38 @@ func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
 		}
 	}()
 
+	userInfoFrom := getUserInfo(seqMemberFrom)
 	userInfoTo := getUserInfoPush(seqMemberTo)
-	isNight := false
-	if userInfoTo.SeqMember > 0 && userInfoTo.IsNewFollower {
+	isNight := tools.IsNight()
 
-		if userInfoTo.IsNightPush == false {
-			now := time.Now()
-			if now.Hour() >= 9 && now.Hour() <= 20 {
-				isNight = false
+	if userInfoTo.SeqMember > 0 && userInfoTo.IsNewFollower {
+		mdb := db.List[define.Mconn.DsnMaster]
+		alarm := schemas.Alarm{
+			SeqMember:  userInfoTo.SeqMember,
+			Title:      "따옴",
+			TypeAlarm:  4,
+			ValueAlarm: int(seqMemberFrom),
+			Step:       0,
+			Content:    userInfoFrom.NickName + "님이 나를 구독하였습니다",
+		}
+		mdb.Create(&alarm)
+
+		// 발송 대상 추출
+		listPush := []InfoPush{}
+		listFinalPush := []InfoPush{}
+		query := "SELECT mpt.push_token, mpt.seq_member, md.is_night_push FROM member_push_tokens mpt LEFT JOIN member_details md ON md.seq_member = mpt.seq_member WHERE md.seq_member = ? AND md.is_new_follower = true"
+		mdb.Raw(query, userInfoTo.SeqMember).Scan(&listPush)
+		for _, o := range listPush {
+			if isNight {
+				if o.IsNightPush {
+					listFinalPush = append(listFinalPush, o)
+				}
 			} else {
-				isNight = true
+				listFinalPush = append(listFinalPush, o)
 			}
 		}
-
-		if !isNight {
-			userInfoFrom := getUserInfo(seqMemberFrom)
-
-			// 1. 푸쉬 테이블 삽입
-			alarm := schemas.Alarm{
-				SeqMember:  userInfoTo.SeqMember,
-				Title:      "따옴",
-				TypeAlarm:  4,
-				ValueAlarm: int(seqMemberFrom),
-				Step:       0,
-				Content:    userInfoFrom.NickName + "님이 나를 구독하였습니다",
-			}
-			mdb := db.List[define.Mconn.DsnMaster]
-			mdb.Create(&alarm)
-
-			msg := &fcm.Message{
-				To: userInfoTo.PushToken,
-				Data: map[string]interface{}{
-					"seq_alarm":   alarm.SeqAlarm,
-					"type_alarm":  4,
-					"value_alarm": seqMemberFrom,
-					"step":        0,
-				},
-				Notification: &fcm.Notification{
-					Title: alarm.Title,
-					Body:  alarm.Content,
-				},
-			}
-
-			// Create a FCM client to send the message.
-			client, err := fcm.NewClient(define.Mconn.PushServerKey)
-			if err != nil {
-				// log.Fatalln(err)
-				fmt.Println(err)
-			}
-
-			// Send the message and receive the response without retries.
-			response, err := client.Send(msg)
-			if err != nil {
-				// log.Fatalln(err)
-				fmt.Println(err)
-			}
-
-			log.Printf("%#v\n", response)
+		for _, o := range listFinalPush {
+			go tools.SendPushMessage(o.PushToken, &alarm)
 		}
 	}
 }
