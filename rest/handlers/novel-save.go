@@ -182,7 +182,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	if !_tempYn {
 		go cacheMainLive(_seqKeyword)
-		go pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWriteTopic(userToken, 1, _seqNovelStep1)
 		go educeImage(_seqColor, _seqImage, _seqNovelStep1)
 	}
 
@@ -308,7 +308,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
-		go pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWriteTopic(userToken, 2, _seqNovelStep1)
 	}
 
 	return res
@@ -441,7 +441,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	var _seqNovelStep1 int64
 	mdb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		go pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWriteTopic(userToken, 3, _seqNovelStep1)
 	}
 
 	return res
@@ -575,10 +575,74 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	var _seqNovelStep1 int64
 	mdb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		go pushWrite(userToken, 1, _seqNovelStep1)
+		go pushWriteTopic(userToken, 4, _seqNovelStep1)
 	}
 
 	return res
+}
+
+func pushWriteTopic(userToken *domain.UserToken, step int8, seqNovel int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
+	if seqNovel < 1 {
+		return
+	}
+
+	isNight := tools.IsNight()
+
+	// 1. 작가 정보 로딩
+	userInfo := getUserInfo(userToken.SeqMember)
+
+	// 2. 구독자 정보 로딩
+	ldb := GetMyLogDbSlave(userToken.Allocated)
+	var listMsSeq []int64
+	ldb.Model(schemas.MemberSubscribe{}).
+		Where("seq_member = ? AND status IN ('BOTH', 'FOLLOWER')", userInfo.SeqMember).
+		Select("seq_member_opponent").
+		Scan(&listMsSeq)
+	mdb := db.List[define.Mconn.DsnMaster]
+	alarm := schemas.Alarm{
+		SeqMember:  0,
+		Title:      "따옴",
+		TypeAlarm:  5,
+		ValueAlarm: int(seqNovel),
+		Step:       step,
+		Content:    userInfo.NickName + "님의 신규 소설이 등록되었습니다",
+	}
+	for _, v := range listMsSeq {
+		alarm = schemas.Alarm{
+			SeqMember:  v,
+			Title:      "따옴",
+			TypeAlarm:  5,
+			ValueAlarm: int(seqNovel),
+			Step:       step,
+			Content:    userInfo.NickName + "님의 신규 소설이 등록되었습니다",
+		}
+		mdb.Create(&alarm)
+	}
+
+	listPush := []InfoPushTopic{}
+	listFinalPush := []InfoPushTopic{}
+	query := "SELECT seq_member, is_night_push FROM member_details WHERE seq_member IN (?) AND is_new_following = true"
+	mdb.Raw(query, listMsSeq).Scan(&listPush)
+	for _, o := range listPush {
+		if isNight {
+			if o.IsNightPush {
+				listFinalPush = append(listFinalPush, o)
+			}
+		} else {
+			listFinalPush = append(listFinalPush, o)
+		}
+	}
+	for _, o := range listFinalPush {
+		alarm.SeqMember = o.SeqMember
+		go tools.SendPushMessageTopic(&alarm)
+	}
 }
 
 func pushWrite(userToken *domain.UserToken, step int8, seqNovel int64) {

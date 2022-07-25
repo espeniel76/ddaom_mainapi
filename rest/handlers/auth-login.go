@@ -128,7 +128,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 		nickName = memberDetail.NickName
 	}
 
-	go setPushToken(member.SeqMember, pushToken)
+	go setPushToken(member.SeqMember, pushToken, "")
 
 	var myLogDB *gorm.DB
 	var allocatedDb int8
@@ -194,6 +194,7 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	m["nick_name"] = nickName
 	m["http_server"] = define.Mconn.HTTPServer
 	m["blocked_yn"] = member.BlockedYn
+	m["seq_member"] = member.SeqMember
 
 	go setUserActionLog(member.SeqMember, 1, "")
 
@@ -205,9 +206,10 @@ func AuthLogin(req *domain.CommonRequest) domain.CommonResponse {
 	return res
 }
 
-func setPushToken(seqMember int64, pushToken string) {
+func setPushToken(seqMember int64, pushToken string, pushTokenDel string) {
+	mdb := db.List[define.Mconn.DsnMaster]
 	if len(pushToken) > 100 && seqMember > 0 {
-		mdb := db.List[define.Mconn.DsnMaster]
+		mdb = db.List[define.Mconn.DsnMaster]
 		mdb.Model(schemas.Member{}).Where("seq_member = ?", seqMember).Update("push_token", pushToken)
 		query := `
 			INSERT INTO member_push_tokens (seq_member, push_token, created_at, updated_at)
@@ -215,5 +217,8 @@ func setPushToken(seqMember int64, pushToken string) {
 			ON DUPLICATE KEY UPDATE updated_at = NOW()
 		`
 		mdb.Exec(query, seqMember, pushToken)
+	}
+	if len(pushTokenDel) > 0 {
+		mdb.Exec("DELETE FROM member_push_tokens WHERE push_token = ?", pushTokenDel)
 	}
 }

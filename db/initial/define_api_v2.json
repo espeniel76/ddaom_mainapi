@@ -159,6 +159,11 @@
 				"name": "push_token",
 				"type": "string",
 				"required": true
+			},
+			{
+				"name": "push_token_del",
+				"type": "string",
+				"required": true
 			}
 		]
 	},

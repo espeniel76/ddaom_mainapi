@@ -128,7 +128,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	// push 날리기
 	if myLike {
-		go pushLike(1, int64(_seqNovelStep1), userToken.SeqMember)
+		go pushLikeTopic(1, int64(_seqNovelStep1), userToken.SeqMember)
 	}
 
 	go cacheMainPopularWriter()
@@ -148,6 +148,47 @@ func updateKeywordMemberLike(seqMember int64, seqKeyword int64, direction string
 
 }
 
+// push 방식 변경
+func pushLikeTopic(step int8, seqNovel int64, seqMember int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
+	info := getNovel(step, seqNovel)
+	isNight := tools.IsNight()
+	if info.SeqMember > 0 {
+		mdb := db.List[define.Mconn.DsnMaster]
+		userInfoFrom := getUserInfo(seqMember)
+		alarm := schemas.Alarm{
+			SeqMember:  info.SeqMember,
+			Title:      "따옴",
+			TypeAlarm:  2,
+			ValueAlarm: int(seqNovel),
+			Step:       step,
+			Content:    "\"" + info.Title + " - step" + fmt.Sprintf("%d", step) + "\"를 " + userInfoFrom.NickName + " 님이 좋아합니다.",
+		}
+		mdb.Create(&alarm)
+		push := InfoPushTopic{}
+		isPush := false
+		query := "SELECT seq_member, is_night_push FROM member_details WHERE seq_member = ? AND is_liked = true"
+		mdb.Raw(query, info.SeqMember).Scan(&push)
+		if isNight {
+			if push.IsNightPush {
+				isPush = true
+			}
+		} else {
+			isPush = true
+		}
+		if isPush {
+			go tools.SendPushMessageTopic(&alarm)
+		}
+	}
+}
+
+// 사용자 개별 토큰으로 push (사용하지 않음)
 func pushLike(step int8, seqNovel int64, seqMember int64) {
 
 	defer func() {
@@ -189,6 +230,11 @@ func pushLike(step int8, seqNovel int64, seqMember int64) {
 			go tools.SendPushMessage(o.PushToken, &alarm)
 		}
 	}
+}
+
+type InfoPushTopic struct {
+	SeqMember   int64
+	IsNightPush bool
 }
 
 // 발송 대상 추출

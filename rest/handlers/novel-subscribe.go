@@ -163,12 +163,53 @@ func NovelSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 	case define.FOLLOWING:
 		fallthrough
 	case define.BOTH:
-		go pushSubscribe(userToken.SeqMember, int64(_seqMember))
+		go pushSubscribeTopic(userToken.SeqMember, int64(_seqMember))
 	}
 
 	go cacheMainPopularWriter()
 
 	return res
+}
+
+func pushSubscribeTopic(seqMemberFrom int64, seqMemberTo int64) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
+	userInfoFrom := getUserInfo(seqMemberFrom)
+	userInfoTo := getUserInfoPush(seqMemberTo)
+	isNight := tools.IsNight()
+
+	if userInfoTo.SeqMember > 0 && userInfoTo.IsNewFollower {
+		mdb := db.List[define.Mconn.DsnMaster]
+		alarm := schemas.Alarm{
+			SeqMember:  userInfoTo.SeqMember,
+			Title:      "따옴",
+			TypeAlarm:  4,
+			ValueAlarm: int(seqMemberFrom),
+			Step:       0,
+			Content:    userInfoFrom.NickName + "님이 나를 구독하였습니다",
+		}
+		mdb.Create(&alarm)
+		push := InfoPushTopic{}
+		isPush := false
+		query := "SELECT seq_member, is_night_push FROM member_details WHERE seq_member = ? AND is_new_follower = true"
+		mdb.Raw(query, userInfoTo.SeqMember).Scan(&push)
+		fmt.Println(push)
+		if isNight {
+			if push.IsNightPush {
+				isPush = true
+			}
+		} else {
+			isPush = true
+		}
+		if isPush {
+			go tools.SendPushMessageTopic(&alarm)
+		}
+	}
 }
 
 func pushSubscribe(seqMemberFrom int64, seqMemberTo int64) {
