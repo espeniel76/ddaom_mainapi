@@ -90,9 +90,10 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	// 존재하는 닉네임 여부
+	sdb := db.List[define.Mconn.DsnSlave]
 	mdb := db.List[define.Mconn.DsnMaster]
 	var cnt int64
-	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result := sdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
@@ -132,7 +133,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			DeletedAt:  time.Now(),
 		}
 
-		result = mdb.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
+		result = sdb.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
 		if corm(result, &res) {
 			return res
 		}
@@ -144,13 +145,13 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		addKeywordCnt(_seqKeyword)
+
 		_seqNovelStep1 = novelWriteStep1.SeqNovelStep1
 
 	} else { // 업데이트
 
 		novelStep := schemas.NovelStep1{}
-		result := mdb.Model(&novelStep).Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep)
+		result := sdb.Model(&novelStep).Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep)
 		if corm(result, &res) {
 			return res
 		}
@@ -181,6 +182,7 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
+		go addKeywordCnt(_seqKeyword)
 		go cacheMainLive(_seqKeyword)
 		go pushWriteTopic(userToken, 1, _seqNovelStep1)
 		go educeImage(_seqColor, _seqImage, _seqNovelStep1)
@@ -211,8 +213,9 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	mdb := db.List[define.Mconn.DsnMaster]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var cnt int64
-	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result := sdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
@@ -220,37 +223,34 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.NO_EXIST_NICK
 		return res
 	}
+	var seqKeyword int64
+	novelStep1 := schemas.NovelStep1{}
+	novelStep2 := schemas.NovelStep2{}
 
 	// step 2 단계 글 신규
 	if _seqNovelStep2 == 0 {
-		// 상위글 삭제 여부 검사
-		isDeleted := false
-		result = mdb.Model(schemas.NovelStep1{}).Select("deleted_yn").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&isDeleted)
+
+		result = sdb.Model(&novelStep1).Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep1)
 		if corm(result, &res) {
 			return res
 		}
-		if isDeleted {
+		// 상위글 삭제 여부
+		if novelStep1.DeletedYn {
 			res.ResultCode = define.DELETED_PARENT
 			return res
 		}
 
-		// 가용 키워드 검사
-		seqKeyword := getSeqKeyword(1, int64(_seqNovelStep1))
-		if isAbleKeyword(seqKeyword) != true {
-			res.ResultCode = define.INACTIVE_KEYWORD
-			return res
-		}
-
-		result = mdb.Model(schemas.NovelStep1{}).Where("seq_novel_step1 = ?", _seqNovelStep1).Count(&cnt)
-		if corm(result, &res) {
-			return res
-		}
-		if cnt == 0 {
+		// 상위글 존재여부
+		if novelStep1.SeqNovelStep1 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
-		if !_tempYn {
-			mdb.Exec("UPDATE novel_step1 SET cnt_step2 = cnt_step2 + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
+
+		// 가용 키워드 검사
+		seqKeyword = getSeqKeyword(1, int64(_seqNovelStep1))
+		if isAbleKeyword(seqKeyword) != true {
+			res.ResultCode = define.INACTIVE_KEYWORD
+			return res
 		}
 
 		novelStep2 := schemas.NovelStep2{
@@ -264,42 +264,39 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		addKeywordCnt(seqKeyword)
+
 		// step 2 단계 글 기존
 	} else {
-		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
+		seqKeyword = getSeqKeyword(2, int64(_seqNovelStep2))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
 			return res
 		}
 
-		novelStep := schemas.NovelStep2{}
-		result := mdb.Model(&novelStep).Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep)
+		result := mdb.Model(&novelStep2).Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep2)
 		if corm(result, &res) {
 			return res
 		}
-		if novelStep.SeqNovelStep2 == 0 {
+		if novelStep2.SeqNovelStep2 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
 		// 상위글 삭제 여부 검사
-		// for push
-		_seqNovelStep1 = novelStep.SeqNovelStep1
-		isDeleted := false
-		result = mdb.Model(schemas.NovelStep1{}).Select("deleted_yn").Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&isDeleted)
+		_seqNovelStep1 = novelStep2.SeqNovelStep1
+		result = mdb.Model(&novelStep1).Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep1)
 		if corm(result, &res) {
 			return res
 		}
-		if isDeleted {
+		if novelStep1.DeletedYn {
 			res.ResultCode = define.DELETED_PARENT
 			return res
 		}
-		if novelStep.SeqMember != userToken.SeqMember {
+		if novelStep2.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
 		}
 
-		result = mdb.Model(&novelStep).
+		result = mdb.Model(&novelStep2).
 			Where("seq_novel_step2 = ?", _seqNovelStep2).
 			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn, "updated_at": time.Now()})
 		if corm(result, &res) {
@@ -308,6 +305,8 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	if !_tempYn {
+		mdb.Exec("UPDATE novel_step1 SET cnt_step2 = cnt_step2 + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
+		go addKeywordCnt(seqKeyword)
 		go pushWriteTopic(userToken, 2, _seqNovelStep1)
 	}
 
@@ -328,6 +327,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep3 := CpInt64(req.Parameters, "seq_novel_step3")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+	var seqNovelStep1 int64
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
@@ -345,47 +345,37 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.NO_EXIST_NICK
 		return res
 	}
+	var seqKeyword int64
+	novelStep2 := schemas.NovelStep2{}
+	novelStep3 := schemas.NovelStep3{}
 
 	if _seqNovelStep3 == 0 {
-		// 상위글 삭제 여부 검사
-		isDeleted := false
-		result = mdb.Model(schemas.NovelStep2{}).Select("deleted_yn").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&isDeleted)
+
+		result = mdb.Model(&novelStep2).Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep2)
 		if corm(result, &res) {
 			return res
 		}
-		if isDeleted {
+
+		// 상위글 삭제 여부 검사
+		if novelStep2.DeletedYn {
 			res.ResultCode = define.DELETED_PARENT
 			return res
 		}
 
-		seqKeyword := getSeqKeyword(2, int64(_seqNovelStep2))
+		seqKeyword = getSeqKeyword(2, int64(_seqNovelStep2))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
 			return res
 		}
 
-		result = mdb.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", _seqNovelStep2).Count(&cnt)
-		if corm(result, &res) {
-			return res
-		}
-		if cnt == 0 {
+		if novelStep2.SeqNovelStep2 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
-		var seqNovelStep1 int64
-		result = mdb.Model(schemas.NovelStep2{}).Where("seq_novel_step2 = ?", _seqNovelStep2).
-			Pluck("seq_novel_step1", &seqNovelStep1)
-		if corm(result, &res) {
-			return res
-		}
-
-		if !_tempYn {
-			result = mdb.Exec("UPDATE novel_step1 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step1 = ?", seqNovelStep1)
-			result = mdb.Exec("UPDATE novel_step2 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
-		}
+		seqNovelStep1 = novelStep2.SeqNovelStep1
 
 		novelStep3 := schemas.NovelStep3{
-			SeqNovelStep1: seqNovelStep1,
+			SeqNovelStep1: novelStep2.SeqNovelStep1,
 			SeqNovelStep2: _seqNovelStep2,
 			SeqMember:     userToken.SeqMember,
 			Content:       _content,
@@ -396,41 +386,43 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		addKeywordCnt(seqKeyword)
+
 		_seqNovelStep3 = novelStep3.SeqNovelStep3
+
 	} else {
-		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
+
+		seqKeyword = getSeqKeyword(3, int64(_seqNovelStep3))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
 			return res
 		}
 
-		novelStep := schemas.NovelStep3{}
-		result := mdb.Model(&novelStep).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep)
+		result := mdb.Model(&novelStep3).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep3)
 		if corm(result, &res) {
 			return res
 		}
-		if novelStep.SeqNovelStep3 == 0 {
+		if novelStep3.SeqNovelStep3 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
-		// 상위글 삭제 여부 검사
-		_seqNovelStep2 = novelStep.SeqNovelStep2
-		isDeleted := false
-		result = mdb.Model(schemas.NovelStep2{}).Select("deleted_yn").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&isDeleted)
+
+		_seqNovelStep2 = novelStep3.SeqNovelStep2
+		result = mdb.Model(&novelStep2).Select("deleted_yn").Where("seq_novel_step2 = ?", _seqNovelStep2).Scan(&novelStep2)
 		if corm(result, &res) {
 			return res
 		}
-		if isDeleted {
+		// 상위글 삭제 여부 검사
+		if novelStep2.DeletedYn {
 			res.ResultCode = define.DELETED_PARENT
 			return res
 		}
-		if novelStep.SeqMember != userToken.SeqMember {
+		if novelStep3.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
 		}
+		seqNovelStep1 = novelStep2.SeqNovelStep1
 
-		result = mdb.Model(&novelStep).
+		result = mdb.Model(&novelStep3).
 			Where("seq_novel_step3 = ?", _seqNovelStep3).
 			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn, "updated_at": time.Now()})
 		if corm(result, &res) {
@@ -438,10 +430,11 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	var _seqNovelStep1 int64
-	mdb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		go pushWriteTopic(userToken, 3, _seqNovelStep1)
+		mdb.Exec("UPDATE novel_step1 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step1 = ?", seqNovelStep1)
+		mdb.Exec("UPDATE novel_step2 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
+		go addKeywordCnt(seqKeyword)
+		go pushWriteTopic(userToken, 3, seqNovelStep1)
 	}
 
 	return res
@@ -461,6 +454,7 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovelStep4 := CpInt64(req.Parameters, "seq_novel_step4")
 	_content := Cp(req.Parameters, "content")
 	_tempYn := CpBool(req.Parameters, "temp_yn")
+	var seqNovelStep1 int64
 
 	// 블록처리된 유저 여부
 	if isBlocked(userToken.SeqMember) {
@@ -470,8 +464,9 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 	// 존재하는 닉네임 여부
 	mdb := db.List[define.Mconn.DsnMaster]
+	sdb := db.List[define.Mconn.DsnSlave]
 	var cnt int64
-	result := mdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
+	result := sdb.Model(schemas.MemberDetail{}).Where("seq_member = ?", userToken.SeqMember).Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
@@ -479,44 +474,37 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.NO_EXIST_NICK
 		return res
 	}
+	var seqKeyword int64
+	novelStep3 := schemas.NovelStep3{}
+	novelStep4 := schemas.NovelStep4{}
 
 	if _seqNovelStep4 == 0 {
 		// 상위글 삭제 여부 검사
-		isDeleted := false
-		result = mdb.Model(schemas.NovelStep3{}).Select("deleted_yn").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&isDeleted)
+		result = sdb.Model(&novelStep3).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep3)
 		if corm(result, &res) {
 			return res
 		}
-		if isDeleted {
+		if novelStep3.DeletedYn {
 			res.ResultCode = define.DELETED_PARENT
 			return res
 		}
 
-		seqKeyword := getSeqKeyword(3, int64(_seqNovelStep3))
+		seqKeyword = getSeqKeyword(3, int64(_seqNovelStep3))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
 			return res
 		}
 
-		result = mdb.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Count(&cnt)
-		if corm(result, &res) {
-			return res
-		}
-		if cnt == 0 {
+		if novelStep3.SeqNovelStep3 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
 		novelStep3 := schemas.NovelStep3{}
-		result = mdb.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep3)
+		result = sdb.Model(schemas.NovelStep3{}).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep3)
 		if corm(result, &res) {
 			return res
 		}
-
-		if !_tempYn {
-			mdb.Exec("UPDATE novel_step1 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step1 = ?", novelStep3.SeqNovelStep1)
-			mdb.Exec("UPDATE novel_step2 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step2 = ?", novelStep3.SeqNovelStep2)
-			mdb.Exec("UPDATE novel_step3 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step3 = ?", _seqNovelStep3)
-		}
+		seqNovelStep1 = novelStep3.SeqNovelStep1
 
 		novelStep4 := schemas.NovelStep4{
 			SeqNovelStep1: novelStep3.SeqNovelStep1,
@@ -531,40 +519,38 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		addKeywordCnt(seqKeyword)
+
 		_seqNovelStep4 = novelStep4.SeqNovelStep4
 	} else {
-		seqKeyword := getSeqKeyword(4, int64(_seqNovelStep4))
+		seqKeyword = getSeqKeyword(4, int64(_seqNovelStep4))
 		if isAbleKeyword(seqKeyword) != true {
 			res.ResultCode = define.INACTIVE_KEYWORD
 			return res
 		}
-		novelStep := schemas.NovelStep4{}
-		result := mdb.Model(&novelStep).Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&novelStep)
+		result := mdb.Model(&novelStep4).Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&novelStep4)
 		if corm(result, &res) {
 			return res
 		}
-		if novelStep.SeqNovelStep4 == 0 {
+		if novelStep4.SeqNovelStep4 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
-		// 상위글 삭제 여부 검사
-		_seqNovelStep3 = novelStep.SeqNovelStep3
-		isDeleted := false
-		result = mdb.Model(schemas.NovelStep3{}).Select("deleted_yn").Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&isDeleted)
+		_seqNovelStep3 = novelStep4.SeqNovelStep3
+		result = mdb.Model(&novelStep3).Where("seq_novel_step3 = ?", _seqNovelStep3).Scan(&novelStep3)
 		if corm(result, &res) {
 			return res
 		}
-		if isDeleted {
+		if novelStep3.DeletedYn {
 			res.ResultCode = define.DELETED_PARENT
 			return res
 		}
-		if novelStep.SeqMember != userToken.SeqMember {
+		if novelStep4.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
 		}
+		seqNovelStep1 = novelStep3.SeqNovelStep1
 
-		result = mdb.Model(&novelStep).
+		result = mdb.Model(&novelStep4).
 			Where("seq_novel_step4 = ?", _seqNovelStep4).
 			Updates(map[string]interface{}{"content": _content, "temp_yn": _tempYn, "updated_at": time.Now()})
 		if corm(result, &res) {
@@ -572,10 +558,12 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	var _seqNovelStep1 int64
-	mdb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ?", _seqNovelStep4).Scan(&_seqNovelStep1)
 	if !_tempYn {
-		go pushWriteTopic(userToken, 4, _seqNovelStep1)
+		mdb.Exec("UPDATE novel_step1 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step1 = ?", novelStep3.SeqNovelStep1)
+		mdb.Exec("UPDATE novel_step2 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step2 = ?", novelStep3.SeqNovelStep2)
+		mdb.Exec("UPDATE novel_step3 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step3 = ?", _seqNovelStep3)
+		go addKeywordCnt(seqKeyword)
+		go pushWriteTopic(userToken, 4, seqNovelStep1)
 	}
 
 	return res
