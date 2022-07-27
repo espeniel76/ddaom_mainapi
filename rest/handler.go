@@ -83,6 +83,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/list/subscribe", common(handlers.MypageListSubscribe))                                // 45
 	mux.HandleFunc("/mypage/list/alarm", common(handlers.MypageListAlarm))                                        // 46
 	mux.HandleFunc("/mypage/alarm/{seq_alarm:[0-9]+}", common(handlers.MypageAlarmReceiveSet))                    // 47
+	mux.HandleFunc("/mypage/user/report", common(handlers.MypageUserReport))                                      // 32
 
 	// 메인
 	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.Main))                               // 48
