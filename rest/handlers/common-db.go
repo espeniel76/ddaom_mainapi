@@ -207,6 +207,17 @@ func isAbleGenre(seqGenre int64) bool {
 	}
 }
 
+func isExistTitle(title string) bool {
+	sdb := db.List[define.Mconn.DsnSlave]
+	var cnt int64
+	sdb.Model(&schemas.NovelStep1{}).Where("title = ? AND temp_yn = false AND deleted_yn = false", title).Count(&cnt)
+	if cnt > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 func getUserInfo(seqMember int64) schemas.MemberDetail {
 	sdb := db.List[define.Mconn.DsnSlave]
 	md := schemas.MemberDetail{}

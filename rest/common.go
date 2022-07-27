@@ -3,7 +3,6 @@ package rest
 import (
 	"ddaom/define"
 	"ddaom/domain"
-	"ddaom/mlogdb"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +137,7 @@ func common(f func(*domain.CommonRequest) domain.CommonResponse) func(w http.Res
 		intervalEnd := time.Now().UnixMilli()
 		if string(r.URL.String()) != "/check" {
 			fmt.Println(intervalEnd - intervalStart)
-			// go accessLog(&req, &res, intervalEnd, intervalStart)
+			go accessLog(&req, &res, intervalEnd, intervalStart)
 		}
 
 		data, _ := json.Marshal(res)
@@ -158,12 +156,12 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 		}
 	}()
 
-	interval := intervalEnd - intervalStart
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
-	seqMember := 0
-	if userToken != nil {
-		seqMember = int(userToken.SeqMember)
-	}
+	// interval := intervalEnd - intervalStart
+	// userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	// seqMember := 0
+	// if userToken != nil {
+	// 	seqMember = int(userToken.SeqMember)
+	// }
 
 	// fmt.Println(req.HttpRquest.Method)
 	// if contentType == "multipart/form-data" {
@@ -186,22 +184,24 @@ func accessLog(req *domain.CommonRequest, res *domain.CommonResponse, intervalEn
 	// 	}
 	// }
 
-	_, err := json.Marshal(res)
-	if err == nil {
+	fmt.Println(res.ResultCode)
 
-		_res := res.ResultCode
-		// _res := strings.ReplaceAll(string(outRes), "\"", "")
-		document := bson.D{
-			{"seq_user", seqMember},
-			{"method", req.HttpRquest.Method},
-			{"url", req.HttpRquest.URL},
-			{"delay", interval},
-			{"res", _res},
-			{"at", time.Now()},
-		}
-		_, err := mlogdb.InsertOne(document)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	}
+	// _, err := json.Marshal(res)
+	// if err == nil {
+	// _res := res
+	// _res := strings.ReplaceAll(string(outRes), "\"", "")
+	// fmt.Println(_res)
+	// document := bson.D{
+	// 	{"seq_user", seqMember},
+	// 	{"method", req.HttpRquest.Method},
+	// 	{"url", req.HttpRquest.URL},
+	// 	{"delay", interval},
+	// 	{"res", _res},
+	// 	{"at", time.Now()},
+	// }
+	// _, err := mlogdb.InsertOne(document)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+	// }
 }

@@ -23,7 +23,7 @@ func NovelCheckTitle(req *domain.CommonRequest) domain.CommonResponse {
 	sdb := db.List[define.Mconn.DsnSlave]
 	var cnt int64
 	isExist := false
-	result := sdb.Model(schemas.NovelStep1{}).Where("title = ?", _title).Count(&cnt)
+	result := sdb.Model(schemas.NovelStep1{}).Where("title = ? AND temp_yn = false AND deleted_yn = false", _title).Count(&cnt)
 	if corm(result, &res) {
 		return res
 	}
@@ -119,6 +119,18 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.INACTIVE_GENRE
 		return res
 	}
+	if isExistTitle(_title) == true {
+		res.ResultCode = define.ALREADY_EXISTS_TITLE
+		return res
+	}
+	// result = sdb.Model(&schemas.NovelStep1{}).Where("title = ? AND temp_yn = false AND deleted_yn = false", _title).Count(&cnt)
+	// if corm(result, &res) {
+	// 	return res
+	// }
+	// if cnt > 0 {
+	// 	res.ResultCode = define.ALREADY_EXISTS_TITLE
+	// 	return res
+	// }
 
 	if _seqNovelStep1 == 0 { // 신규 작성
 		novelWriteStep1 := schemas.NovelStep1{
@@ -133,14 +145,8 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 			DeletedAt:  time.Now(),
 		}
 
-		result = sdb.Model(&novelWriteStep1).Where("title = ?", _title).Count(&cnt)
-		if corm(result, &res) {
-			return res
-		}
-		if cnt > 0 {
-			res.ResultCode = define.ALREADY_EXISTS_TITLE
-			return res
-		}
+		// 기존에 작성된 작성완료 글 제목 체크
+
 		result = mdb.Model(&novelWriteStep1).Create(&novelWriteStep1)
 		if corm(result, &res) {
 			return res
@@ -150,16 +156,16 @@ func NovelWriteStep1(req *domain.CommonRequest) domain.CommonResponse {
 
 	} else { // 업데이트
 
-		novelStep := schemas.NovelStep1{}
-		result := sdb.Model(&novelStep).Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep)
+		novelStep1 := schemas.NovelStep1{}
+		result := sdb.Model(&novelStep1).Where("seq_novel_step1 = ?", _seqNovelStep1).Scan(&novelStep1)
 		if corm(result, &res) {
 			return res
 		}
-		if novelStep.SeqNovelStep1 == 0 {
+		if novelStep1.SeqNovelStep1 == 0 {
 			res.ResultCode = define.NO_EXIST_DATA
 			return res
 		}
-		if novelStep.SeqMember != userToken.SeqMember {
+		if novelStep1.SeqMember != userToken.SeqMember {
 			res.ResultCode = define.OTHER_USER
 			return res
 		}

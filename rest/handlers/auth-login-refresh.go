@@ -12,8 +12,8 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	_refreshToken := Cp(req.Parameters, "refresh_token")
-	_pushToken := Cp(req.Parameters, "push_token")
-	_pushTokenDel := Cp(req.Parameters, "push_token_del")
+	// _pushToken := Cp(req.Parameters, "push_token")
+	// _pushTokenDel := Cp(req.Parameters, "push_token_del")
 	verifyResult, err := define.VerifyToken(_refreshToken, define.Mconn.JwtRefreshSecret)
 	if err != nil {
 		res.ResultCode = verifyResult
@@ -29,7 +29,9 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	go setPushToken(userToken.SeqMember, _pushToken, _pushTokenDel)
+	// fmt.Println(userToken)
+
+	// go setPushToken(userToken.SeqMember, _pushToken, _pushTokenDel)
 
 	// 2. 신규 access_token 과 refresh_token 을 발급한다.
 	accessToken, err := define.CreateToken(userToken, define.Mconn.JwtAccessSecret, "ACCESS")
@@ -49,11 +51,11 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	member := schemas.Member{}
 	memberDetail := schemas.MemberDetail{}
 	sdb := db.List[define.Mconn.DsnSlave]
-	result := sdb.Select("blocked_yn, dormacy_yn").Where("seq_member = ?", userToken.SeqMember).Find(&member)
+	result := sdb.Model(&member).Where("seq_member = ?", userToken.SeqMember).Scan(&member)
 	if corm(result, &res) {
 		return res
 	}
-	result = sdb.Select("nick_name").Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
+	result = sdb.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
 	if corm(result, &res) {
 		return res
 	}
