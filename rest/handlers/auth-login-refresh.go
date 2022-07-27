@@ -12,8 +12,6 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 
 	_refreshToken := Cp(req.Parameters, "refresh_token")
-	// _pushToken := Cp(req.Parameters, "push_token")
-	// _pushTokenDel := Cp(req.Parameters, "push_token_del")
 	verifyResult, err := define.VerifyToken(_refreshToken, define.Mconn.JwtRefreshSecret)
 	if err != nil {
 		res.ResultCode = verifyResult
@@ -29,9 +27,31 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	// fmt.Println(userToken)
+	// 토큰 까서 유효한 사용자 여부 검사
+	member := schemas.Member{}
+	memberDetail := schemas.MemberDetail{}
+	sdb := db.List[define.Mconn.DsnSlave]
+	result := sdb.Model(&member).Where("email = ?", userToken.Email).Scan(&member)
+	if corm(result, &res) {
+		return res
+	}
 
-	// go setPushToken(userToken.SeqMember, _pushToken, _pushTokenDel)
+	// 존재하지 않는 사용자
+	if member.SeqMember == 0 {
+		res.ResultCode = define.NO_EXIST_USER
+		return res
+	}
+
+	// 존재하나, 시퀀스가 맞지않다 (탈퇴)
+	if member.SeqMember != userToken.SeqMember {
+		res.ResultCode = define.WITHDRAWAL_USER
+		return res
+	}
+
+	result = sdb.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
+	if corm(result, &res) {
+		return res
+	}
 
 	// 2. 신규 access_token 과 refresh_token 을 발급한다.
 	accessToken, err := define.CreateToken(userToken, define.Mconn.JwtAccessSecret, "ACCESS")
@@ -45,18 +65,6 @@ func AuthLoginRefresh(req *domain.CommonRequest) domain.CommonResponse {
 	if err != nil {
 		res.ResultCode = define.CREATE_TOKEN_ERROR
 		res.ErrorDesc = err.Error()
-		return res
-	}
-
-	member := schemas.Member{}
-	memberDetail := schemas.MemberDetail{}
-	sdb := db.List[define.Mconn.DsnSlave]
-	result := sdb.Model(&member).Where("seq_member = ?", userToken.SeqMember).Scan(&member)
-	if corm(result, &res) {
-		return res
-	}
-	result = sdb.Model(&memberDetail).Where("seq_member = ?", userToken.SeqMember).Find(&memberDetail)
-	if corm(result, &res) {
 		return res
 	}
 

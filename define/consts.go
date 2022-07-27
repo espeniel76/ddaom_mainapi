@@ -43,6 +43,7 @@ const (
 	BLOCKED_ME              = "BLOCKED_ME"
 	DORMANCY                = "DORMANCY"
 	UJDTBLOCKED             = "UJDTBLOCKED"
+	WITHDRAWAL_USER         = "WITHDRAWAL_USER"
 )
 
 // const LIST_PER_PAGE = 2
