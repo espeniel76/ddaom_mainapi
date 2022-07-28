@@ -1191,6 +1191,60 @@
 			}
 		]
 	},
+	"/mypage/user/report": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_member",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason_type",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "reason",
+				"type": "string",
+				"required": true
+			}
+		]
+	},
+	"/mypage/user/block/:seq_member": {
+		"allow_method": "GET",
+		"data_type": "text/plain",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_member",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/mypage/user/block/list": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
 	"/novel/report/live": {
 		"allow_method": "POST",
 		"data_type": "application/json",

@@ -84,5 +84,9 @@ func InitialDb(req *domain.CommonRequest) domain.CommonResponse {
 	mdb.AutoMigrate(schemas.Alarm{})
 	mdb.AutoMigrate(schemas.NovelReport{})
 
+	mdb.AutoMigrate(schemas.MemberReport{})
+	ldb1.AutoMigrate(schemas.MemberBlocking{})
+	ldb2.AutoMigrate(schemas.MemberBlocking{})
+
 	return res
 }

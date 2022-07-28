@@ -458,3 +458,13 @@ type NovelReport struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
+
+type MemberReport struct {
+	SeqMemberReport int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_report"`
+	SeqMember       int64     `gorm:"index" json:"seq_member"`
+	SeqMemberTo     int64     `gorm:"index" json:"seq_member_to"`
+	ReasonType      int8      `gorm:"default:0" json:"reason_type"`
+	Reason          string    `json:"reason"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}

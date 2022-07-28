@@ -73,3 +73,32 @@ func NovelReportFinish(req *domain.CommonRequest) domain.CommonResponse {
 
 	return res
 }
+
+func MypageUserReport(req *domain.CommonRequest) domain.CommonResponse {
+
+	var res = domain.CommonResponse{}
+	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+	mdb := db.List[define.Mconn.DsnMaster]
+
+	_seqMember := CpInt64(req.Parameters, "seq_member")
+	_reasonType := CpInt64(req.Parameters, "reason_type")
+	_reason := Cp(req.Parameters, "reason")
+
+	novelReport := schemas.MemberReport{
+		SeqMember:   userToken.SeqMember,
+		SeqMemberTo: _seqMember,
+		ReasonType:  int8(_reasonType),
+		Reason:      _reason,
+	}
+	result := mdb.Create(&novelReport)
+	if corm(result, &res) {
+		return res
+	}
+
+	return res
+}

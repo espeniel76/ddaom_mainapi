@@ -28,6 +28,16 @@ type MemberBookmark struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
+type MemberBlocking struct {
+	SeqMemberBlocking int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_blocking"`
+	SeqMember         int64     `gorm:"index" json:"seq_member"`
+	SeqMemberTo       int64     `gorm:"index" json:"seq_member_to"`
+	BlockYn           bool      `gorm:"default:false" json:"block_yn"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+	CntBlock          int64     `gorm:"default:0" json:"cnt_block"`
+}
+
 type MemberLikeStep1 struct {
 	SeqMemberLike int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_member_like"`
 	SeqMember     int64     `gorm:"index:idx_like" json:"seq_member"`
