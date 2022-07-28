@@ -36,7 +36,7 @@ func GetMyLogDbMaster(allocated int8) *gorm.DB {
 }
 
 func GetMyLogDbSlave(allocated int8) *gorm.DB {
-	fmt.Println("allocated: ", allocated)
+	// fmt.Println("allocated: ", allocated)
 	var myLogDb *gorm.DB
 	switch allocated {
 	case 1:
@@ -501,4 +501,32 @@ func setUserActionLog(_seqMember int64, _type int8, _contents string) {
 		Type:      _type,
 		Contents:  _contents,
 	})
+}
+
+// 사용자 시퀀스로 나와 사용자의 차단 여부를 리턴 받는다.
+func getBlockMemberList(allocatedDb int8, seqMember int64, listMemberTo []int64) {
+	sdb := GetMyLogDbSlave(allocatedDb)
+
+	listMemberBlock := []ListMemberBlock{}
+
+	// 1. 나의 로그에서 차단 유저 가져오기
+	sdb.Model(schemas.MemberBlocking{}).
+		Select("seq_member_to AS seq_member, block_yn").
+		Where("seq_member = ?", seqMember).
+		Where("seq_member_to IN (?)", listMemberTo).
+		Where("block_yn = true").
+		Scan(&listMemberBlock)
+	for i := 0; i < len(listMemberTo); i++ {
+		for _, v := range listMemberBlock {
+			if listMemberTo[i] == v.SeqMember {
+
+			}
+		}
+	}
+
+}
+
+type ListMemberBlock struct {
+	SeqMember int64 `json:"seq_member"`
+	BlockYn   bool  `json:"block_yn"`
 }
