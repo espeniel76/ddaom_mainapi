@@ -503,30 +503,59 @@ func setUserActionLog(_seqMember int64, _type int8, _contents string) {
 	})
 }
 
-// 사용자 시퀀스로 나와 사용자의 차단 여부를 리턴 받는다.
-func getBlockMemberList(allocatedDb int8, seqMember int64, listMemberTo []int64) {
+// 사용자 시퀀스로 나와 사용자의 차단을 리턴 받는다.
+func getBlockMember(allocatedDb int8, seqMember int64, memberTo int64) MemberBlock {
 	sdb := GetMyLogDbSlave(allocatedDb)
+	memberBlock := MemberBlock{}
 
-	listMemberBlock := []ListMemberBlock{}
-
-	// 1. 나의 로그에서 차단 유저 가져오기
+	// // 1. 나의 로그에서 차단 유저 가져오기
 	sdb.Model(schemas.MemberBlocking{}).
 		Select("seq_member_to AS seq_member, block_yn").
 		Where("seq_member = ?", seqMember).
-		Where("seq_member_to IN (?)", listMemberTo).
+		Where("seq_member_to = ?", memberTo).
 		Where("block_yn = true").
-		Scan(&listMemberBlock)
-	for i := 0; i < len(listMemberTo); i++ {
-		for _, v := range listMemberBlock {
-			if listMemberTo[i] == v.SeqMember {
-
-			}
-		}
-	}
-
+		Scan(&memberBlock)
+	return memberBlock
 }
 
-type ListMemberBlock struct {
+func isBlockMember(allocatedDb int8, seqMember int64, memberTo int64) bool {
+	sdb := GetMyLogDbSlave(allocatedDb)
+	isBlock := false
+
+	// // 1. 나의 로그에서 차단 유저 가져오기
+	sdb.Model(schemas.MemberBlocking{}).
+		Select("block_yn").
+		Where("seq_member = ?", seqMember).
+		Where("seq_member_to = ?", memberTo).
+		Where("block_yn = true").
+		Scan(&isBlock)
+	return isBlock
+}
+
+// 사용자 시퀀스로 나와 사용자의 차단 목록을 리턴 받는다.
+func getBlockMemberList(allocatedDb int8, seqMember int64, listMemberTo []int64) []MemberBlock {
+	keys := make(map[int64]bool)
+	var list []int64
+	for _, value := range listMemberTo {
+		if _, saveValue := keys[value]; !saveValue {
+			keys[value] = true
+			list = append(list, value)
+		}
+	}
+	sdb := GetMyLogDbSlave(allocatedDb)
+	listMemberBlock := []MemberBlock{}
+
+	// // 1. 나의 로그에서 차단 유저 가져오기
+	sdb.Model(schemas.MemberBlocking{}).
+		Select("seq_member_to AS seq_member, block_yn").
+		Where("seq_member = ?", seqMember).
+		Where("seq_member_to IN (?)", list).
+		Where("block_yn = true").
+		Scan(&listMemberBlock)
+	return listMemberBlock
+}
+
+type MemberBlock struct {
 	SeqMember int64 `json:"seq_member"`
 	BlockYn   bool  `json:"block_yn"`
 }

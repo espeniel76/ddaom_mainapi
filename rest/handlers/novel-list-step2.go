@@ -79,9 +79,11 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	isBool := false
 	var seqs []int64
+	var seqMembers []int64
 	for i := 0; i < len(step2ResTmp); i++ {
 		o := step2ResTmp[i]
 		seqs = append(seqs, o.SeqNovelStep2)
+		seqMembers = append(seqMembers, o.SeqMember)
 		novelListStep2Res.List = append(novelListStep2Res.List, struct {
 			SeqNovelStep2 int64  "json:\"seq_novel_step2\""
 			SeqMember     int64  "json:\"seq_member\""
@@ -90,6 +92,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			CntLike       int64  "json:\"cnt_like\""
 			MyLike        bool   "json:\"my_like\""
 			Content       string "json:\"content\""
+			BlockYn       bool   "json:\"block_yn\""
 		}{
 			SeqNovelStep2: o.SeqNovelStep2,
 			SeqMember:     o.SeqMember,
@@ -98,6 +101,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			CntLike:       o.CntLike,
 			MyLike:        isBool,
 			Content:       o.Content,
+			BlockYn:       false,
 		})
 	}
 
@@ -108,12 +112,21 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			Select("seq_novel_step2").
 			Where("seq_member = ? AND seq_novel_step2 IN (?) AND like_yn = true", userToken.SeqMember, seqs).
 			Scan(&listSeq)
-
 		for i := 0; i < len(novelListStep2Res.List); i++ {
 			o := novelListStep2Res.List[i]
 			for _, v := range listSeq {
 				if v == o.SeqNovelStep2 {
 					novelListStep2Res.List[i].MyLike = true
+					break
+				}
+			}
+		}
+
+		listMemberBlock := getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqMembers)
+		for i := 0; i < len(novelListStep2Res.List); i++ {
+			for _, v := range listMemberBlock {
+				if v.SeqMember == novelListStep2Res.List[i].SeqMember {
+					novelListStep2Res.List[i].BlockYn = v.BlockYn
 					break
 				}
 			}
@@ -146,5 +159,6 @@ type NovelListStep2Res struct {
 		CntLike       int64  `json:"cnt_like"`
 		MyLike        bool   `json:"my_like"`
 		Content       string `json:"content"`
+		BlockYn       bool   `json:"block_yn"`
 	} `json:"list"`
 }

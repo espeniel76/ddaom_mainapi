@@ -34,6 +34,14 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 			data["is_you"] = false
 		}
 	}
+	// 로그인 했고, 내 프로필이 아니다
+	if userToken != nil && !itsMe {
+		// 차단 유저 체크
+		if isBlockMember(userToken.Allocated, userToken.SeqMember, _seqMember) {
+			res.ResultCode = define.BLOCK_USER
+			return res
+		}
+	}
 
 	sdb := db.List[define.Mconn.DsnSlave]
 

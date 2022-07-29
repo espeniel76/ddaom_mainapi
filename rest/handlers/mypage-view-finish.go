@@ -115,12 +115,13 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
 			BlockedYn bool   "json:\"blocked_yn\""
+			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep1,
 			NickName:  n.NickNameStep1,
 			DeletedYn: n.DeletedYnStep1,
-			BlockedYn: false,
+			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep1),
 			Content:   n.ContentStep1,
 		},
 		Step2: struct {
@@ -128,12 +129,13 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
 			BlockedYn bool   "json:\"blocked_yn\""
+			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep2,
 			NickName:  n.NickNameStep2,
 			DeletedYn: n.DeletedYnStep2,
-			BlockedYn: false,
+			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep2),
 			Content:   n.ContentStep2,
 		},
 		Step3: struct {
@@ -141,12 +143,13 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
 			BlockedYn bool   "json:\"blocked_yn\""
+			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep3,
 			NickName:  n.NickNameStep3,
 			DeletedYn: n.DeletedYnStep3,
-			BlockedYn: false,
+			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep3),
 			Content:   n.ContentStep3,
 		},
 		Step4: struct {
@@ -154,12 +157,13 @@ func MypageViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			NickName  string "json:\"nick_name\""
 			DeletedYn bool   "json:\"deleted_yn\""
 			BlockedYn bool   "json:\"blocked_yn\""
+			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
 		}{
 			SeqMember: n.SeqMemberStep4,
 			NickName:  n.NickNameStep4,
 			DeletedYn: n.DeletedYnStep4,
-			BlockedYn: false,
+			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep4),
 			Content:   n.ContentStep4,
 		},
 	}

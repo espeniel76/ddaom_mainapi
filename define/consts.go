@@ -39,7 +39,8 @@ const (
 	NOT_ALLOW_FORMAT        = "NOT_ALLOW_FORMAT"
 	DELETED_PARENT          = "DELETED_PARENT"
 	DELETED_NOVEL           = "DELETED_NOVEL"
-	BLOCKED_USER            = "BLOCKED_USER"
+	BLOCKED_USER            = "BLOCKED_USER" // 블랙된 유저
+	BLOCK_USER              = "BLOCK_USER"   // 차단한 유저
 	BLOCKED_ME              = "BLOCKED_ME"
 	DORMANCY                = "DORMANCY"
 	UJDTBLOCKED             = "UJDTBLOCKED"

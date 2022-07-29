@@ -96,9 +96,11 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 
 	isBool := false
 	var seqs []int64
+	var seqMembers []int64
 	for i := 0; i < len(step4ResTmp); i++ {
 		o := step4ResTmp[i]
 		seqs = append(seqs, o.SeqNovelStep4)
+		seqMembers = append(seqMembers, o.SeqMember)
 		novelListStep4Res.List = append(novelListStep4Res.List, struct {
 			SeqNovelStep4 int64  "json:\"seq_novel_step4\""
 			SeqMember     int64  "json:\"seq_member\""
@@ -107,6 +109,7 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 			CntLike       int64  "json:\"cnt_like\""
 			MyLike        bool   "json:\"my_like\""
 			Content       string "json:\"content\""
+			BlockYn       bool   "json:\"block_yn\""
 		}{
 			SeqNovelStep4: o.SeqNovelStep4,
 			SeqMember:     o.SeqMember,
@@ -115,6 +118,7 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 			CntLike:       o.CntLike,
 			MyLike:        isBool,
 			Content:       o.Content,
+			BlockYn:       false,
 		})
 	}
 
@@ -131,6 +135,16 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 			for _, v := range listSeq {
 				if v == o.SeqNovelStep4 {
 					novelListStep4Res.List[i].MyLike = true
+					break
+				}
+			}
+		}
+
+		listMemberBlock := getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqMembers)
+		for i := 0; i < len(novelListStep4Res.List); i++ {
+			for _, v := range listMemberBlock {
+				if v.SeqMember == novelListStep4Res.List[i].SeqMember {
+					novelListStep4Res.List[i].BlockYn = v.BlockYn
 					break
 				}
 			}
@@ -163,5 +177,6 @@ type NovelListStep4Res struct {
 		CntLike       int64  `json:"cnt_like"`
 		MyLike        bool   `json:"my_like"`
 		Content       string `json:"content"`
+		BlockYn       bool   `json:"block_yn"`
 	} `json:"list"`
 }

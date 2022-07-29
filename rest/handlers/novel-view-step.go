@@ -26,7 +26,7 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 	o := NovelViewStepRes{}
 	if _seqNovelStep1 > 0 {
 		result := sdb.Model(schemas.NovelStep1{}).
-			Select("title, content, cnt_like, UNIX_TIMESTAMP(created_at) * 1000 AS created_at").
+			Select("title, content, cnt_like, UNIX_TIMESTAMP(created_at) * 1000 AS created_at, seq_member").
 			Where("seq_novel_step1 = ?", _seqNovelStep1).
 			Scan(&o)
 		if corm(result, &res) {
@@ -40,7 +40,8 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 			ns1.title,
 			ns2.content,
 			ns2.cnt_like,
-			UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at
+			UNIX_TIMESTAMP(ns2.created_at) * 1000 AS created_at,
+			ns2.seq_member
 		FROM novel_step1 ns1
 		INNER JOIN novel_step2 ns2 ON ns1.seq_novel_step1 = ns2.seq_novel_step1
 		WHERE ns2.seq_novel_step2 = ?
@@ -57,7 +58,8 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 			ns1.title,
 			ns3.content,
 			ns3.cnt_like,
-			UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at
+			UNIX_TIMESTAMP(ns3.created_at) * 1000 AS created_at,
+			ns3.seq_member
 		FROM novel_step1 ns1
 		INNER JOIN novel_step3 ns3 ON ns1.seq_novel_step1 = ns3.seq_novel_step1
 		WHERE ns3.seq_novel_step3 = ?
@@ -74,7 +76,8 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 			ns1.title,
 			ns4.content,
 			ns4.cnt_like,
-			UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at
+			UNIX_TIMESTAMP(ns4.created_at) * 1000 AS created_at,
+			ns4.seq_member
 		FROM novel_step1 ns1
 		INNER JOIN novel_step4 ns4 ON ns1.seq_novel_step1 = ns4.seq_novel_step1
 		WHERE ns3.seq_novel_step4 = ?
@@ -86,6 +89,9 @@ func NovelViewStep(req *domain.CommonRequest) domain.CommonResponse {
 		o.MyLike = getMyLike(userToken, 4, _seqNovelStep4)
 		o.Step = 4
 	}
+	bm := getBlockMember(userToken.Allocated, userToken.SeqMember, o.SeqMember)
+	o.BlockYn = bm.BlockYn
+
 	res.Data = o
 
 	return res
@@ -98,4 +104,6 @@ type NovelViewStepRes struct {
 	MyLike    bool    `json:"my_like"`
 	Step      int8    `json:"step"`
 	CreatedAt float64 `json:"created_at"`
+	SeqMember int64   `json:"seq_member"`
+	BlockYn   bool    `json:"block_yn"`
 }

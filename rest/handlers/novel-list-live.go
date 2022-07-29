@@ -61,7 +61,8 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 			ns.seq_image,
 			ns.seq_color,
 			ns.title,
-			ns.content
+			ns.content,
+			ns.seq_member
 		FROM novel_step1 ns
 		INNER JOIN keywords k ON ns.seq_keyword = k.seq_keyword
 		WHERE NOW() BETWEEN k.start_date AND k.end_date
@@ -77,6 +78,22 @@ func NovelListLive(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.OK
 		res.ErrorDesc = result.Error.Error()
 		return res
+	}
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if userToken != nil {
+		var seqs []int64
+		for _, v := range novelListLiveRes.List {
+			seqs = append(seqs, v.SeqMember)
+		}
+		listMemberBlock := getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqs)
+		for i := 0; i < len(novelListLiveRes.List); i++ {
+			for _, v := range listMemberBlock {
+				if v.SeqMember == novelListLiveRes.List[i].SeqMember {
+					novelListLiveRes.List[i].BlockYn = v.BlockYn
+					break
+				}
+			}
+		}
 	}
 
 	res.Data = novelListLiveRes
@@ -96,5 +113,7 @@ type NovelListLiveRes struct {
 		SeqColor      int64  `json:"seq_color"`
 		Title         string `json:"title"`
 		Content       string `json:"content"`
+		BlockYn       bool   `json:"block_yn"`
+		SeqMember     int64  `json:"seq_member"`
 	} `json:"list"`
 }

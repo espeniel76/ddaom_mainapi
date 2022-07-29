@@ -75,8 +75,6 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 	}
 	query.WriteString(" LIMIT ?, ?")
 
-	// fmt.Println(query.String())
-
 	step3ResTmp := []Step3ResTmp{}
 
 	if _seqNovelStep2 > 0 {
@@ -99,9 +97,11 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 
 	isBool := false
 	var seqs []int64
+	var seqMembers []int64
 	for i := 0; i < len(step3ResTmp); i++ {
 		o := step3ResTmp[i]
 		seqs = append(seqs, o.SeqNovelStep3)
+		seqMembers = append(seqMembers, o.SeqMember)
 		novelListStep3Res.List = append(novelListStep3Res.List, struct {
 			SeqNovelStep3 int64  "json:\"seq_novel_step3\""
 			SeqMember     int64  "json:\"seq_member\""
@@ -110,6 +110,7 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 			CntLike       int64  "json:\"cnt_like\""
 			MyLike        bool   "json:\"my_like\""
 			Content       string "json:\"content\""
+			BlockYn       bool   "json:\"block_yn\""
 		}{
 			SeqNovelStep3: o.SeqNovelStep3,
 			SeqMember:     o.SeqMember,
@@ -118,6 +119,7 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 			CntLike:       o.CntLike,
 			MyLike:        isBool,
 			Content:       o.Content,
+			BlockYn:       false,
 		})
 	}
 
@@ -134,6 +136,16 @@ func NovelListStep3(req *domain.CommonRequest) domain.CommonResponse {
 			for _, v := range listSeq {
 				if v == o.SeqNovelStep3 {
 					novelListStep3Res.List[i].MyLike = true
+					break
+				}
+			}
+		}
+
+		listMemberBlock := getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqMembers)
+		for i := 0; i < len(novelListStep3Res.List); i++ {
+			for _, v := range listMemberBlock {
+				if v.SeqMember == novelListStep3Res.List[i].SeqMember {
+					novelListStep3Res.List[i].BlockYn = v.BlockYn
 					break
 				}
 			}
@@ -166,5 +178,6 @@ type NovelListStep3Res struct {
 		CntLike       int64  `json:"cnt_like"`
 		MyLike        bool   `json:"my_like"`
 		Content       string `json:"content"`
+		BlockYn       bool   `json:"block_yn"`
 	} `json:"list"`
 }

@@ -44,6 +44,7 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 	// step1 글이 있어야 step2 가 있다
 	data := make(map[string]interface{})
 	if step1Res.SeqNovelStep1 > 0 {
+
 		data["title"] = step1Res.Title
 		data["created_at"] = step1Res.CreatedAt.UnixMilli()
 		data["seq_genre"] = step1Res.SeqGenre
@@ -59,6 +60,12 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		step1["cnt_like"] = step1Res.CntLike
 		step1["my_like"] = getMyLike(userToken, 1, step1Res.SeqNovelStep1)
 		step1["deleted_yn"] = bool(step1Res.DeletedYn)
+		if userToken != nil {
+			bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step1Res.SeqMember)
+			step1["block_yn"] = bm.BlockYn
+		} else {
+			step1["block_yn"] = false
+		}
 		data["step1"] = step1
 
 		query = `
@@ -95,6 +102,12 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 				return res
 			}
 			step["cnt_total"] = cntTotal
+			if userToken != nil {
+				bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step2Res.SeqMember)
+				step["block_yn"] = bm.BlockYn
+			} else {
+				step["block_yn"] = false
+			}
 			data["step2"] = step
 
 			query = `
@@ -131,6 +144,12 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 					return res
 				}
 				step["cnt_total"] = cntTotal
+				if userToken != nil {
+					bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step3Res.SeqMember)
+					step["block_yn"] = bm.BlockYn
+				} else {
+					step["block_yn"] = false
+				}
 				data["step3"] = step
 
 				query = `
@@ -167,6 +186,12 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 						return res
 					}
 					step["cnt_total"] = cntTotal
+					if userToken != nil {
+						bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step4Res.SeqMember)
+						step["block_yn"] = bm.BlockYn
+					} else {
+						step["block_yn"] = false
+					}
 					data["step4"] = step
 				} else {
 					data["step4"] = nil
@@ -208,6 +233,7 @@ type Step1Res struct {
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
+	BlockYn       bool      `json:"block_yn"`
 }
 type Step2Res struct {
 	SeqNovelStep2 int64     `json:"seq_novel_step2"`
@@ -217,6 +243,7 @@ type Step2Res struct {
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
+	BlockYn       bool      `json:"block_yn"`
 }
 type Step3Res struct {
 	SeqNovelStep3 int64     `json:"seq_novel_step3"`
@@ -226,6 +253,7 @@ type Step3Res struct {
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
+	BlockYn       bool      `json:"block_yn"`
 }
 type Step4Res struct {
 	SeqNovelStep4 int64     `json:"seq_novel_step4"`
@@ -235,4 +263,5 @@ type Step4Res struct {
 	Content       string    `json:"content"`
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
+	BlockYn       bool      `json:"block_yn"`
 }

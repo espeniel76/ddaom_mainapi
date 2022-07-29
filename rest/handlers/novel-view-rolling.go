@@ -26,8 +26,6 @@ func NovelViewRolling(req *domain.CommonRequest) domain.CommonResponse {
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
 
-	// fmt.Println(_step, _seqNovelStep1, _seqNovelStep2, _seqNovelStep3, _page, _sizePerPage)
-
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
 		return res
@@ -193,7 +191,6 @@ func NovelViewRolling(req *domain.CommonRequest) domain.CommonResponse {
 			}
 		}
 	}
-	// fmt.Println(query.String())
 
 	var seqs []int64
 	for i := 0; i < len(list.List); i++ {
@@ -222,6 +219,15 @@ func NovelViewRolling(req *domain.CommonRequest) domain.CommonResponse {
 				}
 			}
 		}
+		listMemberBlock := getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqs)
+		for i := 0; i < len(list.List); i++ {
+			for _, v := range listMemberBlock {
+				if v.SeqMember == list.List[i].SeqMember {
+					list.List[i].BlockYn = v.BlockYn
+					break
+				}
+			}
+		}
 	}
 
 	res.Data = list
@@ -242,5 +248,6 @@ type NovelListRollingRes struct {
 		CntLike   int64   `json:"cnt_like"`
 		MyLike    bool    `json:"my_like"`
 		Content   string  `json:"content"`
+		BlockYn   bool    `json:"block_yn"`
 	} `json:"list"`
 }
