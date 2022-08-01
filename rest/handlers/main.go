@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/memdb"
 	"encoding/json"
+	"fmt"
+	"strconv"
 )
 
 func Main(req *domain.CommonRequest) domain.CommonResponse {
@@ -30,9 +33,37 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	// 인기작가
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	list, err = memdb.Get("CACHES:MAIN:LIST_POPULAR_WRITER")
-	if err == nil {
-		json.Unmarshal([]byte(list), &mainRes.ListPopularWriter)
+	if userToken != nil {
+
+		// 차단 작가 제외 로직
+		var seqs []int64
+		_list, err := memdb.Get("CACHES:USERS:BLOCK:" + strconv.FormatInt(userToken.SeqMember, 10))
+		if err == nil {
+			json.Unmarshal([]byte(_list), &seqs)
+			fmt.Println(seqs)
+		}
+
+		listPopularWriter := []ListPopularWriter{}
+		json.Unmarshal([]byte(list), &listPopularWriter)
+		for i := 0; i < len(listPopularWriter); i++ {
+			o := listPopularWriter[i]
+			isExist := false
+			for _, v := range seqs {
+				if v == o.SeqMember {
+					isExist = true
+					break
+				}
+			}
+			if !isExist {
+				mainRes.ListPopularWriter = append(mainRes.ListPopularWriter, o)
+			}
+		}
+	} else {
+		if err == nil {
+			json.Unmarshal([]byte(list), &mainRes.ListPopularWriter)
+		}
 	}
 
 	res.Data = mainRes

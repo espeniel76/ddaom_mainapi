@@ -392,6 +392,18 @@ func cacheMainPopularWriter() {
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))
 }
 
+func cacheMyBlockUser(userToken *domain.UserToken) {
+	ldb := GetMyLogDbSlave(userToken.Allocated)
+	var seqs []int64
+	ldb.
+		Model(schemas.MemberBlocking{}).
+		Select("seq_member_to").
+		Where("seq_member = ? AND block_yn = true", userToken.SeqMember).
+		Scan(&seqs)
+	j, _ := json.Marshal(seqs)
+	memdb.Set("CACHES:USERS:BLOCK:"+strconv.FormatInt(userToken.SeqMember, 10), string(j))
+}
+
 func educeImage(seqColor int64, seqImage int64, seqNovelStep1 int64) {
 
 	defer func() {

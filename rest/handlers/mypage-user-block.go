@@ -180,5 +180,7 @@ func MypageUserBlock(req *domain.CommonRequest) domain.CommonResponse {
 	data["cnt_block"] = cntBlock
 	res.Data = data
 
+	go cacheMyBlockUser(userToken)
+
 	return res
 }

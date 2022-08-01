@@ -96,11 +96,16 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 		if corm(result, &res) {
 			return res
 		}
-		// fmt.Println(statuses)
+	}
+	listMemberBlock := []MemberBlock{}
+	if isLogin {
+		// 내 차단 목록 가져옴
+		listMemberBlock = getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqs)
 	}
 
 	nickName := ""
 	isYou := false
+	isBlock := false
 	mySubscribe := ""
 	// 구독 정보 순회
 	for _, v := range info {
@@ -148,18 +153,31 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 			mySubscribe = v.Status
 		}
 
+		// 내 차단목록 매칭
+		isBlock = false
+		for _, val := range listMemberBlock {
+			if v.SeqMemberOpponent == val.SeqMember {
+				isBlock = val.BlockYn
+				break
+			}
+		}
+
 		o.List = append(o.List, struct {
 			SeqMember   int64  "json:\"seq_member\""
 			NickName    string "json:\"nick_name\""
 			IsYou       bool   "json:\"is_you\""
 			MySubscribe string "json:\"my_subscribe\""
+			BlockYn     bool   "json:\"block_yn\""
 		}{
 			SeqMember:   int64(v.SeqMemberOpponent),
 			NickName:    nickName,
 			IsYou:       isYou,
 			MySubscribe: mySubscribe,
+			BlockYn:     isBlock,
 		})
 	}
+
+	// 차단
 
 	res.Data = o
 
@@ -192,5 +210,6 @@ type MypageListSubscribeRes struct {
 		NickName    string `json:"nick_name"`
 		IsYou       bool   `json:"is_you"`
 		MySubscribe string `json:"my_subscribe"`
+		BlockYn     bool   `json:"block_yn"`
 	} `json:"list"`
 }
