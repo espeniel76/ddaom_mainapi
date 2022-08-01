@@ -56,7 +56,7 @@ func MypageListAlarm(req *domain.CommonRequest) domain.CommonResponse {
 		UNIX_TIMESTAMP(updated_at) * 1000 AS updated_at
 	FROM alarms
 	WHERE seq_member = ?
-	ORDER BY is_read ASC, seq_alarm DESC
+	ORDER BY seq_alarm DESC
 	LIMIT ?, ?
 	`
 	result = sdb.Raw(query, userToken.SeqMember, limitStart, _sizePerPage).Find(&alarmListRes.List)

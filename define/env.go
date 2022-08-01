@@ -20,8 +20,8 @@ func SetDefineApiParse() {
 var Mconn domain.ConnectionInfos
 
 func SetConnectionInfosParse() {
-	// jsonFile, _ := os.Open("/etc/ddaom/define_conn_v0.1.json")
-	jsonFile, _ := os.Open("d:\\etc\\ddaom\\define_conn_v0.1.json")
+	jsonFile, _ := os.Open("/etc/ddaom/define_conn_v0.1.json")
+	// jsonFile, _ := os.Open("d:\\etc\\ddaom\\define_conn_v0.1.json")
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	Mconn = domain.ConnectionInfos{}
