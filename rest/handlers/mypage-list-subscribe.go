@@ -176,9 +176,6 @@ func MypageListSubscribe(req *domain.CommonRequest) domain.CommonResponse {
 			BlockYn:     isBlock,
 		})
 	}
-
-	// 차단
-
 	res.Data = o
 
 	return res

@@ -26,27 +26,27 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	switch _step {
 	case 1:
 		seqNovelStep1 = _seqNovel
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
 	case 2:
 		// 1,3,4
 		seqNovelStep2 = _seqNovel
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step1").Where("seq_novel_step2 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep2).Scan(&seqNovelStep1)
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step1").Where("seq_novel_step2 = ? AND temp_yn = false", seqNovelStep2).Scan(&seqNovelStep1)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
 	case 3:
 		// 1,2,4
 		seqNovelStep3 = _seqNovel
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep3).Scan(&seqNovelStep1)
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step1").Where("seq_novel_step3 = ? AND temp_yn = false", seqNovelStep3).Scan(&seqNovelStep1)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step4").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep4)
 	case 4:
 		// 1,2,3
 		seqNovelStep4 = _seqNovel
-		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep4).Scan(&seqNovelStep1)
-		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
-		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND deleted_yn = false AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
+		ldb.Model(schemas.NovelStep4{}).Select("seq_novel_step1").Where("seq_novel_step4 = ? AND temp_yn = false", seqNovelStep4).Scan(&seqNovelStep1)
+		ldb.Model(schemas.NovelStep2{}).Select("seq_novel_step2").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep2)
+		ldb.Model(schemas.NovelStep3{}).Select("seq_novel_step3").Where("seq_novel_step1 = ? AND temp_yn = false", seqNovelStep1).Order("updated_at DESC").Scan(&seqNovelStep3)
 	}
 
 	query := `
@@ -66,7 +66,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 	FROM novel_step1 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
 	INNER JOIN members m ON md.seq_member = m.seq_member
-	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`
+	WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false`
 	step1Res := Step1Res{}
 	result := ldb.Raw(query, seqNovelStep1).Scan(&step1Res)
 	if corm(result, &res) {
@@ -90,6 +90,12 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		step1["cnt_like"] = step1Res.CntLike
 		step1["my_like"] = getMyLike(userToken, 1, step1Res.SeqNovelStep1)
 		step1["deleted_yn"] = bool(step1Res.DeletedYn)
+		if userToken != nil {
+			bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step1Res.SeqMember)
+			step1["block_yn"] = bm.BlockYn
+		} else {
+			step1["block_yn"] = false
+		}
 		data["step1"] = step1
 
 		query = `
@@ -104,7 +110,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 		FROM novel_step2 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
 		INNER JOIN members m ON md.seq_member = m.seq_member
-		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
+		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
 		ORDER BY ns.updated_at DESC`
 		step2Res := Step2Res{}
 		result = ldb.Raw(query, seqNovelStep1).Scan(&step2Res)
@@ -121,11 +127,17 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 			step["cnt_like"] = step2Res.CntLike
 			step["my_like"] = getMyLike(userToken, 2, step2Res.SeqNovelStep2)
 			step["deleted_yn"] = bool(step2Res.DeletedYn)
-			result = ldb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", seqNovelStep1).Count(&cntTotal)
+			result = ldb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", seqNovelStep1).Count(&cntTotal)
 			if corm(result, &res) {
 				return res
 			}
 			step["cnt_total"] = cntTotal
+			if userToken != nil {
+				bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step2Res.SeqMember)
+				step["block_yn"] = bm.BlockYn
+			} else {
+				step["block_yn"] = false
+			}
 			data["step2"] = step
 
 			query = `
@@ -140,7 +152,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 			FROM novel_step3 ns
 			INNER JOIN member_details md ON ns.seq_member = md.seq_member
 			INNER JOIN members m ON md.seq_member = m.seq_member
-			WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
+			WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
 			ORDER BY ns.updated_at DESC`
 			step3Res := Step3Res{}
 			result = ldb.Raw(query, seqNovelStep1).Scan(&step3Res)
@@ -157,11 +169,17 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 				step["cnt_like"] = step3Res.CntLike
 				step["my_like"] = getMyLike(userToken, 3, step3Res.SeqNovelStep3)
 				step["deleted_yn"] = bool(step3Res.DeletedYn)
-				result = ldb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", seqNovelStep1).Count(&cntTotal)
+				result = ldb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", seqNovelStep1).Count(&cntTotal)
 				if corm(result, &res) {
 					return res
 				}
 				step["cnt_total"] = cntTotal
+				if userToken != nil {
+					bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step3Res.SeqMember)
+					step["block_yn"] = bm.BlockYn
+				} else {
+					step["block_yn"] = false
+				}
 				data["step3"] = step
 
 				query = `
@@ -176,7 +194,7 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 				FROM novel_step4 ns
 				INNER JOIN member_details md ON ns.seq_member = md.seq_member
 				INNER JOIN members m ON md.seq_member = m.seq_member
-				WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false
+				WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false
 				ORDER BY ns.updated_at DESC`
 				step4Res := Step4Res{}
 				result = ldb.Raw(query, seqNovelStep1).Scan(&step4Res)
@@ -193,11 +211,17 @@ func MypageViewLive(req *domain.CommonRequest) domain.CommonResponse {
 					step["cnt_like"] = step4Res.CntLike
 					step["my_like"] = getMyLike(userToken, 4, step4Res.SeqNovelStep4)
 					step["deleted_yn"] = bool(step4Res.DeletedYn)
-					result = ldb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", seqNovelStep1).Count(&cntTotal)
+					result = ldb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false", seqNovelStep1).Count(&cntTotal)
 					if corm(result, &res) {
 						return res
 					}
 					step["cnt_total"] = cntTotal
+					if userToken != nil {
+						bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step4Res.SeqMember)
+						step["block_yn"] = bm.BlockYn
+					} else {
+						step["block_yn"] = false
+					}
 					data["step4"] = step
 				} else {
 					data["step4"] = nil

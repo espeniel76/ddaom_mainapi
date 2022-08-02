@@ -5,6 +5,7 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/tools"
+	"fmt"
 )
 
 func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
@@ -14,6 +15,8 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 	_seqMember := CpInt64(req.Parameters, "seq_member")
 	_page := CpInt64(req.Parameters, "page")
 	_sizePerPage := CpInt64(req.Parameters, "size_per_page")
+
+	fmt.Println(_seqMember)
 
 	if _page < 1 || _sizePerPage < 1 {
 		res.ResultCode = define.REQUIRE_OVER_1
@@ -75,6 +78,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 	query = `
 		(
 				SELECT
+					ns1.seq_member,
 					ns1.seq_novel_step1,
 					0 AS seq_novel_step2,
 					0 AS seq_novel_step3,
@@ -96,6 +100,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 			UNION ALL
 			(
 				SELECT
+					ns1.seq_member,
 					0 AS seq_novel_step1,
 					ns2.seq_novel_step2,
 					0 AS seq_novel_step3,
@@ -119,6 +124,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 			UNION ALL
 			(
 				SELECT
+					ns1.seq_member,
 					0 AS seq_novel_step1,
 					0 AS seq_novel_step2,
 					ns3.seq_novel_step3,
@@ -142,6 +148,7 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 			UNION ALL
 			(
 				SELECT
+					ns1.seq_member,
 					0 AS seq_novel_step1,
 					0 AS seq_novel_step2,
 					0 AS seq_novel_step3,
@@ -172,6 +179,22 @@ func MypageListLive(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if userToken != nil {
+		var seqs []int64
+		for _, v := range novelMyListLiveRes.List {
+			seqs = append(seqs, v.SeqMember)
+		}
+		listMemberBlock := getBlockMemberList(userToken.Allocated, userToken.SeqMember, seqs)
+		for i := 0; i < len(novelMyListLiveRes.List); i++ {
+			for _, v := range listMemberBlock {
+				if v.SeqMember == novelMyListLiveRes.List[i].SeqMember {
+					novelMyListLiveRes.List[i].BlockYn = v.BlockYn
+					break
+				}
+			}
+		}
+	}
 
 	res.Data = novelMyListLiveRes
 
@@ -184,6 +207,7 @@ type NovelMyListLiveRes struct {
 	TotalData int `json:"total_data"`
 	List      []struct {
 		Step          int8    `json:"step"`
+		SeqMember     int64   `json:"seq_member"`
 		SeqNovelStep1 int64   `json:"seq_novel_step1"`
 		SeqNovelStep2 int64   `json:"seq_novel_step2"`
 		SeqNovelStep3 int64   `json:"seq_novel_step3"`
@@ -197,5 +221,6 @@ type NovelMyListLiveRes struct {
 		CntLike       int64   `json:"cnt_like"`
 		CreatedAt     float64 `json:"created_at"`
 		DeletedYn     bool    `json:"deleted_yn"`
+		BlockYn       bool    `json:"block_yn"`
 	} `json:"list"`
 }
