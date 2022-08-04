@@ -50,7 +50,7 @@ func MypageUserBlockList(req *domain.CommonRequest) domain.CommonResponse {
 	WHERE
 		seq_member = ?
 		AND block_yn = true
-	ORDER BY seq_member_blocking DESC
+	ORDER BY updated_at DESC
 	LIMIT ?, ?
 	`
 	result = ldb.Raw(query, userToken.SeqMember, limitStart, _sizePerPage).Scan(&memberBlockingListRes.List)

@@ -116,7 +116,7 @@ func MypageUserBlock(req *domain.CommonRequest) domain.CommonResponse {
 			}
 			myBlocking = false
 		} else {
-			sql := "UPDATE member_blockings SET block_yn = true, cnt_block = cnt_block + 1 WHERE seq_member = ? AND seq_member_to = ?"
+			sql := "UPDATE member_blockings SET block_yn = true, cnt_block = cnt_block + 1, updated_at = NOW() WHERE seq_member = ? AND seq_member_to = ?"
 			ldbMe.Exec(sql, userToken.SeqMember, _seqMemberTo)
 
 			if result.Error != nil {
