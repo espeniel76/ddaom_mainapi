@@ -119,7 +119,7 @@ func NovelLikeStep2(req *domain.CommonRequest) domain.CommonResponse {
 
 	// push 날리기
 	if myLike {
-		go pushLike(2, int64(_seqNovelStep2), userToken.SeqMember)
+		go pushLikeTopic(2, int64(_seqNovelStep2), userToken.SeqMember)
 	}
 
 	go cacheMainPopularWriter()
