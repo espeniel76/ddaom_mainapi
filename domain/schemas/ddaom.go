@@ -10,7 +10,7 @@ type Member struct {
 	Token           string    `gorm:"type:varchar(5120)" json:"token"`
 	ProfileImageUrl string    `gorm:"type:varchar(512)" json:"profile_image_url"`
 	SnsType         string    `gorm:"type:ENUM('KAKAO','NAVER','FACEBOOK','GOOGLE','APPLE'); DEFAULT:'GOOGLE'" json:"sns_type"`
-	ActiveYn        bool      `gorm:"default:false" json:"active_yn"`
+	ActiveYn        bool      `gorm:"default:true" json:"active_yn"`
 	UserLevel       int8      `gorm:"default:5" json:"user_level"`
 	AllocatedDb     int8      `json:"allocted_db"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -61,6 +61,7 @@ type MemberDetail struct {
 	IsNightPush      bool      `gorm:"default:false" json:"is_night_push"`
 	IsDeleted        bool      `gorm:"default:false" json:"is_deleted"`
 	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
+	CntBookmark      int64     `gorm:"default:0" json:"cnt_bookmark"`
 	CntLike          int64     `gorm:"default:0" json:"cnt_like"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
@@ -174,7 +175,7 @@ type Keyword struct {
 	Creator    string    `gorm:"type:varchar(50)" json:"creator"`
 	UpdatedAt  time.Time `json:"updated_at"`
 	Updator    string    `gorm:"type:varchar(50)" json:"updator"`
-	FinishedAt bool      `json:"finished_at"`
+	FinishedAt time.Time `json:"finished_at"`
 }
 
 type KeywordToday struct {

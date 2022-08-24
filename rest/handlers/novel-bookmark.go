@@ -41,6 +41,14 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 		res.ResultCode = define.NO_EXIST_DATA
 		return res
 	}
+	// 소설 데이터 가져오기
+	novelFinish := schemas.NovelFinish{}
+	result = mdb.Model(&novelFinish).Where("seq_novel_finish = ?", _seqNovelFinish).Scan(&novelFinish)
+	if result.Error != nil {
+		res.ResultCode = define.DB_ERROR_ORM
+		res.ErrorDesc = result.Error.Error()
+		return res
+	}
 
 	// 북마크 상태 확인
 	memberBookmark := schemas.MemberBookmark{}
@@ -65,12 +73,12 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 		}
 
 		// 2. 북마크 카운트 업데이트
-		result = mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
-		if result.Error != nil {
-			res.ResultCode = define.DB_ERROR_ORM
-			res.ErrorDesc = result.Error.Error()
-			return res
-		}
+		mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
+		mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep1)
+		mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep2)
+		mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep3)
+		mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep4)
+
 		myBookmark = true
 	} else { // 존재함
 		// 1. 북마크 상태
@@ -83,12 +91,11 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 				res.ErrorDesc = result.Error.Error()
 				return res
 			}
-			result = mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
-				return res
-			}
+			mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_member = ?", novelFinish.SeqMemberStep1)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_member = ?", novelFinish.SeqMemberStep2)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_member = ?", novelFinish.SeqMemberStep3)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark - 1 WHERE seq_member = ?", novelFinish.SeqMemberStep4)
 			myBookmark = false
 		} else {
 			result = ldb.Model(&schemas.MemberBookmark{}).
@@ -99,12 +106,11 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 				res.ErrorDesc = result.Error.Error()
 				return res
 			}
-			result = mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
-			if result.Error != nil {
-				res.ResultCode = define.DB_ERROR_ORM
-				res.ErrorDesc = result.Error.Error()
-				return res
-			}
+			mdb.Exec("UPDATE novel_finishes SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_novel_finish = ?", _seqNovelFinish)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep1)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep2)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep3)
+			mdb.Exec("UPDATE member_details SET cnt_bookmark = cnt_bookmark + 1 WHERE seq_member = ?", novelFinish.SeqMemberStep4)
 			myBookmark = true
 		}
 	}
@@ -112,6 +118,8 @@ func NovelBookmark(req *domain.CommonRequest) domain.CommonResponse {
 	data := make(map[string]bool)
 	data["my_bookmark"] = myBookmark
 	res.Data = data
+
+	go cacheMainPopularWriter()
 
 	return res
 }

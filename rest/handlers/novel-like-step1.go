@@ -131,7 +131,7 @@ func NovelLikeStep1(req *domain.CommonRequest) domain.CommonResponse {
 		go pushLikeTopic(1, int64(_seqNovelStep1), userToken.SeqMember)
 	}
 
-	go cacheMainPopularWriter()
+	go cacheMainPopularWriterLike()
 
 	return res
 }

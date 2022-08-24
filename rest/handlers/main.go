@@ -86,9 +86,10 @@ type MainRes struct {
 		Title          string `json:"title"`
 	} `json:"list_finish"`
 	ListPopularWriter []struct {
-		SeqMember    int64  `json:"seq_member"`
-		NickName     string `json:"nick_name"`
-		ProfilePhoto string `json:"profile_photo"`
+		SeqMember            int64  `json:"seq_member"`
+		NickName             string `json:"nick_name"`
+		ProfilePhoto         string `json:"profile_photo"`
+		CntSubscribeBookmark int64  `json:"cnt_subscribe_bookmark"`
 	} `json:"list_popular_writer"`
 }
 
@@ -122,7 +123,16 @@ type ListPopular struct {
 }
 
 type ListPopularWriter struct {
+	SeqMember            int64  `json:"seq_member"`
+	NickName             string `json:"nick_name"`
+	ProfilePhoto         string `json:"profile_photo"`
+	CntSubscribeBookmark int64  `json:"cnt_subscribe_bookmark"`
+}
+
+type ListPopularWriterLIke struct {
+	SeqKeyword   int64  `json:"seq_keyword"`
 	SeqMember    int64  `json:"seq_member"`
 	NickName     string `json:"nick_name"`
 	ProfilePhoto string `json:"profile_photo"`
+	Cnt          int64  `json:"cnt"`
 }

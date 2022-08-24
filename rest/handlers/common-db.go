@@ -374,22 +374,69 @@ func cacheMainPopular() {
 
 // novel-subscribe (subscribe cnt)
 // like step1~4 (like cnt)
+/*
+*
+인기작가 순위 기준 수정
+- 받은 구독 수 + 북마크 수 + 연재중 좋아요 수
+(연재중일때는 반영하고, 주제어 종료되면 다시 삭제되는 방식?으로 하여 계속 변동이 있게? or 주제어 종료되어도 유지)
+*/
 func cacheMainPopularWriter() {
 	sdb := db.List[define.Mconn.DsnSlave]
 	listPopularWriter := []ListPopularWriter{}
 	query := `
 		SELECT
-			md.seq_member, md.nick_name, md.profile_photo
+			md.seq_member, md.nick_name, md.profile_photo, md.cnt_subscribe + md.cnt_bookmark AS cnt_subscribe_bookmark
 		FROM
 			member_details md INNER JOIN members m ON md.seq_member = m.seq_member
 		WHERE
-			m.deleted_yn = false AND md.cnt_subscribe > 0
-		ORDER BY
-			md.cnt_subscribe DESC
+			m.deleted_yn = false AND md.cnt_subscribe > 0 OR md.cnt_bookmark > 0
+		ORDER BY cnt_subscribe_bookmark DESC
 		LIMIT 10`
 	sdb.Raw(query).Scan(&listPopularWriter)
 	j, _ := json.Marshal(listPopularWriter)
 	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER", string(j))
+}
+
+func cacheMainPopularWriterLike() {
+	sdb := db.List[define.Mconn.DsnSlave]
+	listPopularWriterLike := []ListPopularWriterLIke{}
+	query := `
+	SELECT
+		A.seq_keyword, A.seq_member, A.nick_name, A.profile_photo, SUM(A.cnt) AS cnt
+	FROM
+	(	
+	SELECT k.seq_keyword, ns1.seq_member, md.nick_name, md.profile_photo, SUM(ns1.cnt_like) AS cnt
+		FROM novel_step1 ns1 INNER JOIN keywords k ON ns1.seq_keyword = k.seq_keyword
+		INNER JOIN member_details md ON ns1.seq_member = md.seq_member
+		WHERE NOW() BETWEEN k.start_date AND k.end_date AND ns1.cnt_like > 0
+		GROUP BY k.seq_keyword, ns1.seq_member, md.nick_name, md.profile_photo
+		UNION ALL
+		SELECT k.seq_keyword, ns2.seq_member, md.nick_name, md.profile_photo, SUM(ns2.cnt_like) AS cnt
+		FROM novel_step2 ns2 INNER JOIN novel_step1 ns1 ON ns2.seq_novel_step1 = ns1.seq_novel_step1
+		INNER JOIN keywords k ON ns1.seq_keyword = k.seq_keyword
+		INNER JOIN member_details md ON ns2.seq_member = md.seq_member
+		WHERE NOW() BETWEEN k.start_date AND k.end_date AND ns2.cnt_like > 0
+		GROUP BY k.seq_keyword, ns2.seq_member, md.nick_name, md.profile_photo
+		UNION ALL
+		SELECT k.seq_keyword, ns3.seq_member, md.nick_name, md.profile_photo, SUM(ns3.cnt_like) AS cnt
+		FROM novel_step3 ns3 INNER JOIN novel_step1 ns1 ON ns3.seq_novel_step1 = ns1.seq_novel_step1
+		INNER JOIN keywords k ON ns1.seq_keyword = k.seq_keyword
+		INNER JOIN member_details md ON ns3.seq_member = md.seq_member
+		WHERE NOW() BETWEEN k.start_date AND k.end_date AND ns3.cnt_like > 0
+		GROUP BY k.seq_keyword, ns3.seq_member, md.nick_name, md.profile_photo
+		UNION ALL
+		SELECT k.seq_keyword, ns4.seq_member, md.nick_name, md.profile_photo, SUM(ns4.cnt_like) AS cnt
+		FROM novel_step4 ns4 INNER JOIN novel_step1 ns1 ON ns4.seq_novel_step1 = ns1.seq_novel_step1
+		INNER JOIN keywords k ON ns1.seq_keyword = k.seq_keyword
+		INNER JOIN member_details md ON ns4.seq_member = md.seq_member
+		WHERE NOW() BETWEEN k.start_date AND k.end_date AND ns4.cnt_like > 0
+		GROUP BY k.seq_keyword, ns4.seq_member, md.nick_name, md.profile_photo
+	) AS A
+	GROUP BY A.seq_keyword, A.seq_member, A.nick_name, A.profile_photo
+	`
+	sdb.Raw(query).Scan(&listPopularWriterLike)
+	j, _ := json.Marshal(listPopularWriterLike)
+	memdb.Set("CACHES:MAIN:LIST_POPULAR_WRITER_LIKE", string(j))
 }
 
 func cacheMyBlockUser(userToken *domain.UserToken) {
