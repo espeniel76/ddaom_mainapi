@@ -200,7 +200,7 @@ func ServiceNoticeList(req *domain.CommonRequest) domain.CommonResponse {
 
 	var totalData int64
 	sdb := db.List[define.Mconn.DsnSlave]
-	result := sdb.Model(schemas.Notice{}).Count(&totalData)
+	result := sdb.Model(schemas.Notice{}).Where("active_yn = true").Count(&totalData)
 	if corm(result, &res) {
 		return res
 	}

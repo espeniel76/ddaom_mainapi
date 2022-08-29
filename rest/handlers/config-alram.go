@@ -24,6 +24,7 @@ func ConfigAlarm(req *domain.CommonRequest) domain.CommonResponse {
 	_isNewFollowing := CpBool(req.Parameters, "is_new_following")
 	_isNightPush := CpBool(req.Parameters, "is_night_push")
 	_isDeleted := CpBool(req.Parameters, "is_deleted")
+	_isMysubnovel := CpBool(req.Parameters, "is_mysubnovel")
 
 	mdb := db.List[define.Mconn.DsnMaster]
 	m := schemas.MemberDetail{}
@@ -39,10 +40,11 @@ func ConfigAlarm(req *domain.CommonRequest) domain.CommonResponse {
 		is_new_follower = ?,
 		is_new_following = ?,
 		is_night_push = ?,
-		is_deleted = ?
+		is_deleted = ?,
+		is_mysubnovel = ?
 	WHERE
 		seq_member = ?`
-	result = mdb.Exec(query, _isNewKeyword, _isLiked, _isFinished, _isNewFollower, _isNewFollowing, _isNightPush, _isDeleted, userToken.SeqMember)
+	result = mdb.Exec(query, _isNewKeyword, _isLiked, _isFinished, _isNewFollower, _isNewFollowing, _isNightPush, _isDeleted, _isMysubnovel, userToken.SeqMember)
 	if corm(result, &res) {
 		return res
 	}
@@ -75,6 +77,7 @@ func ConfigAlarmGet(req *domain.CommonRequest) domain.CommonResponse {
 	o["is_new_following"] = m.IsNewFollowing
 	o["is_night_push"] = m.IsNightPush
 	o["is_deleted"] = m.IsDeleted
+	o["is_mysubnovel"] = m.IsMysubmodel
 	res.Data = o
 	// fmt.Println(o)
 

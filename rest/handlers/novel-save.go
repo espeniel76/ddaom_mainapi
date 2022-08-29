@@ -7,6 +7,7 @@ import (
 	"ddaom/domain/schemas"
 	"ddaom/tools"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -314,6 +315,7 @@ func NovelWriteStep2(req *domain.CommonRequest) domain.CommonResponse {
 		mdb.Exec("UPDATE novel_step1 SET cnt_step2 = cnt_step2 + 1 WHERE seq_novel_step1 = ?", _seqNovelStep1)
 		go addKeywordCnt(seqKeyword)
 		go pushWriteTopic(userToken, 2, _seqNovelStep1)
+		go pushMySubnovelTopic(userToken.SeqMember, 1, _seqNovelStep1)
 	}
 
 	return res
@@ -441,6 +443,7 @@ func NovelWriteStep3(req *domain.CommonRequest) domain.CommonResponse {
 		mdb.Exec("UPDATE novel_step2 SET cnt_step3 = cnt_step3 + 1 WHERE seq_novel_step2 = ?", _seqNovelStep2)
 		go addKeywordCnt(seqKeyword)
 		go pushWriteTopic(userToken, 3, seqNovelStep1)
+		go pushMySubnovelTopic(userToken.SeqMember, 2, seqNovelStep1)
 	}
 
 	return res
@@ -570,9 +573,56 @@ func NovelWriteStep4(req *domain.CommonRequest) domain.CommonResponse {
 		mdb.Exec("UPDATE novel_step3 SET cnt_step4 = cnt_step4 + 1 WHERE seq_novel_step3 = ?", _seqNovelStep3)
 		go addKeywordCnt(seqKeyword)
 		go pushWriteTopic(userToken, 4, seqNovelStep1)
+		go pushMySubnovelTopic(userToken.SeqMember, 3, seqNovelStep1)
+
 	}
 
 	return res
+}
+
+func pushMySubnovelTopic(seqMember int64, step int8, seqNovelStep1 int64) {
+
+	// {소설 작성자 닉네임}님 께서 작성하신 소설 “{해당 소설 제목 – 내가 등록한 Step 정보}” 에 새로운 이어쓰기가 등록되었습니다.
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+		}
+	}()
+
+	isNight := tools.IsNight()
+
+	mdb := db.List[define.Mconn.DsnMaster]
+
+	// 1. 소설 정보 로딩
+	novelStep1 := schemas.NovelStep1{}
+	mdb.Model(&novelStep1).Where("seq_novel_step1 = ?", seqNovelStep1).Scan(&novelStep1)
+
+	// 2. 원 작가 정보 로딩
+	userInfo := getUserInfo(novelStep1.SeqMember)
+
+	msg := userInfo.NickName + "님 께서 작성하신 소설 “" + novelStep1.Title + " – " + strconv.FormatInt(int64(step), 10) + "” 에 새로운 이어쓰기가 등록되었습니다."
+	alarm := schemas.Alarm{
+		SeqMember:  userInfo.SeqMember,
+		Title:      "따옴",
+		TypeAlarm:  11,
+		ValueAlarm: int(seqNovelStep1),
+		Step:       step,
+		Content:    msg,
+	}
+	mdb.Create(&alarm)
+
+	pushInfo := InfoPushTopic{}
+	query := "SELECT seq_member, is_night_push FROM member_details WHERE seq_member = ? AND is_mysubnovel = true"
+	mdb.Raw(query, userInfo.SeqMember).Scan(&pushInfo)
+
+	if isNight {
+		if pushInfo.IsNightPush {
+			go tools.SendPushMessageTopic(&alarm)
+		}
+	} else {
+		go tools.SendPushMessageTopic(&alarm)
+	}
 }
 
 func pushWriteTopic(userToken *domain.UserToken, step int8, seqNovel int64) {

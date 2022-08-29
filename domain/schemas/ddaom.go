@@ -60,6 +60,7 @@ type MemberDetail struct {
 	IsNewFollowing   bool      `gorm:"default:false" json:"is_new_following"`
 	IsNightPush      bool      `gorm:"default:false" json:"is_night_push"`
 	IsDeleted        bool      `gorm:"default:false" json:"is_deleted"`
+	IsMysubmodel     bool      `gorm:"default:false" json:"is_mysubmodel"`
 	CntSubscribe     int64     `gorm:"default:0" json:"cnt_subscribe"`
 	CntBookmark      int64     `gorm:"default:0" json:"cnt_bookmark"`
 	CntLike          int64     `gorm:"default:0" json:"cnt_like"`

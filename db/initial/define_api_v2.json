@@ -1027,6 +1027,11 @@
 				"name": "is_deleted",
 				"type": "bool",
 				"required": true
+			},
+			{
+				"name": "is_mysubnovel",
+				"type": "bool",
+				"required": true
 			}
 		]
 	},
