@@ -35,43 +35,8 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	list, _ = memdb.Get("CACHES:MAIN:LIST_POPULAR_WRITER")
 
-	// 연재중 좋아요 수
-	// listLike, _ := memdb.Get("CACHES:MAIN:LIST_POPULAR_WRITER_LIKE")
-
 	listPopularWriter := []ListPopularWriter{}
 	json.Unmarshal([]byte(list), &listPopularWriter)
-	// listPopularWriterLike := []ListPopularWriterLIke{}
-	// json.Unmarshal([]byte(listLike), &listPopularWriterLike)
-
-	// 연재중 키워드
-
-	// 구독/북마크 + 연재중 좋아요 데이터 합침
-	// for j := 0; j < len(listPopularWriterLike); j++ {
-
-	// 	// 연재중 여부 확인
-
-	// 	isExist := false
-	// 	for i := 0; i < len(listPopularWriter); i++ {
-	// 		if listPopularWriter[i].SeqMember == listPopularWriterLike[j].SeqMember {
-	// 			isExist = true
-	// 			listPopularWriter[i].CntSubscribeBookmark += listPopularWriterLike[j].Cnt
-	// 			break
-	// 		}
-	// 	}
-	// 	if !isExist {
-	// 		listPopularWriter = append(listPopularWriter, ListPopularWriter{
-	// 			SeqMember:            listPopularWriterLike[j].SeqMember,
-	// 			NickName:             listPopularWriterLike[j].NickName,
-	// 			ProfilePhoto:         listPopularWriterLike[j].ProfilePhoto,
-	// 			CntSubscribeBookmark: listPopularWriterLike[j].Cnt,
-	// 		})
-	// 	}
-	// }
-
-	// // 데이터 정렬 (구독+북마크+연재중 좋아요)
-	// sort.Slice(listPopularWriter, func(i, j int) bool {
-	// 	return listPopularWriter[i].CntSubscribeBookmark > listPopularWriter[j].CntSubscribeBookmark
-	// })
 
 	// 차단 작가 제외 로직
 	if userToken != nil {
@@ -79,7 +44,6 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 		_list, err := memdb.Get("CACHES:USERS:BLOCK:" + strconv.FormatInt(userToken.SeqMember, 10))
 		if err == nil {
 			json.Unmarshal([]byte(_list), &seqs)
-			// fmt.Println(seqs)
 		}
 
 		for i := 0; i < len(listPopularWriter); i++ {
@@ -101,12 +65,14 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
+	mainRes.IsNewAlarm = true
 	res.Data = mainRes
 
 	return res
 }
 
 type MainRes struct {
+	IsNewAlarm  bool       `json:"is_new_alarm"`
 	ListLive    []ListLive `json:"list_live"`
 	ListPopular []struct {
 		SeqNovelFinish int64  `json:"seq_novel_finish"`
