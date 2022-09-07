@@ -1031,7 +1031,7 @@
 			{
 				"name": "is_mysubnovel",
 				"type": "bool",
-				"required": true
+				"required": false
 			}
 		]
 	},

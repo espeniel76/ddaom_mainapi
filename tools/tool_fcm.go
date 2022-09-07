@@ -1,10 +1,13 @@
 package tools
 
 import (
+	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain/schemas"
+	"ddaom/memdb"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/appleboy/go-fcm"
 )
@@ -38,7 +41,16 @@ func SendPushMessageTopic(alarm *schemas.Alarm) {
 		fmt.Println(err)
 	}
 
+	go CacheMyPushCnt(alarm.SeqAlarm)
+
 	log.Printf("%#v\n", response)
+}
+
+func CacheMyPushCnt(seqMember int64) {
+	sdb := db.List[define.Mconn.DsnSlave]
+	var cnt int64
+	sdb.Model(schemas.Alarm{}).Where("seq_member = ? AND is_read = false", seqMember).Count(&cnt)
+	memdb.Set("CACHES:USERS:PUSH_CNT:"+strconv.FormatInt(seqMember, 10), strconv.FormatInt(cnt, 10))
 }
 
 func SendPushMessage(pushToken string, alarm *schemas.Alarm) {

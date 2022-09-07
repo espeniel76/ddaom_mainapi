@@ -85,6 +85,7 @@ func MypageAlarmReceiveSet(req *domain.CommonRequest) domain.CommonResponse {
 	if corm(result, &res) {
 		return res
 	}
+	go tools.CacheMyPushCnt(userToken.SeqMember)
 
 	return res
 }

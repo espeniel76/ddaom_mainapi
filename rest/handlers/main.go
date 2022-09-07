@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"ddaom/db"
 	"ddaom/define"
 	"ddaom/domain"
+	"ddaom/domain/schemas"
 	"ddaom/memdb"
 	"encoding/json"
 	"strconv"
@@ -12,6 +14,31 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 
 	var res = domain.CommonResponse{}
 	mainRes := MainRes{}
+
+	_isNewAlarm := false
+
+	// push cnt
+	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if userToken != nil {
+		// _cnt, err := memdb.Get("CACHES:USERS:PUSH_CNT:" + strconv.FormatInt(userToken.SeqMember, 10))
+		// if err == nil {
+		// 	n, _ := strconv.Atoi(_cnt)
+		// 	if err == nil {
+		// 		if n > 0 {
+		// 			_isNewAlarm = true
+		// 		}
+		// 	}
+		// }
+
+		// 읽지 않은 메시지 조회 캐시 오동작으로 일단 DB 사용
+		// 반드시 캐시화 다시 고도화 해야함
+		sdb := db.List[define.Mconn.DsnSlave]
+		var cntAlarm int64
+		sdb.Model(schemas.Alarm{}).Select("COUNT(*)").Where("seq_member = ? AND is_read = false", userToken.SeqMember).Scan(&cntAlarm)
+		if cntAlarm > 0 {
+			_isNewAlarm = true
+		}
+	}
 
 	// 연재중인 소설 (오늘 주제어 키워드)
 	list, err := memdb.Get("CACHES:MAIN:LIST_LIVE:" + req.Vars["seq_keyword"])
@@ -32,7 +59,6 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 	}
 
 	// 인기작가
-	userToken, _ := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
 	list, _ = memdb.Get("CACHES:MAIN:LIST_POPULAR_WRITER")
 
 	listPopularWriter := []ListPopularWriter{}
@@ -65,7 +91,7 @@ func Main(req *domain.CommonRequest) domain.CommonResponse {
 		}
 	}
 
-	mainRes.IsNewAlarm = true
+	mainRes.IsNewAlarm = _isNewAlarm
 	res.Data = mainRes
 
 	return res
