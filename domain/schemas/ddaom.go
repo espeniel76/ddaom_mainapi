@@ -255,6 +255,7 @@ type NovelStep1 struct {
 	DeletedAt      time.Time `json:"deleted_at"`
 	SeqNovelDelete int64     `gorm:"default:0" json:"seq_novel_delete"`
 	EndureImage    string    `gorm:"type:varchar(50); index" json:"endure_image"`
+	CntReply       int64     `gorm:"default:0" json:"cnt_reply"`
 }
 
 type NovelStep2 struct {
@@ -273,6 +274,7 @@ type NovelStep2 struct {
 	DeletedYn      bool      `gorm:"default:false" json:"deleted_yn"`
 	DeletedAt      time.Time `json:"deleted_at"`
 	SeqNovelDelete int64     `gorm:"default:0" json:"seq_novel_delete"`
+	CntReply       int64     `gorm:"default:0" json:"cnt_reply"`
 }
 
 type NovelStep3 struct {
@@ -291,6 +293,7 @@ type NovelStep3 struct {
 	DeletedYn      bool      `gorm:"default:false" json:"deleted_yn"`
 	DeletedAt      time.Time `json:"deleted_at"`
 	SeqNovelDelete int64     `gorm:"default:0" json:"seq_novel_delete"`
+	CntReply       int64     `gorm:"default:0" json:"cnt_reply"`
 }
 
 type NovelStep4 struct {
@@ -309,6 +312,7 @@ type NovelStep4 struct {
 	DeletedYn      bool      `gorm:"default:false" json:"deleted_yn"`
 	DeletedAt      time.Time `json:"deleted_at"`
 	SeqNovelDelete int64     `gorm:"default:0" json:"seq_novel_delete"`
+	CntReply       int64     `gorm:"default:0" json:"cnt_reply"`
 }
 
 type NovelFinish struct {
@@ -340,6 +344,10 @@ type NovelFinish struct {
 	ActiveYn       bool      `gorm:"default:true" json:"active_yn"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
+	CntReplyStep1  int64     `gorm:"default:0" json:"cnt_reply_step1"`
+	CntReplyStep2  int64     `gorm:"default:0" json:"cnt_reply_step2"`
+	CntReplyStep3  int64     `gorm:"default:0" json:"cnt_reply_step3"`
+	CntReplyStep4  int64     `gorm:"default:0" json:"cnt_reply_step4"`
 }
 
 type NovelFinishBatchRunLog struct {
@@ -469,4 +477,30 @@ type MemberReport struct {
 	Reason          string    `json:"reason"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+type NovelReply struct {
+	SeqReply   int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_reply"`
+	Step       int8      `gorm:"default:0" json:"step"`
+	SeqNovel   int64     `gorm:"index" json:"seq_novel"`
+	SeqMember  int64     `gorm:"index" json:"seq_member"`
+	CntLike    int64     `gorm:"default:0" json:"cnt_like"`
+	Likes      string    `gorm:"type:text" json:"likes"`
+	Contents   string    `gorm:"type:varchar(350)" json:"contents"`
+	CntReReply int64     `gorm:"default:0" json:"cnt_re_reply"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type NovelReReply struct {
+	SeqReReply    int64     `gorm:"primaryKey;autoIncrement:true" json:"seq_re_reply"`
+	SeqReply      int64     `gorm:"index" json:"seq_reply"`
+	SeqMember     int64     `gorm:"index" json:"seq_member"`
+	CntLike       int64     `gorm:"default:0" json:"cnt_like"`
+	Likes         string    `gorm:"type:text" json:"likes"`
+	Contents      string    `gorm:"type:varchar(350)" json:"contents"`
+	SeqReReplyOrg int64     `gorm:"index;default:0" json:"seq_re_reply_org"`
+	SeqMemberOrg  int64     `gorm:"index;default:0" json:"seq_member_org"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }

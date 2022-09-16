@@ -96,11 +96,14 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/config/alarm", common(handlers.ConfigAlarm))        // 51
 	mux.HandleFunc("/config/alarm/get", common(handlers.ConfigAlarmGet)) // 52
 
-	// server
+	// service
 	mux.HandleFunc("/service/inquiry", common(handlers.ServiceInquiry))              // 53
 	mux.HandleFunc("/service/inquiry/edit", common(handlers.ServiceInquiryEdit))     // 54
 	mux.HandleFunc("/service/inquiry/delete", common(handlers.ServiceInquiryDelete)) // 55
 	mux.HandleFunc("/service/inquiry/list", common(handlers.ServiceInquiryList))     // 56
 	mux.HandleFunc("/service/notice/list", common(handlers.ServiceNoticeList))       // 57
 	mux.HandleFunc("/service/faq/list", common(handlers.ServiceFaqList))             // 58
+
+	// reply
+	mux.HandleFunc("/novel/view/reply/write", common(handlers.NovelViewReplyWrite))
 }

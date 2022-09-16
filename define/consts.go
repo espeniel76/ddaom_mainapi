@@ -45,6 +45,7 @@ const (
 	DORMANCY                = "DORMANCY"
 	UJDTBLOCKED             = "UJDTBLOCKED"
 	WITHDRAWAL_USER         = "WITHDRAWAL_USER"
+	TEXT_LIMIT_EXCEEDED     = "TEXT_LIMIT_EXCEEDED"
 )
 
 // const LIST_PER_PAGE = 2
