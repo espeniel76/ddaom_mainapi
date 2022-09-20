@@ -50,7 +50,8 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			md.nick_name,
 			ns.created_at,
 			ns.cnt_like,
-			ns.content
+			ns.content,
+			ns.cnt_reply
 		FROM novel_step2 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
 		WHERE ns.active_yn = true AND ns.seq_novel_step1 = ? AND ns.temp_yn = false AND ns.deleted_yn = false`)
@@ -93,6 +94,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			MyLike        bool   "json:\"my_like\""
 			Content       string "json:\"content\""
 			BlockYn       bool   "json:\"block_yn\""
+			CntReply      int64  "json:\"cnt_reply\""
 		}{
 			SeqNovelStep2: o.SeqNovelStep2,
 			SeqMember:     o.SeqMember,
@@ -102,6 +104,7 @@ func NovelListStep2(req *domain.CommonRequest) domain.CommonResponse {
 			MyLike:        isBool,
 			Content:       o.Content,
 			BlockYn:       false,
+			CntReply:      o.CntReply,
 		})
 	}
 
@@ -145,6 +148,7 @@ type Step2ResTmp struct {
 	CreatedAt     time.Time `json:"created_at"`
 	CntLike       int64     `json:"cnt_like"`
 	Content       string    `json:"content"`
+	CntReply      int64     `json:"cnt_reply"`
 }
 
 type NovelListStep2Res struct {
@@ -160,5 +164,6 @@ type NovelListStep2Res struct {
 		MyLike        bool   `json:"my_like"`
 		Content       string `json:"content"`
 		BlockYn       bool   `json:"block_yn"`
+		CntReply      int64  `json:"cnt_reply"`
 	} `json:"list"`
 }
