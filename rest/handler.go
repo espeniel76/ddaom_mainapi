@@ -106,4 +106,7 @@ func Handlers(mux *mux.Router) {
 
 	// reply
 	mux.HandleFunc("/novel/view/reply/write", common(handlers.NovelViewReplyWrite))
+	mux.HandleFunc("/novel/view/re_reply/write", common(handlers.NovelViewReReplyWrite))
+	mux.HandleFunc("/novel/view/re_re_reply/write", common(handlers.NovelViewReReReplyWrite))
+	mux.HandleFunc("/novel/view/reply/delete", common(handlers.NovelViewReplyDelete))
 }
