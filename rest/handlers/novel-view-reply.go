@@ -161,7 +161,34 @@ func NovelViewReplyDelete(req *domain.CommonRequest) domain.CommonResponse {
 	mdb.Where("seq_reply = ?", _seqReply).Delete(&schemas.NovelReply{})
 
 	// 원글 댓글 카운트 업데이트
-	setReplyCnt(_seqNovelFinish, _step, _seqNovel, "-", strconv.Itoa(int(cntTotal)))
+	go setReplyCnt(_seqNovelFinish, _step, _seqNovel, "-", strconv.Itoa(int(cntTotal)))
+
+	return res
+}
+
+/** 답글 삭제 */
+func NovelViewReReplyDelete(req *domain.CommonRequest) domain.CommonResponse {
+	var res = domain.CommonResponse{}
+	_, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)
+	if err != nil {
+		res.ResultCode = define.INVALID_TOKEN
+		res.ErrorDesc = err.Error()
+		return res
+	}
+
+	_seqNovelFinish := CpInt64(req.Parameters, "seq_novel_finish")
+	_step := CpInt64(req.Parameters, "step")
+	_seqNovel := CpInt64(req.Parameters, "seq_novel")
+	_seqReply := CpInt64(req.Parameters, "seq_reply")
+	_seqReReply := CpInt64(req.Parameters, "seq_re_reply")
+
+	mdb := db.List[define.Mconn.DsnMaster]
+
+	// 답글 지우기
+	mdb.Where("seq_re_reply = ?", _seqReReply).Delete(&schemas.NovelReReply{})
+
+	go setReReplyCnt(_seqReply, "-", "1")
+	go setReplyCnt(_seqNovelFinish, _step, _seqNovel, "-", "1")
 
 	return res
 }

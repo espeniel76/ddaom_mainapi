@@ -1437,5 +1437,89 @@
 				"required": true
 			}
 		]
+	},
+	"/novel/view/re_reply/delete": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_novel_finish",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "step",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_novel",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_reply",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_re_reply",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/novel/view/reply/list": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "step",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_novel",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
+	"/novel/view/re_reply/list": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "seq_reply",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "page",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "size_per_page",
+				"type": "int",
+				"required": true
+			}
+		]
 	}
 }
