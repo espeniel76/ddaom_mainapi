@@ -30,7 +30,9 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		ns.cnt_like,
 		ns.seq_image,
 		ns.seq_color,
-		m.deleted_yn
+		m.deleted_yn,
+		ns.cnt_reply,
+		md.profile_photo
 	FROM novel_step1 ns
 	INNER JOIN member_details md ON ns.seq_member = md.seq_member
 	INNER JOIN members m ON md.seq_member = m.seq_member
@@ -60,6 +62,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 		step1["cnt_like"] = step1Res.CntLike
 		step1["my_like"] = getMyLike(userToken, 1, step1Res.SeqNovelStep1)
 		step1["deleted_yn"] = bool(step1Res.DeletedYn)
+		step1["cnt_reply"] = step1Res.CntReply
+		step1["profile_photo"] = step1Res.ProfilePhoto
 		if userToken != nil {
 			bm := getBlockMember(userToken.Allocated, userToken.SeqMember, step1Res.SeqMember)
 			step1["block_yn"] = bm.BlockYn
@@ -76,7 +80,9 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 			ns.created_at,
 			ns.content,
 			ns.cnt_like,
-			m.deleted_yn
+			m.deleted_yn,
+			ns.cnt_reply,
+			md.profile_photo
 		FROM novel_step2 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
 		INNER JOIN members m ON md.seq_member = m.seq_member
@@ -97,6 +103,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 			step["cnt_like"] = step2Res.CntLike
 			step["my_like"] = getMyLike(userToken, 2, step2Res.SeqNovelStep2)
 			step["deleted_yn"] = bool(step2Res.DeletedYn)
+			step["cnt_reply"] = step2Res.CntReply
+			step["profile_photo"] = step2Res.ProfilePhoto
 			result = sdb.Model(schemas.NovelStep2{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
 			if corm(result, &res) {
 				return res
@@ -118,7 +126,9 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 				ns.created_at,
 				ns.content,
 				ns.cnt_like,
-				m.deleted_yn
+				m.deleted_yn,
+				ns.cnt_reply,
+				md.profile_photo
 			FROM novel_step3 ns
 			INNER JOIN member_details md ON ns.seq_member = md.seq_member
 			INNER JOIN members m ON md.seq_member = m.seq_member
@@ -139,6 +149,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 				step["cnt_like"] = step3Res.CntLike
 				step["my_like"] = getMyLike(userToken, 3, step3Res.SeqNovelStep3)
 				step["deleted_yn"] = bool(step3Res.DeletedYn)
+				step["cnt_reply"] = step3Res.CntReply
+				step["profile_photo"] = step3Res.ProfilePhoto
 				result = sdb.Model(schemas.NovelStep3{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
 				if corm(result, &res) {
 					return res
@@ -160,7 +172,9 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 					ns.created_at,
 					ns.content,
 					ns.cnt_like,
-					m.deleted_yn
+					m.deleted_yn,
+					ns.cnt_reply,
+					md.profile_photo
 				FROM novel_step4 ns
 				INNER JOIN member_details md ON ns.seq_member = md.seq_member
 				INNER JOIN members m ON md.seq_member = m.seq_member
@@ -181,6 +195,8 @@ func NovelView(req *domain.CommonRequest) domain.CommonResponse {
 					step["cnt_like"] = step4Res.CntLike
 					step["my_like"] = getMyLike(userToken, 4, step4Res.SeqNovelStep4)
 					step["deleted_yn"] = bool(step4Res.DeletedYn)
+					step["cnt_reply"] = step4Res.CntReply
+					step["profile_photo"] = step4Res.ProfilePhoto
 					result = sdb.Model(schemas.NovelStep4{}).Where("seq_novel_step1 = ? AND active_yn = true AND temp_yn = false AND deleted_yn = false", _seqNovelStep1).Count(&cntTotal)
 					if corm(result, &res) {
 						return res
@@ -234,6 +250,8 @@ type Step1Res struct {
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
 	BlockYn       bool      `json:"block_yn"`
+	CntReply      int64     `json:"cnt_reply"`
+	ProfilePhoto  string    `json:"profile_photo"`
 }
 type Step2Res struct {
 	SeqNovelStep2 int64     `json:"seq_novel_step2"`
@@ -244,6 +262,8 @@ type Step2Res struct {
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
 	BlockYn       bool      `json:"block_yn"`
+	CntReply      int64     `json:"cnt_reply"`
+	ProfilePhoto  string    `json:"profile_photo"`
 }
 type Step3Res struct {
 	SeqNovelStep3 int64     `json:"seq_novel_step3"`
@@ -254,6 +274,8 @@ type Step3Res struct {
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
 	BlockYn       bool      `json:"block_yn"`
+	CntReply      int64     `json:"cnt_reply"`
+	ProfilePhoto  string    `json:"profile_photo"`
 }
 type Step4Res struct {
 	SeqNovelStep4 int64     `json:"seq_novel_step4"`
@@ -264,4 +286,6 @@ type Step4Res struct {
 	CntLike       int64     `json:"cnt_like"`
 	DeletedYn     bool      `json:"deleted_yn"`
 	BlockYn       bool      `json:"block_yn"`
+	CntReply      int64     `json:"cnt_reply"`
+	ProfilePhoto  string    `json:"profile_photo"`
 }

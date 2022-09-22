@@ -49,7 +49,11 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 		nick_name_step4,
 		(SELECT deleted_yn FROM members WHERE seq_member = seq_member_step4) AS deleted_yn_step4,
 		content4 AS content_step4,
-		created_at
+		created_at,
+		cnt_reply_step1,
+		cnt_reply_step2,
+		cnt_reply_step3,
+		cnt_reply_step4
 	FROM novel_finishes nf
 	WHERE seq_novel_finish = ?
 	`
@@ -125,6 +129,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn bool   "json:\"blocked_yn\""
 			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
+			CntReply  int64  "json:\"cnt_reply\""
 		}{
 			SeqMember: n.SeqMemberStep1,
 			NickName:  n.NickNameStep1,
@@ -132,6 +137,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn: blockedAll.Step1,
 			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep1),
 			Content:   n.ContentStep1,
+			CntReply:  n.CntReplyStep1,
 		},
 		Step2: struct {
 			SeqMember int64  "json:\"seq_member\""
@@ -140,6 +146,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn bool   "json:\"blocked_yn\""
 			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
+			CntReply  int64  "json:\"cnt_reply\""
 		}{
 			SeqMember: n.SeqMemberStep2,
 			NickName:  n.NickNameStep2,
@@ -147,6 +154,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn: blockedAll.Step2,
 			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep2),
 			Content:   n.ContentStep2,
+			CntReply:  n.CntReplyStep2,
 		},
 		Step3: struct {
 			SeqMember int64  "json:\"seq_member\""
@@ -155,6 +163,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn bool   "json:\"blocked_yn\""
 			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
+			CntReply  int64  "json:\"cnt_reply\""
 		}{
 			SeqMember: n.SeqMemberStep3,
 			NickName:  n.NickNameStep3,
@@ -162,6 +171,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn: blockedAll.Step3,
 			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep3),
 			Content:   n.ContentStep3,
+			CntReply:  n.CntReplyStep3,
 		},
 		Step4: struct {
 			SeqMember int64  "json:\"seq_member\""
@@ -170,6 +180,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn bool   "json:\"blocked_yn\""
 			BlockYn   bool   "json:\"block_yn\""
 			Content   string "json:\"content\""
+			CntReply  int64  "json:\"cnt_reply\""
 		}{
 			SeqMember: n.SeqMemberStep4,
 			NickName:  n.NickNameStep4,
@@ -177,6 +188,7 @@ func NovelViewFinish(req *domain.CommonRequest) domain.CommonResponse {
 			BlockedYn: blockedAll.Step4,
 			BlockYn:   isBlockMember(userToken.Allocated, userToken.SeqMember, n.SeqMemberStep4),
 			Content:   n.ContentStep4,
+			CntReply:  n.CntReplyStep4,
 		},
 	}
 
@@ -221,18 +233,22 @@ type NovelViewFinishData struct {
 	NickNameStep1  string    `json:"nick_name_step1"`
 	DeletedYnStep1 bool      `json:"deleted_yn_step1"`
 	ContentStep1   string    `json:"content_step1"`
+	CntReplyStep1  int64     `json:"cnt_reply_step1"`
 	SeqMemberStep2 int64     `json:"seq_member_step2"`
 	NickNameStep2  string    `json:"nick_name_step2"`
 	DeletedYnStep2 bool      `json:"deleted_yn_step2"`
 	ContentStep2   string    `json:"content_step2"`
+	CntReplyStep2  int64     `json:"cnt_reply_step2"`
 	SeqMemberStep3 int64     `json:"seq_member_step3"`
 	NickNameStep3  string    `json:"nick_name_step3"`
 	DeletedYnStep3 bool      `json:"deleted_yn_step3"`
 	ContentStep3   string    `json:"content_step3"`
+	CntReplyStep3  int64     `json:"cnt_reply_step3"`
 	SeqMemberStep4 int64     `json:"seq_member_step4"`
 	NickNameStep4  string    `json:"nick_name_step4"`
 	DeletedYnStep4 bool      `json:"deleted_yn_step4"`
 	ContentStep4   string    `json:"content_step4"`
+	CntReplyStep4  int64     `json:"cnt_reply_step4"`
 }
 
 type NovelViewFinishRes struct {
@@ -254,6 +270,7 @@ type NovelViewFinishRes struct {
 		BlockedYn bool   `json:"blocked_yn"`
 		BlockYn   bool   `json:"block_yn"`
 		Content   string `json:"content"`
+		CntReply  int64  `json:"cnt_reply"`
 	} `json:"step1"`
 	Step2 struct {
 		SeqMember int64  `json:"seq_member"`
@@ -262,6 +279,7 @@ type NovelViewFinishRes struct {
 		BlockedYn bool   `json:"blocked_yn"`
 		BlockYn   bool   `json:"block_yn"`
 		Content   string `json:"content"`
+		CntReply  int64  `json:"cnt_reply"`
 	} `json:"step2"`
 	Step3 struct {
 		SeqMember int64  `json:"seq_member"`
@@ -270,6 +288,7 @@ type NovelViewFinishRes struct {
 		BlockedYn bool   `json:"blocked_yn"`
 		BlockYn   bool   `json:"block_yn"`
 		Content   string `json:"content"`
+		CntReply  int64  `json:"cnt_reply"`
 	} `json:"step3"`
 	Step4 struct {
 		SeqMember int64  `json:"seq_member"`
@@ -278,5 +297,6 @@ type NovelViewFinishRes struct {
 		BlockedYn bool   `json:"blocked_yn"`
 		BlockYn   bool   `json:"block_yn"`
 		Content   string `json:"content"`
+		CntReply  int64  `json:"cnt_reply"`
 	} `json:"step4"`
 }

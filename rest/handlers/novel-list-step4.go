@@ -57,7 +57,8 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 			ns.created_at,
 			ns.cnt_like,
 			ns.content,
-			ns.cnt_reply
+			ns.cnt_reply,
+			md.profile_photo
 		FROM novel_step4 ns
 		INNER JOIN member_details md ON ns.seq_member = md.seq_member
 	`)
@@ -112,6 +113,7 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 			Content       string "json:\"content\""
 			BlockYn       bool   "json:\"block_yn\""
 			CntReply      int64  "json:\"cnt_reply\""
+			ProfilePhoto  string "json:\"profile_photo\""
 		}{
 			SeqNovelStep4: o.SeqNovelStep4,
 			SeqMember:     o.SeqMember,
@@ -122,6 +124,7 @@ func NovelListStep4(req *domain.CommonRequest) domain.CommonResponse {
 			Content:       o.Content,
 			BlockYn:       false,
 			CntReply:      o.CntReply,
+			ProfilePhoto:  o.ProfilePhoto,
 		})
 	}
 
@@ -167,6 +170,7 @@ type Step4ResTmp struct {
 	CntLike       int64     `json:"cnt_like"`
 	Content       string    `json:"content"`
 	CntReply      int64     `json:"cnt_reply"`
+	ProfilePhoto  string    `json:"profile_photo"`
 }
 
 type NovelListStep4Res struct {
@@ -183,5 +187,6 @@ type NovelListStep4Res struct {
 		Content       string `json:"content"`
 		BlockYn       bool   `json:"block_yn"`
 		CntReply      int64  `json:"cnt_reply"`
+		ProfilePhoto  string `json:"profile_photo"`
 	} `json:"list"`
 }
