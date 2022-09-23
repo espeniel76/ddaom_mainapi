@@ -8,6 +8,7 @@ import (
 	"ddaom/tools"
 	"fmt"
 	"strings"
+	"time"
 )
 
 func NovelViewReplyList(req *domain.CommonRequest) domain.CommonResponse {
@@ -40,6 +41,7 @@ func NovelViewReplyList(req *domain.CommonRequest) domain.CommonResponse {
 		NowPage:   int(_page),
 		TotalPage: tools.GetTotalPage(totalData, _sizePerPage),
 		TotalData: int(totalData),
+		NowDate:   time.Now().UnixMilli(),
 	}
 
 	query.Reset()
@@ -99,9 +101,10 @@ func NovelViewReplyList(req *domain.CommonRequest) domain.CommonResponse {
 }
 
 type NovelListReplyRes struct {
-	NowPage   int `json:"now_page"`
-	TotalPage int `json:"total_page"`
-	TotalData int `json:"total_data"`
+	NowPage   int   `json:"now_page"`
+	TotalPage int   `json:"total_page"`
+	TotalData int   `json:"total_data"`
+	NowDate   int64 `json:"now_date"`
 	List      []struct {
 		SeqReply     int64   `json:"seq_reply"`
 		SeqMember    int64   `json:"seq_member"`
