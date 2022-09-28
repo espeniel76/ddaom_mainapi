@@ -86,6 +86,7 @@ func Handlers(mux *mux.Router) {
 	mux.HandleFunc("/mypage/user/report", common(handlers.MypageUserReport))                                      // 32
 	mux.HandleFunc("/mypage/user/block/{seq_member:[0-9]+}", common(handlers.MypageUserBlock))                    // 32
 	mux.HandleFunc("/mypage/user/block/list", common(handlers.MypageUserBlockList))                               // 32
+	mux.HandleFunc("/mypage/list/temp/delete", common(handlers.MypageListTempDelete))                             // 32
 
 	// 메인
 	mux.HandleFunc("/main/{seq_keyword:[0-9]+}", common(handlers.Main))                               // 48

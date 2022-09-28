@@ -45,6 +45,7 @@ type MemberDetail struct {
 	Name             string    `gorm:"type:varchar(50)" json:"name"`
 	NickName         string    `gorm:"type:varchar(50);unique;column:nick_name" json:"nick_name"`
 	ProfilePhoto     string    `gorm:"type:varchar(1024)" json:"profile_photo"`
+	ProfileComment   string    `gorm:"type:varchar(1024)" json:"profile_comment"`
 	Tel              string    `gorm:"type:varchar(50)" json:"tel"`
 	MobileCompany    int8      `gorm:"default:0" json:"mobile_company"`
 	Mobile           string    `gorm:"type:varchar(50)" json:"mobile"`

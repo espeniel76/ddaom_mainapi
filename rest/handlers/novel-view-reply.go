@@ -63,6 +63,10 @@ func NovelViewReReplyWrite(req *domain.CommonRequest) domain.CommonResponse {
 	_seqNovel := CpInt64(req.Parameters, "seq_novel")
 	_seqReply := CpInt64(req.Parameters, "seq_reply")
 	_contents := Cp(req.Parameters, "contents")
+	_seqMember := CpInt64(req.Parameters, "seq_member")
+
+	fmt.Println("sdfsfsf")
+	fmt.Println(_seqMember)
 
 	if utf8.RuneCountInString(_contents) > 150 {
 		res.ResultCode = define.TEXT_LIMIT_EXCEEDED
@@ -71,9 +75,10 @@ func NovelViewReReplyWrite(req *domain.CommonRequest) domain.CommonResponse {
 
 	mdb := db.List[define.Mconn.DsnMaster]
 	novelReReply := &schemas.NovelReReply{
-		SeqReply:  _seqReply,
-		SeqMember: userToken.SeqMember,
-		Contents:  _contents,
+		SeqReply:     _seqReply,
+		SeqMember:    userToken.SeqMember,
+		Contents:     _contents,
+		SeqMemberOrg: _seqMember,
 	}
 	result := mdb.Create(novelReReply)
 	if corm(result, &res) {
@@ -86,7 +91,7 @@ func NovelViewReReplyWrite(req *domain.CommonRequest) domain.CommonResponse {
 	return res
 }
 
-/** 답글의 답글 작성 */
+/** 답글의 답글 작성 (안씀) */
 func NovelViewReReReplyWrite(req *domain.CommonRequest) domain.CommonResponse {
 	var res = domain.CommonResponse{}
 	userToken, err := define.ExtractTokenMetadata(req.JWToken, define.Mconn.JwtAccessSecret)

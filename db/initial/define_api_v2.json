@@ -870,6 +870,24 @@
 			}
 		]
 	},
+	"/mypage/list/temp/delete": {
+		"allow_method": "POST",
+		"data_type": "application/json",
+		"require_token": false,
+		"user_level": 5,
+		"require_parameters": [
+			{
+				"name": "step",
+				"type": "int",
+				"required": true
+			},
+			{
+				"name": "seq_novel",
+				"type": "int",
+				"required": true
+			}
+		]
+	},
 	"/mypage/list/subscribe": {
 		"allow_method": "POST",
 		"data_type": "application/json",
@@ -1363,6 +1381,11 @@
 			{
 				"name": "contents",
 				"type": "string",
+				"required": true
+			},
+			{
+				"name": "seq_member",
+				"type": "int",
 				"required": true
 			}
 		]

@@ -5,20 +5,22 @@ import (
 	"ddaom/define"
 	"ddaom/domain"
 	"ddaom/domain/schemas"
+	"fmt"
 	"time"
 )
 
 type MemberDetailRes struct {
-	Name          string `json:"name"`
-	MobileCompany int8   `json:"mobile_company"`
-	Mobile        string `json:"mobile"`
-	Zipcode       string `json:"zipcode"`
-	Address       string `json:"address"`
-	AddressDetail string `json:"address_detail"`
-	Email         string `json:"email"`
-	NickName      string `json:"nick_name"`
-	SnsType       string `json:"sns_type"`
-	BlockedYn     bool   `json:"blocked_yn"`
+	Name           string `json:"name"`
+	MobileCompany  int8   `json:"mobile_company"`
+	Mobile         string `json:"mobile"`
+	Zipcode        string `json:"zipcode"`
+	Address        string `json:"address"`
+	AddressDetail  string `json:"address_detail"`
+	Email          string `json:"email"`
+	NickName       string `json:"nick_name"`
+	SnsType        string `json:"sns_type"`
+	BlockedYn      bool   `json:"blocked_yn"`
+	ProfileComment string `json:"profile_comment"`
 }
 
 func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
@@ -44,7 +46,8 @@ func AuthInfo(req *domain.CommonRequest) domain.CommonResponse {
 		md.email,
 		md.nick_name,
 		m.sns_type,
-		m.blocked_yn
+		m.blocked_yn,
+		md.profile_comment
 	FROM
 		members m
 	INNER JOIN
@@ -68,12 +71,14 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 		res.ErrorDesc = err.Error()
 		return res
 	}
+	fmt.Println(userToken.SeqMember)
 
 	isExistImage := false
 	_nickName := req.HttpRquest.FormValue("nick_name")
 	_email := req.HttpRquest.FormValue("email")
 	_isDefaultImage := req.HttpRquest.FormValue("is_default_image")
 	file, handler, err := req.HttpRquest.FormFile("profile_photo")
+	_profileComment := req.HttpRquest.FormValue("profile_comment")
 	fullPath := ""
 
 	if _isDefaultImage == "N" {
@@ -159,6 +164,7 @@ func AuthInfoUpdate(req *domain.CommonRequest) domain.CommonResponse {
 	if len(_email) > 0 {
 		memberDetail.Email = _email
 	}
+	memberDetail.ProfileComment = _profileComment
 	if isExistMember {
 		result = mdb.Model(&memberDetail).
 			Where("seq_member = ?", userToken.SeqMember).
