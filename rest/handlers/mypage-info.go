@@ -57,34 +57,35 @@ func MypageInfo(req *domain.CommonRequest) domain.CommonResponse {
 		return res
 	}
 
-	var seqKeywords []int64
-	sdb.Model(schemas.Keyword{}).Select("seq_keyword").Scan(&seqKeywords)
+	// var seqKeywords []int64
+	// sdb.Model(schemas.Keyword{}).Select("seq_keyword").Scan(&seqKeywords)
 
 	// 임시저장, 작성완료
 	var isTemps []bool
 	query := ""
-	if itsMe {
-		query = `
-		(SELECT ns1.temp_yn FROM novel_step1 ns1 WHERE ns1.seq_member = ? AND ns1.active_yn = true AND ns1.seq_keyword IN (?))
+	// if itsMe {
+	// 	query = `
+	// 	(SELECT ns1.temp_yn FROM novel_step1 ns1 WHERE ns1.seq_member = ? AND ns1.active_yn = true AND ns1.seq_keyword IN (?))
+	// 	UNION ALL
+	// 	(SELECT ns2.temp_yn FROM novel_step2 ns2 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns1.seq_keyword IN (?))
+	// 	UNION ALL
+	// 	(SELECT ns3.temp_yn FROM novel_step3 ns3 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns1.seq_keyword IN (?))
+	// 	UNION ALL
+	// 	(SELECT ns4.temp_yn FROM novel_step4 ns4 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns1.seq_keyword IN (?))
+	// 	`
+	// } else {
+	query = `
+		(SELECT ns1.temp_yn FROM novel_step1 ns1 WHERE ns1.seq_member = ? AND ns1.active_yn = true AND ns1.deleted_yn = false)
 		UNION ALL
-		(SELECT ns2.temp_yn FROM novel_step2 ns2 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns1.seq_keyword IN (?))
+		(SELECT ns2.temp_yn FROM novel_step2 ns2 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns2.deleted_yn = false)
 		UNION ALL
-		(SELECT ns3.temp_yn FROM novel_step3 ns3 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns1.seq_keyword IN (?))
+		(SELECT ns3.temp_yn FROM novel_step3 ns3 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns3.deleted_yn = false)
 		UNION ALL
-		(SELECT ns4.temp_yn FROM novel_step4 ns4 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns1.seq_keyword IN (?))
+		(SELECT ns4.temp_yn FROM novel_step4 ns4 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns4.deleted_yn = false)
 		`
-	} else {
-		query = `
-		(SELECT ns1.temp_yn FROM novel_step1 ns1 WHERE ns1.seq_member = ? AND ns1.active_yn = true AND ns1.seq_keyword IN (?) AND ns1.deleted_yn = false)
-		UNION ALL
-		(SELECT ns2.temp_yn FROM novel_step2 ns2 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns2.seq_novel_step1 WHERE ns2.seq_member = ? AND ns2.active_yn = true AND ns1.seq_keyword IN (?) AND ns2.deleted_yn = false)
-		UNION ALL
-		(SELECT ns3.temp_yn FROM novel_step3 ns3 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns3.seq_novel_step1 WHERE ns3.seq_member = ? AND ns3.active_yn = true AND ns1.seq_keyword IN (?) AND ns3.deleted_yn = false)
-		UNION ALL
-		(SELECT ns4.temp_yn FROM novel_step4 ns4 INNER JOIN novel_step1 ns1 ON ns1.seq_novel_step1 = ns4.seq_novel_step1 WHERE ns4.seq_member = ? AND ns4.active_yn = true AND ns1.seq_keyword IN (?) AND ns4.deleted_yn = false)
-		`
-	}
-	result = sdb.Raw(query, _seqMember, seqKeywords, _seqMember, seqKeywords, _seqMember, seqKeywords, _seqMember, seqKeywords).Scan(&isTemps)
+	// }
+	// result = sdb.Raw(query, _seqMember, seqKeywords, _seqMember, seqKeywords, _seqMember, seqKeywords, _seqMember, seqKeywords).Scan(&isTemps)
+	result = sdb.Raw(query, _seqMember, _seqMember, _seqMember, _seqMember).Scan(&isTemps)
 	if corm(result, &res) {
 		return res
 	}
